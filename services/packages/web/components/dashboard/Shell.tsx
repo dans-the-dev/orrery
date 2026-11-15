@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { BrandMark } from "@/components/Brand";
+import { SITE_HOST } from "@/lib/site";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { useConnection } from "wagmi";
@@ -75,7 +76,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="dsh-side-foot">
           <Link href="/docs">Docs</Link>
-          <Link href="/">orrery.tech</Link>
+          <Link href="/">{SITE_HOST}</Link>
         </div>
       </aside>
       {menuOpen ? <button type="button" className="dsh-scrim" aria-label="Close navigation" onClick={() => setMenuOpen(false)} /> : null}

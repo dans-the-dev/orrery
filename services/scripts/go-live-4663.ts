@@ -39,7 +39,7 @@ const SERVER_IP = "187.53.130.188";
 const API_HOST = "api.orrery.tech";
 const KEYS = FORK ? "46630" : "mainnet";
 const REHEARSAL_DIR = join(ROOT, "ops/server1/out/rehearsal");
-const VERCEL = { org: "team_wRfsbfi0dD9R8aLIlSrQAvRX", project: "prj_eBjksRcLg5Q0qQSYIkNUM44XTird" };
+const VERCEL = { org: "team_wRfsbfi0dD9R8aLIlSrQAvRX", project: "prj_EnJvBohVCy94TRGI3eWVCWovKNEX" }; // Vercel project "orrery"
 
 const log = (s: string) => console.log(s);
 const fail = (s: string): never => {

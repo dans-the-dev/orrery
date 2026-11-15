@@ -6,6 +6,7 @@ import { wagmiConfig } from "@/lib/wagmi";
 import { MOTION_BOOT, MotionRoot } from "@/components/motion/MotionRoot";
 import { EXTENSION_GUARD } from "@/lib/extension-guard";
 import { X_HANDLE } from "@/components/social";
+import { SITE_URL } from "@/lib/site";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -16,8 +17,8 @@ const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500", "700"], variabl
 export const metadata: Metadata = {
   title: "Orrery · Bounded payments for AI agents",
   description: "Plot the caps your AI agents pay within, in USDG on Robinhood Chain. Whoever they pay can read the paying address and receive a signed reading.",
-  metadataBase: new URL("https://orrery.tech"),
-  openGraph: { title: "Orrery", description: "Every agent payment on a visible orbit.", url: "https://orrery.tech", siteName: "Orrery", images: [{ url: "/og.png", width: 1200, height: 630 }] },
+  metadataBase: new URL(SITE_URL),
+  openGraph: { title: "Orrery", description: "Every agent payment on a visible orbit.", url: SITE_URL, siteName: "Orrery", images: [{ url: "/og.png", width: 1200, height: 630 }] },
   twitter: { card: "summary_large_image", ...(X_HANDLE ? { site: X_HANDLE } : {}), images: ["/og.png"] },
 };
 
