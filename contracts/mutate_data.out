@@ -1,0 +1,67 @@
+baseline passes
+CAUGHT  burn share changed  by testFuzz_split_conserves_and_burns_exactly, test_burn_rounds_down_and_the_pool_gets_the_dust, test_constants
+CAUGHT  burn rounds up  by testFuzz_split_conserves_and_burns_exactly, test_burn_rounds_down_and_the_pool_gets_the_dust, test_deep_run
+CAUGHT  burn skipped  by testFuzz_split_conserves_and_burns_exactly, test_burn_rounds_down_and_the_pool_gets_the_dust, test_deep_run
+CAUGHT  burn delta check removed  by test_short_burn_token_is_refused
+CAUGHT  Burned event missing  by test_split_burns_70_percent_and_holds_30_until_the_pool_is_set
+CAUGHT  wrong burn source  by test_constants, test_split_burns_70_percent_and_holds_30_until_the_pool_is_set
+CAUGHT  pool share not booked  by testFuzz_split_conserves_and_burns_exactly, test_burn_rounds_down_and_the_pool_gets_the_dust, test_nothing_to_split_reverts
+CAUGHT  booking counted as fresh  by testFuzz_split_conserves_and_burns_exactly, test_burn_rounds_down_and_the_pool_gets_the_dust, test_deep_run
+CAUGHT  pool share burned too  by testFuzz_split_conserves_and_burns_exactly, test_burn_rounds_down_and_the_pool_gets_the_dust, test_deep_run
+CAUGHT  empty split allowed  by test_nothing_to_split_reverts
+CAUGHT  pool never funded  by test_deep_run, test_pool_flow_and_held_share_is_sent_on_the_next_split, test_pool_that_pulls_less_is_refused
+CAUGHT  funding delta check removed  by test_pool_that_pulls_less_is_refused
+CAUGHT  booking kept after funding  by testFuzz_split_conserves_and_burns_exactly, test_deep_run, test_pool_flow_and_held_share_is_sent_on_the_next_split
+CAUGHT  PoolFunded event missing  by test_pool_flow_and_held_share_is_sent_on_the_next_split
+CAUGHT  refused funding keeps the allowance  by test_refusing_pool_blocks_no_burn_and_keeps_the_booking
+CAUGHT  refusing pool blocks the burn  by test_deep_run, test_refusing_pool_blocks_no_burn_and_keeps_the_booking
+CAUGHT  reentrancy guard removed  by test_reentry_from_the_pool_is_blocked
+MISSED  preview ignores the booking
+CAUGHT  preview says nothing is sent  by test_preview_matches_split
+CAUGHT  anyone proposes  by test_only_the_treasury_owner_of_the_moment_proposes_and_executes
+CAUGHT  anyone executes  by test_only_the_treasury_owner_of_the_moment_proposes_and_executes
+CAUGHT  delay ignored  by test_deep_run, test_new_proposal_replaces_and_restarts_the_delay, test_pool_flow_and_held_share_is_sent_on_the_next_split
+CAUGHT  delay shortened  by test_constants, test_new_proposal_replaces_and_restarts_the_delay, test_pool_flow_and_held_share_is_sent_on_the_next_split
+CAUGHT  pool re-proposed after set  by test_pool_is_set_once
+CAUGHT  pool re-executed after set  by test_pool_is_set_once
+CAUGHT  zero pool accepted  by test_proposal_rejects_zero_wrong_token_and_non_pools
+CAUGHT  pool token not checked  by test_proposal_rejects_zero_wrong_token_and_non_pools
+CAUGHT  pool token mismatch accepted  by test_proposal_rejects_zero_wrong_token_and_non_pools
+CAUGHT  proposal not cleared  by test_pool_flow_and_held_share_is_sent_on_the_next_split
+CAUGHT  execute without proposal  by test_execute_without_proposal_reverts
+CAUGHT  zero token accepted  by test_constructor_rejects_zero_addresses
+CAUGHT  fee constant changed  by setUp
+CAUGHT  any factory accepted  by test_constructor_checks
+CAUGHT  zero minimum accepted  by test_constructor_checks
+CAUGHT  listed twice  by test_list_twice_reverts
+CAUGHT  list without stake  by test_list_needs_the_stake
+CAUGHT  update without stake  by test_update_by_the_provider_only_with_stake
+CAUGHT  stake must exceed the minimum  by testFuzz_active_iff_listed_and_staked, test_active_follows_the_stake_without_any_call, test_endpoint_rules
+CAUGHT  splitter not created  by test_list_creates_the_splitter_and_records_the_listing, test_provider_payment_pays_one_percent
+CAUGHT  count not raised  by test_deep_run, test_list_creates_the_splitter_and_records_the_listing, test_unlist_always_works_and_counts
+CAUGHT  count not lowered  by test_deep_run, test_unlist_always_works_and_counts
+CAUGHT  unlist keeps the listing  by test_deep_run, test_unlist_always_works_and_counts
+CAUGHT  update of a stranger  by test_update_by_the_provider_only_with_stake
+CAUGHT  unlist of a stranger  by test_unlist_always_works_and_counts
+CAUGHT  http accepted  by test_endpoint_rules
+CAUGHT  short endpoint accepted  by test_endpoint_rules
+CAUGHT  long endpoint accepted  by test_endpoint_rules
+CAUGHT  space in endpoint accepted  by test_endpoint_rules
+CAUGHT  DEL in endpoint accepted  by test_endpoint_rules
+CAUGHT  short name accepted  by test_name_description_price_rules
+CAUGHT  long name accepted  by test_name_description_price_rules
+CAUGHT  control byte in name accepted  by test_name_description_price_rules
+CAUGHT  long description accepted  by test_name_description_price_rules
+CAUGHT  zero price accepted  by test_name_description_price_rules, test_update_by_the_provider_only_with_stake
+CAUGHT  active ignores the stake  by testFuzz_active_iff_listed_and_staked, test_active_follows_the_stake_without_any_call, test_deep_run
+CAUGHT  failing stake read counts as staked  by test_active_follows_the_stake_without_any_call, test_list_needs_the_stake
+CAUGHT  update keeps the old price  by test_update_by_the_provider_only_with_stake
+CAUGHT  update keeps the old time  by test_update_by_the_provider_only_with_stake
+CAUGHT  hash leaves out the description  by test_list_creates_the_splitter_and_records_the_listing, test_update_by_the_provider_only_with_stake
+CAUGHT  update keeps the old hash  by test_update_by_the_provider_only_with_stake
+
+59/60 mutations caught in 805 s
+
+# follow-up after adding the preview assertion (test_preview_matches_split), single rerun:
+CAUGHT  preview ignores the booking  by test_preview_matches_split
+1/1 mutations caught; all 60 caught

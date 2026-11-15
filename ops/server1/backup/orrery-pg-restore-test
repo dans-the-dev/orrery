@@ -1,0 +1,63 @@
+#!/bin/sh
+# Restores a Orrery dump into a throwaway Postgres container and prints the exact row count of every table, next to
+# the live database's count. Touches nothing live: the test container has no network, a 256 MB limit and is removed
+# (with its volume) on exit, also on failure. Installed on server 1 as /usr/local/bin/orrery-pg-restore-test.
+#
+#   orrery-pg-restore-test                      newest dump in /opt/orrery/backups
+#   orrery-pg-restore-test <file.dump>          that dump
+#
+# Exits 1 when pg_restore fails or the restored database lacks a table the live one has. Row counts may differ where
+# the live database was written after the dump (the Discord process writes every minute); that is printed, not failed.
+set -eu
+umask 077
+
+DIR=${ORRERY_BACKUP_DIR:-/opt/orrery/backups}
+LIVE=${ORRERY_PG_CONTAINER:-orrery-pg}
+TEST=orrery-pg-restoretest
+IMAGE=postgres:17-alpine
+
+dump=${1:-$(ls -1t "$DIR"/orrery-*.dump 2>/dev/null | head -1)}
+[ -n "$dump" ] && [ -s "$dump" ] || { echo "no dump found (looked in $DIR)" >&2; exit 1; }
+
+work=$(mktemp -d)
+cleanup() { docker rm -fv "$TEST" > /dev/null 2>&1 || true; rm -rf "$work"; }
+trap cleanup EXIT INT TERM
+docker rm -fv "$TEST" > /dev/null 2>&1 || true
+
+# trust auth is safe here: --network none, nothing can reach the container
+docker run -d --name "$TEST" --network none --memory 256m \
+  -e POSTGRES_USER=orrery -e POSTGRES_DB=orrery -e POSTGRES_HOST_AUTH_METHOD=trust \
+  "$IMAGE" > /dev/null
+
+i=0
+until docker logs "$TEST" 2>&1 | grep -q 'PostgreSQL init process complete' &&
+  docker exec "$TEST" pg_isready -U orrery -d orrery > /dev/null 2>&1; do
+  i=$((i + 1))
+  [ "$i" -le 60 ] || { echo "test container did not become ready in 60 s" >&2; exit 1; }
+  sleep 1
+done
+
+t0=$(date +%s)
+docker exec -i "$TEST" pg_restore -U orrery -d orrery --no-owner --exit-on-error < "$dump"
+t1=$(date +%s)
+
+# exact counts, one line per table: schema.table|rows
+COUNTS="select format('select %L, count(*) from %I.%I', table_schema || '.' || table_name, table_schema, table_name)
+  from information_schema.tables
+  where table_type = 'BASE TABLE' and table_schema not in ('pg_catalog', 'information_schema')
+  order by table_schema, table_name \gexec"
+echo "$COUNTS" | docker exec -i "$TEST" psql -U orrery -d orrery -XAtq -F '|' > "$work/restored"
+echo "$COUNTS" | docker exec -i "$LIVE" psql -U orrery -d orrery -XAtq -F '|' > "$work/live"
+
+echo "dump: $dump ($(stat -c %s "$dump") bytes, taken $(date -u -r "$dump" +%Y-%m-%dT%H:%MZ)), restored in $((t1 - t0)) s"
+printf '%-34s %10s %10s\n' TABLE RESTORED LIVE
+missing=0
+while IFS='|' read -r t n; do
+  r=$(awk -F'|' -v t="$t" '$1 == t { print $2 }' "$work/restored")
+  [ -n "$r" ] || { r=MISSING; missing=$((missing + 1)); }
+  note=""
+  [ "$r" = "$n" ] || note="  (differs)"
+  printf '%-34s %10s %10s%s\n' "$t" "$r" "$n" "$note"
+done < "$work/live"
+echo "tables: $(wc -l < "$work/restored") restored, $(wc -l < "$work/live") live, $missing missing"
+[ "$missing" -eq 0 ]

@@ -1,0 +1,38 @@
+#!/bin/sh
+# Daily dump of the Orrery database (container orrery-pg, database orrery, user orrery), custom format (compressed).
+# Installed on server 1 as /usr/local/bin/orrery-pg-backup, run by orrery-pg-backup.timer.
+#
+# pg_dump runs inside the container over the local socket (trust in the official image), so no password is read,
+# passed or logged. Each dump is written under a temporary name, checked with pg_restore --list, made mode 600 and
+# only then renamed: a dump in the folder is whole and readable or absent. Dumps older than 14 days are removed after
+# a successful dump only, so a failing job never thins the history.
+#
+# Same disk as the database: this guards against a bad change, a bad migration or a deletion, not against losing the
+# server. Restore steps: docs/RUNBOOK-INCIDENTS.md section 8.
+set -eu
+umask 077
+
+DIR=${ORRERY_BACKUP_DIR:-/opt/orrery/backups}
+CONTAINER=${ORRERY_PG_CONTAINER:-orrery-pg}
+KEEP_DAYS=${ORRERY_BACKUP_KEEP_DAYS:-14}
+
+install -d -m 700 "$DIR"
+f="$DIR/orrery-$(date -u +%Y%m%dT%H%MZ).dump"
+tmp="$f.tmp"
+toc="$f.toc"
+trap 'rm -f "$tmp" "$toc"' EXIT
+
+docker exec "$CONTAINER" pg_dump -U orrery -d orrery -Fc -Z 6 > "$tmp"
+[ -s "$tmp" ] || { echo "orrery-pg-backup: empty dump" >&2; exit 1; }
+docker exec -i "$CONTAINER" pg_restore --list < "$tmp" > "$toc"
+tables=$(grep -c ' TABLE DATA ' "$toc" || true)
+rm -f "$toc"
+chmod 600 "$tmp"
+mv -f "$tmp" "$f"
+trap - EXIT
+
+# -mtime +N matches files at least N+1 whole days old: +13 keeps the newest 14 days.
+find "$DIR" -maxdepth 1 -type f -name 'orrery-*.dump' -mtime +$((KEEP_DAYS - 1)) -delete
+find "$DIR" -maxdepth 1 -type f -name 'orrery-*.dump.tmp' -mtime +0 -delete
+kept=$(find "$DIR" -maxdepth 1 -type f -name 'orrery-*.dump' | wc -l)
+echo "orrery-pg-backup: $f, $(stat -c %s "$f") bytes, $tables tables with data, $kept dumps kept"

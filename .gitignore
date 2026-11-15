@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+out/
+cache/
+broadcast/
+*.key
+design/*.log
+deployments/*-fork.json
+contracts/lib/v4-periphery

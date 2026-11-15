@@ -1,0 +1,17 @@
+# ~/.config/systemd/user/orrery-backup-pull.service on the owner's Fedora laptop (owner's choice 2026-11-09).
+# Off-server copy of the Orrery database dumps: pulls every finished dump from server 1 that is not here yet into
+# ~/Backups/orrery-db (folder 700, files 600) and keeps 30 days. A pull, so server 1 holds no credential for this
+# machine and cannot delete the copies. Dumps still being written are named *.dump.tmp and are not matched; rsync
+# writes each file under a temporary name and renames it when complete. -a keeps the server's file time, which the
+# 30-day pruning uses. Driven by orrery-backup-pull.timer.
+[Unit]
+Description=Orrery: copy new database dumps from server 1 to this laptop
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/install -d -m 700 %h/Backups/orrery-db
+ExecStart=/usr/bin/rsync -a --ignore-existing --chmod=D700,F600 -e "ssh -o BatchMode=yes -o ConnectTimeout=20" "server1:/opt/orrery/backups/orrery-*.dump" %h/Backups/orrery-db/
+ExecStartPost=/usr/bin/find %h/Backups/orrery-db -maxdepth 1 -type f -name orrery-*.dump -mtime +29 -delete
+ExecStartPost=/bin/sh -c 'echo "orrery-backup-pull: $(ls -1 %h/Backups/orrery-db | grep -c "\\.dump$") dumps here, newest $(ls -1t %h/Backups/orrery-db | head -1)"'
+TimeoutStartSec=600

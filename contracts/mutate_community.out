@@ -1,0 +1,133 @@
+# python3 mutate_community.py, run 2026-11-11 in two shards (0-71 and 72-129) on copies of contracts/ at the lane commit
+  0 CAUGHT  lock cap ignored  by test_createEvent_cap_and_books, test_createEvent_guards, test_create_guards
+  1 CAUGHT  lock cap counts locked  by test_createEvent_cap_and_books, test_create_guards
+  2 CAUGHT  fund without balance delta  by test_fund_reverts
+  3 CAUGHT  eth fund mismatch accepted  by test_fund_reverts
+  4 CAUGHT  sync books the whole balance  by test_deep_run_reaches_every_state, test_fund_eth_and_sync, test_names_unique_fee_to_pool
+  5 CAUGHT  publish after the deadline  by test_publish_guards
+  6 CAUGHT  duplicate winners accepted  by test_publish_guards
+  7 CAUGHT  prizes above the locked amount  by test_publish_guards, test_replace_guards
+  8 CAUGHT  remainder not returned  by test_deep_run_reaches_every_state, test_publish_window_and_claim, test_replace_once_restarts_window
+  9 CAUGHT  max winners off by one  by test_publish_guards
+ 10 CAUGHT  replace twice  by test_replace_once_restarts_window
+ 11 CAUGHT  replace after the window  by test_replace_guards
+ 12 CAUGHT  replace keeps old prizes  by test_deep_run_reaches_every_state, test_replace_once_restarts_window
+ 13 CAUGHT  window not restarted on replace  by test_replace_once_restarts_window
+ 14 CAUGHT  prize before the window  by test_deep_run_reaches_every_state, test_publish_window_and_claim
+ 15 CAUGHT  prize paid twice  by test_deep_run_reaches_every_state, test_publish_window_and_claim
+ 16 CAUGHT  claimFor pays the caller  by test_publish_window_and_claim
+ 17 CAUGHT  expire before the deadline  by test_expire_returns_to_free_not_admin
+ 18 CAUGHT  expire sends to the admin  by test_deep_run_reaches_every_state, test_expire_returns_to_free_not_admin
+ 19 CAUGHT  expire a published event  by test_expire_refused_after_publish, test_expire_returns_to_free_not_admin
+ 20 CAUGHT  achievement hooks open  by test_achievement_hooks_only_from_achievements
+ 21 CAUGHT  admin gate open  by test_admin_two_step, test_createEvent_guards, test_publish_guards
+ 22 CAUGHT  admin accepted by anyone  by test_admin_two_step
+ 23 CAUGHT  deadline unbounded  by test_createEvent_guards
+ 24 CAUGHT  achievement payout keeps its lock  by test_close_returns_unpaid_slots_once, test_deep_run_reaches_every_state
+ 25 CAUGHT  release keeps the lock  by test_close_returns_unpaid_slots_once, test_deep_run_reaches_every_state
+ 26 CAUGHT  verifier ignored  by test_onchain_claim_first_come_and_cap, test_onchain_claim_guards
+ 27 CAUGHT  recipient cap off by one  by test_deep_run_reaches_every_state, test_onchain_claim_first_come_and_cap
+ 28 CAUGHT  on-chain claim twice  by test_onchain_claim_first_come_and_cap
+ 29 CAUGHT  on-chain claim after the deadline  by test_deep_run_reaches_every_state, test_onchain_claim_guards
+ 30 CAUGHT  listed beyond the cap  by test_deep_run_reaches_every_state, test_publish_completers_guards
+ 31 CAUGHT  listed out of order  by test_publish_completers_guards
+ 32 CAUGHT  listed in the future  by test_publish_completers_guards
+ 33 CAUGHT  listed duplicate  by test_publish_completers_guards
+ 34 CAUGHT  listed claim before the window  by test_deep_run_reaches_every_state, test_listed_flow
+ 35 CAUGHT  listed claim by an unlisted address  by test_listed_flow, test_unlist_in_window_frees_slot
+ 36 CAUGHT  listed claim after the deadline  by test_deep_run_reaches_every_state, test_listed_flow
+ 37 CAUGHT  close twice  by test_close_returns_unpaid_slots_once, test_deep_run_reaches_every_state
+ 38 CAUGHT  close before the deadline  by test_close_returns_unpaid_slots_once, test_deep_run_reaches_every_state
+ 39 CAUGHT  close returns every slot  by test_close_returns_unpaid_slots_once, test_deep_run_reaches_every_state, test_listed_flow
+ 40 CAUGHT  unlist after the window  by test_unlist_in_window_frees_slot
+ 41 CAUGHT  unlist keeps the slot  by test_unlist_in_window_frees_slot
+ 42 CAUGHT  lock only one reward  by test_close_returns_unpaid_slots_once, test_create_locks_reward_times_max, test_deep_run_reaches_every_state
+ 43 CAUGHT  listed window past the deadline  by test_publish_completers_guards
+ 44 CAUGHT  anyone creates  by test_create_guards, test_listed_flow, test_unlist_in_window_frees_slot
+ 45 CAUGHT  listed deadline without room for the window  by test_create_guards
+ 46 CAUGHT  stake threshold exclusive  by test_close_returns_unpaid_slots_once, test_onchain_claim_first_come_and_cap, test_stake_usd_verifier
+ 47 CAUGHT  stake valued while the price is not ready  by test_onchain_claim_guards
+ 48 CAUGHT  agent owner not checked  by test_verified_agent_verifier
+ 49 CAUGHT  verification not checked  by test_verified_agent_verifier
+ 50 CAUGHT  agent id length not checked  by test_verified_agent_verifier
+ 51 CAUGHT  max price ignored  by test_boost_guards, test_market_creator_controls, test_names_charset_and_bounds
+ 52 CAUGHT  ready ignored  by test_post_guards
+ 53 CAUGHT  pull not delta checked  by test_fee_token_refused
+ 54 CAUGHT  burn not supply checked  by test_short_burn_refused
+ 55 CAUGHT  burn skipped  by test_boost_burns_and_stacks, test_boost_guards, test_market_sale_burns_share_and_pays_creator
+ 56 CAUGHT  burn event amount wrong  by test_boost_burns_and_stacks
+ 57 CAUGHT  post fee not charged  by test_deep_run_reaches_every_state, test_fee_token_refused, test_post_pays_exact_fee_to_pool
+ 58 CAUGHT  room stake ignored  by test_staker_room
+ 59 CAUGHT  text bound off by one  by test_post_guards
+ 60 CAUGHT  empty text accepted  by test_post_guards
+ 61 CAUGHT  reply to an unknown message  by test_post_guards
+ 62 CAUGHT  unknown room accepted  by test_post_guards
+ 63 CAUGHT  self tip accepted  by test_tip_splits_exactly
+ 64 CAUGHT  tip cut rounded up  by test_tip_splits_exactly
+ 65 CAUGHT  tip cut to the author  by test_tip_splits_exactly
+ 66 CAUGHT  report twice  by test_report_and_hide
+ 67 CAUGHT  report without stake  by test_report_and_hide
+ 68 CAUGHT  hidden at the wrong count  by test_report_and_hide
+ 69 CAUGHT  anyone creates rooms  by test_staker_room
+ 70 CAUGHT  author not stored  by test_post_pays_exact_fee_to_pool, test_report_and_hide, test_tip_splits_exactly
+ 71 CAUGHT  uppercase accepted  by test_names_charset_and_bounds
+ 72 CAUGHT  no maximum length  by test_names_charset_and_bounds
+ 73 CAUGHT  name taken ignored  by test_names_unique_fee_to_pool
+ 74 CAUGHT  old name not freed  by test_names_unique_fee_to_pool
+ 75 CAUGHT  name fee not paid  by test_names_unique_fee_to_pool
+ 76 CAUGHT  boost days unbounded  by test_boost_guards
+ 77 CAUGHT  boost does not stack  by test_boost_burns_and_stacks
+ 78 CAUGHT  agent priced as a post  by test_boost_burns_and_stacks
+ 79 CAUGHT  boost burn source  by test_boost_burns_and_stacks
+ 80 CAUGHT  boost price for one day  by test_boost_burns_and_stacks
+ 81 CAUGHT  week lasts a day  by test_passes_burn_and_stack_for_any_account
+ 82 CAUGHT  pass does not stack  by test_passes_burn_and_stack_for_any_account
+ 83 CAUGHT  pass count unbounded  by test_passes_guards
+ 84 CAUGHT  pass for the zero address  by test_passes_guards
+ 85 CAUGHT  pass priced for one unit  by test_passes_burn_and_stack_for_any_account
+ 86 CAUGHT  creator buys own template  by test_market_sale_burns_share_and_pays_creator
+ 87 CAUGHT  licence bought twice  by test_market_sale_burns_share_and_pays_creator
+ 88 CAUGHT  delisted template sold  by test_market_creator_controls
+ 89 CAUGHT  nothing burned  by test_market_sale_burns_share_and_pays_creator
+ 90 CAUGHT  creator paid the whole price  by test_market_sale_burns_share_and_pays_creator
+ 91 CAUGHT  anyone reprices  by test_market_creator_controls
+ 92 CAUGHT  no minimum price  by test_market_creator_controls
+ 93 CAUGHT  self link  by test_link_once_never_changes
+ 94 CAUGHT  link changed  by test_link_once_never_changes, test_link_with_sig_eoa_and_1271
+ 95 CAUGHT  signature not checked  by test_link_with_sig_eoa_and_1271
+ 96 CAUGHT  expired signature accepted  by test_link_with_sig_eoa_and_1271
+ 97 CAUGHT  digest ignores the referrer  by test_link_with_sig_eoa_and_1271
+ 98 CAUGHT  cashback ceiling ignored  by test_accrue_bounds
+ 99 CAUGHT  referral share ceiling ignored  by test_referral_rules
+100 CAUGHT  referral link not checked  by test_referral_rules
+101 CAUGHT  fee before the link  by test_referral_rules
+102 CAUGHT  referral window inclusive  by test_referral_rules
+103 CAUGHT  monthly cap ignored  by test_deep_run_reaches_every_state, test_referral_monthly_cap
+104 CAUGHT  cap use not recorded  by test_referral_monthly_cap
+105 CAUGHT  duplicate accepted  by test_accrue_bounds
+106 CAUGHT  lag unbounded  by test_accrue_bounds
+107 CAUGHT  future fee accepted  by test_accrue_bounds
+108 CAUGHT  unknown kind accepted  by test_accrue_bounds
+109 CAUGHT  cashback with a referee  by test_accrue_bounds
+110 CAUGHT  open before the hold  by test_deep_run_reaches_every_state, test_open_hold_and_pro_rata
+111 CAUGHT  hold not applied  by test_open_hold_and_pro_rata
+112 CAUGHT  reserve not capped by free  by test_deep_run_reaches_every_state, test_open_hold_and_pro_rata
+113 CAUGHT  month claimed twice  by test_open_hold_and_pro_rata
+114 CAUGHT  claim not pro rata  by test_open_hold_and_pro_rata
+115 CAUGHT  claim keeps the reservation  by test_close_returns_unclaimed, test_deep_run_reaches_every_state, test_open_hold_and_pro_rata
+116 CAUGHT  close before the window  by test_close_returns_unclaimed
+117 CAUGHT  close twice  by test_close_returns_unclaimed
+118 CAUGHT  claim after close  by test_close_returns_unclaimed
+119 CAUGHT  void after opening  by test_void_before_open_only
+120 CAUGHT  void keeps the total  by test_void_before_open_only
+121 CAUGHT  publisher gate open  by test_accrue_bounds
+122 CAUGHT  claimFor pays the caller  by test_open_hold_and_pro_rata
+123 CAUGHT  open twice  by test_deep_run_reaches_every_state, test_open_hold_and_pro_rata
+124 CAUGHT  open while the price is not ready  by test_open_hold_and_pro_rata
+125 CAUGHT  close returns nothing  by test_close_returns_unclaimed, test_deep_run_reaches_every_state
+126 CAUGHT  admin gate open  by test_roles, test_void_before_open_only
+127 CAUGHT  first day of month off by one  by testFuzz_months_roundtrip, test_close_returns_unclaimed, test_empty_month_opens_without_price
+128 CAUGHT  century leap rule dropped  by testFuzz_months_roundtrip, test_months_known_dates
+129 CAUGHT  january and february in the wrong year  by testFuzz_months_roundtrip, test_accrue_bounds, test_close_returns_unclaimed
+
+130/130 mutations caught

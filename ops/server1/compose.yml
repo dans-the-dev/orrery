@@ -1,0 +1,182 @@
+# Orrery on server 1 (house rule: publish nothing to the outside; the shared edge Caddy reaches the API on the
+# shared network `infra_default` under the alias orrery-api, ports bound to loopback for health checks only).
+#
+#   docker compose -p orrery-mainnet --env-file release.env -f compose.yml up -d
+#
+# ORRERY_DIR (default /opt/orrery) and ORRERY_KEYS (default mainnet) let scripts/go-live-4663.ts rehearse the same file
+# locally against a fork with the development keys.
+# TAG names the image (the commit it was built from); release.env holds TAG. Secrets: /opt/orrery/secrets, mode 600,
+# copied from ~/.secrets/orrery/ (never from a repository). Every service reads only the key files it needs.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: orrery-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: orrery
+      POSTGRES_DB: orrery
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg-password
+    volumes:
+      - orrery-pg:/var/lib/postgresql/data
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/pg-password:/run/secrets/pg-password:ro
+    healthcheck: {test: ["CMD", "pg_isready", "-U", "orrery", "-d", "orrery"], interval: 5s, retries: 20}
+    mem_limit: 384m
+    networks: [data]
+
+  api:
+    image: orrery-services:${TAG:?set TAG, or pass --env-file release.env}
+    container_name: orrery-api
+    restart: unless-stopped
+    command: ["src/bin/api.ts"]
+    env_file: [common.env, api.env, {path: discord.env, required: false}]
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-quote-signer.json:/run/keys/quote-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
+      - ${ORRERY_DIR:-/opt/orrery}/cards:/run/cards:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 384m
+    cpus: 0.5
+    ports: ["127.0.0.1:18787:8787"]
+    networks:
+      data:
+      edge: {aliases: [orrery-api]}
+
+  indexer:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-indexer
+    restart: unless-stopped
+    command: ["src/bin/indexer.ts"]
+    env_file: [common.env]
+    # loadConfig reads the three v1 hot keys in every process, so each service mounts them read-only.
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 384m
+    cpus: 0.5
+    ports: ["127.0.0.1:18788:8788"]
+    networks: [data]
+
+  prober:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-prober
+    restart: unless-stopped
+    command: ["src/bin/prober.ts"]
+    env_file: [common.env]
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 256m
+    cpus: 0.25
+    networks: [data]
+
+  keeper:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-keeper
+    restart: unless-stopped
+    command: ["src/bin/keeper.ts"]
+    env_file: [common.env]
+    environment:
+      ORRERY_KEEPER_KEY_FILE: /run/keys/keeper.json
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-keeper.json:/run/keys/keeper.json:ro
+    mem_limit: 256m
+    cpus: 0.25
+    networks: [data]
+    profiles: [orry]
+
+  # wave R1 markets (deploy-markets-4663.ts): clears sealed batches and sends opted-in reveals
+  market-keeper:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-market-keeper
+    restart: unless-stopped
+    command: ["src/bin/market-keeper.ts"]
+    env_file: [common.env]
+    environment:
+      ORRERY_MARKET_KEEPER_KEY_FILE: /run/keys/market-keeper.json
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-market-keeper.json:/run/keys/market-keeper.json:ro
+    mem_limit: 192m
+    cpus: 0.25
+    networks: [data]
+    profiles: [markets]
+
+  market-relay:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-market-relay
+    restart: unless-stopped
+    command: ["src/bin/market-relay.ts"]
+    env_file: [common.env]
+    environment:
+      ORRERY_RELAY_KEY_FILE: /run/keys/reveal-relay.json
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-reveal-relay.json:/run/keys/reveal-relay.json:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 192m
+    cpus: 0.25
+    networks: [data]
+    profiles: [markets]
+
+  discord:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-discord
+    restart: unless-stopped
+    command: ["src/bin/discord.ts"]
+    env_file: [common.env, discord.env]
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
+      - ${ORRERY_DIR:-/opt/orrery}/cards:/run/cards:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 256m
+    cpus: 0.25
+    networks: [data]
+    profiles: [discord]
+
+  # Replies to Discord questions and @OrreryHQ mentions (#reply-queue). Its own image tag, so shipping it never moves
+  # the other services off TAG; it starts only with the support profile. Keys sit in secrets/support/ (dir 700, uid 1000):
+  # anthropic.env (required) and x-api.json (optional: without it X stays off). No ports: it only connects out.
+  support:
+    image: orrery-services:${SUPPORT_TAG:-unset}
+    container_name: orrery-support
+    restart: unless-stopped
+    command: ["src/bin/support.ts"]
+    env_file: [common.env, discord.env, {path: support.env, required: false}]
+    environment:
+      ORRERY_ANTHROPIC_KEY_FILE: /run/keys/support/anthropic.env
+      ORRERY_SUPPORT_X_FILE: /run/keys/support/x-api.json
+    volumes:
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
+      - ${ORRERY_DIR:-/opt/orrery}/secrets/support:/run/keys/support:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 256m
+    cpus: 0.25
+    networks: [data]
+    profiles: [support]
+
+volumes:
+  orrery-pg:
+
+networks:
+  # server 1's default address pools are used up; an explicit subnet, clear of the 10.232.1/3/5 networks there
+  data:
+    ipam:
+      config: [{subnet: 10.232.9.0/24}]
+  edge: {external: true, name: infra_default}

@@ -1,0 +1,4 @@
+common.env
+api.env
+release.env
+discord.env

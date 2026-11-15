@@ -1,0 +1,15 @@
+# ~/.config/systemd/user/orrery-backup-pull.timer on the owner's Fedora laptop.
+# Daily at 11:30 WIB (04:30 UTC, after the 03:47 UTC dump on server 1), 5 minutes after each login, and at the next
+# start when a run was missed (Windows days, laptop off). Server 1 keeps 14 days, so any gap shorter than that is
+# filled by the next pull.
+[Unit]
+Description=Orrery: pull new database dumps from server 1
+
+[Timer]
+OnCalendar=*-*-* 04:30:00 UTC
+OnStartupSec=5min
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

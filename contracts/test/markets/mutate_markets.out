@@ -1,0 +1,125 @@
+# mutate_markets.py on r1/contracts a8ba376 (first pass, 4 shards), then the missed and constructor-rule mutants re-run one at a time on dfa1ea9
+# first pass:
+  0 CAUGHT  zero commitment accepted  by test_commit_reverts
+  1 CAUGHT  commit outside the commit window  by test_commit_reverts
+  2 CAUGHT  second commit overwrites  by test_commit_reverts
+  3 CAUGHT  batch cap off by one  by test_batch_full_at_max_orders
+  4 CAUGHT  commit fee not burned  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_donation_does_not_block_clearing, test_a_failing_fee_tier_read_charges_the_full_fee
+  5 CAUGHT  commit burn not supply checked  by test_a_burn_that_does_not_reduce_supply_is_refused
+  6 CAUGHT  commit fee burn source wrong  by test_commit_stores_and_burns_the_commit_fee
+  7 CAUGHT  reveal in the commit window  by test_reveal_for_an_account_by_a_relay, test_reveal_reverts
+  8 CAUGHT  reveal does not open the commitment  by test_deep_run_market, test_reveal_for_an_account_by_a_relay, test_reveal_reverts
+  9 CAUGHT  revealFor keyed by the sender  by test_reveal_for_an_account_by_a_relay
+ 10 CAUGHT  reveal stored for the wrong account  by test_reveal_for_an_account_by_a_relay
+ 11 CAUGHT  reveal twice  by test_reveal_for_an_account_by_a_relay, test_reveal_reverts, test_reveal_stores_the_order
+ 12 CAUGHT  zero amount revealed  by test_reveal_rejects_zero_and_below_minimum
+ 13 CAUGHT  minimum notional inclusive  by test_reveal_rejects_zero_and_below_minimum, test_unfundable_amount_is_dropped
+ 14 CAUGHT  sell notional at the raw answer  by test_reveal_of_a_sell_needs_a_positive_feed_answer, test_reveal_rejects_zero_and_below_minimum
+ 15 CAUGHT  clear before the reveal window ends  by test_clear_timing_and_once
+ 16 CAUGHT  clear twice  by test_clear_timing_and_once, test_deep_run_market
+ 17 CAUGHT  clear after expiry  by test_deep_run_market, test_expiry
+ 18 CAUGHT  expire early  by test_deep_run_market, test_expiry
+ 19 CAUGHT  expire a cleared batch  by test_clear_timing_and_once, test_deep_run_market, test_expiry
+ 20 CAUGHT  commit window one second longer  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_clear_time_orry_burn_that_does_not_reduce_supply_is_refused, test_a_donation_does_not_block_clearing
+ 21 CAUGHT  round after the end accepted  by test_round_must_be_the_latest_at_or_before_reveal_end
+ 22 CAUGHT  older round accepted  by test_a_round_updated_exactly_at_reveal_end_is_the_latest_one, test_deep_run_market, test_round_must_be_the_latest_at_or_before_reveal_end
+ 23 CAUGHT  next round boundary off by one  by test_a_round_updated_exactly_at_reveal_end_is_the_latest_one
+ 24 CAUGHT  missing next round accepted  by test_round_hint_across_a_phase_change
+ 25 CAUGHT  staleness bound inclusive  by test_stale_round_is_refused
+ 26 CAUGHT  oracle pause ignored  by test_corporate_action_blocks_clearing, test_deep_run_market
+ 27 CAUGHT  multiplier change ignored  by test_corporate_action_blocks_clearing
+ 28 CAUGHT  zero price accepted  by test_tiny_answer_that_prices_to_zero_is_refused
+ 29 CAUGHT  negative answer accepted  by test_non_positive_answer_is_refused
+ 30 CAUGHT  sell limit inclusive the wrong way  by test_deep_run_market
+ 31 CAUGHT  buy limit ignored  by test_deep_run_market
+ 32 CAUGHT  unfundable amount kept  by test_unfundable_amount_is_dropped
+ 33 CAUGHT  orry fee cover not checked  by test_orry_fee_order_without_orry_allowance_is_dropped
+ 34 CAUGHT  receive probe removed  by test_deep_run_market, test_frozen_usdg_seller_is_dropped_before_its_asset_is_pulled, test_issuer_block_drops_the_blocked_seller_and_buyer
+ 35 CAUGHT  buyer pull without the fee  by test_a_clear_time_orry_burn_that_does_not_reduce_supply_is_refused, test_a_donation_does_not_block_clearing, test_a_failing_fee_tier_read_charges_the_full_fee
+ 36 CAUGHT  failed pull reverts the batch  by test_deep_run_market, test_issuer_block_drops_the_blocked_seller_and_buyer, test_moved_balance_drops_only_that_order
+ 37 CAUGHT  dropped order not counted  by test_deep_run_market, test_frozen_usdg_seller_is_dropped_before_its_asset_is_pulled, test_issuer_block_drops_the_blocked_seller_and_buyer
+ 38 CAUGHT  cross the larger side  by test_a_round_updated_exactly_at_reveal_end_is_the_latest_one, test_buyers_larger_side_fill_pro_rata_and_pay_the_same_price, test_corporate_action_blocks_clearing
+ 39 CAUGHT  buyers pay rounded down  by test_deep_run_market, test_rounding_dust_goes_to_the_treasury_in_usdg_only
+ 40 CAUGHT  sellers split by the buy total  by test_a_donation_does_not_block_clearing, test_a_failing_fee_tier_read_charges_the_full_fee, test_a_round_updated_exactly_at_reveal_end_is_the_latest_one
+ 41 CAUGHT  buyer split not cumulative  by test_deep_run_market, test_rounding_dust_goes_to_the_treasury_in_usdg_only
+ 42 CAUGHT  buyer payment split rounded down  by test_deep_run_market
+ 43 CAUGHT  seller earns rounded up  by test_cross_first_then_the_swap_remainder, test_deep_run_market
+ 44 CAUGHT  unsold asset not refunded  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_pool_beyond_the_band_on_the_favourable_side_undoes_the_leg, test_a_round_updated_exactly_at_reveal_end_is_the_latest_one
+ 45 CAUGHT  unspent USDG not refunded  by test_a_large_buy_stops_at_the_band_and_refunds_the_rest, test_buyers_larger_side_fill_pro_rata_and_pay_the_same_price, test_deep_run_market
+ 46 CAUGHT  rounding dust kept  by test_a_round_updated_exactly_at_reveal_end_is_the_latest_one, test_cross_first_then_the_swap_remainder, test_deep_run_market
+ 47 CAUGHT  fees kept by the market  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_donation_does_not_block_clearing, test_a_failing_fee_tier_read_charges_the_full_fee
+ 48 CAUGHT  fill event for unfilled orders  by test_one_sided_batch_refunds_everything
+ 49 CAUGHT  fee discount ignored  by test_deep_run_market, test_fee_tiers_discount_the_usdg_fee
+ 50 CAUGHT  fee rounds up  by test_a_large_buy_stops_at_the_band_and_refunds_the_rest, test_buyers_larger_side_fill_pro_rata_and_pay_the_same_price, test_deep_run_market
+ 51 CAUGHT  orry fee discount ignored  by test_deep_run_market, test_fee_in_orry_covers_the_pool_leg, test_fee_paid_in_orry_is_burned_with_the_extra_discount
+ 52 CAUGHT  orry fee not burned  by test_deep_run_market, test_fee_in_orry_covers_the_pool_leg, test_fee_paid_in_orry_is_burned_with_the_extra_discount
+ 53 CAUGHT  clear burn not supply checked  by test_a_clear_time_orry_burn_that_does_not_reduce_supply_is_refused
+ 54 CAUGHT  orry fee burn source wrong  by test_fee_paid_in_orry_is_burned_with_the_extra_discount
+ 55 CAUGHT  orry fee also charged in usdg  by test_deep_run_market, test_fee_in_orry_covers_the_pool_leg, test_fee_paid_in_orry_is_burned_with_the_extra_discount
+ 56 CAUGHT  tier discount read fails open  by test_a_failing_fee_tier_read_charges_the_full_fee
+ 57 CAUGHT  band ignored on the low side  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_deep_run_market
+ 58 CAUGHT  band ignored on the high side  by test_a_large_buy_stops_at_the_band_and_refunds_the_rest, test_deep_run_market
+ 59 CAUGHT  seller pool limit ignores the order limit  by test_one_order_past_its_bound_does_not_stop_the_others, test_the_order_limit_is_tighter_than_the_band
+ 60 CAUGHT  buyer pool limit ignores the order limit  by test_deep_run_market, test_the_order_limit_is_tighter_than_the_band
+ 61 CAUGHT  realised price guard removed  by test_a_pool_beyond_the_band_on_the_favourable_side_undoes_the_leg, test_deep_run_market
+ 62 CAUGHT  favourable side unchecked  by test_a_pool_beyond_the_band_on_the_favourable_side_undoes_the_leg, test_deep_run_market
+ 63 CAUGHT  swap without a price limit  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_large_buy_stops_at_the_band_and_refunds_the_rest, test_deep_run_market
+ 64 MISSED  pool fee not in the limit
+ 65 CAUGHT  limit already passed still swaps  by test_deep_run_market, test_one_order_past_its_bound_does_not_stop_the_others
+ 66 CAUGHT  limit-mode orders use the pool  by test_cross_first_then_the_swap_remainder, test_deep_run_market, test_limit_mode_never_touches_the_pool
+ 67 MISSED  both sides sent to the pool
+ 68 CAUGHT  a failed pool leg reverts the clear  by test_a_pool_beyond_the_band_on_the_favourable_side_undoes_the_leg, test_an_issuer_block_on_the_pool_manager_skips_the_leg, test_deep_run_market
+ 69 CAUGHT  callback open to anyone  by test_unlock_callback_refuses_outsiders
+ 70 CAUGHT  callback outside a clear  by test_unlock_callback_refuses_outsiders
+ 71 CAUGHT  pool output not counted  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_large_buy_stops_at_the_band_and_refunds_the_rest, test_cross_first_then_the_swap_remainder
+ 72 CAUGHT  pool currencies unchecked  by test_factory_checks_the_pool_and_reports_its_id
+ 73 CAUGHT  hooked pool accepted  by test_factory_checks_the_pool_and_reports_its_id
+ 74 CAUGHT  seller orry cover ignores the band  by test_deep_run_market, test_orry_fee_on_a_pool_fill_above_the_clearing_price
+ 75 CAUGHT  deviation cap removed  by test_constructor_rules
+ 76 CAUGHT  pool id not reported  by test_factory_checks_the_pool_and_reports_its_id
+ 77 CAUGHT  deviation passed as zero  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_large_buy_stops_at_the_band_and_refunds_the_rest, test_constructor_reads_and_params
+ 78 CAUGHT  fee cap raised  by test_constructor_rules
+ 79 CAUGHT  short windows accepted  by test_constructor_rules
+ 80 CAUGHT  second market per asset  by test_create_records_one_market_per_asset
+ 81 CAUGHT  anyone creates  by test_create_records_one_market_per_asset
+ 82 CAUGHT  acceptOwnership by anyone  by test_two_step_ownership
+ 83 CAUGHT  market not recorded  by test_create_records_one_market_per_asset, test_deep_run_market
+ 84 CAUGHT  fee passed as zero  by test_a_clear_time_orry_burn_that_does_not_reduce_supply_is_refused, test_a_failing_fee_tier_read_charges_the_full_fee, test_a_large_buy_stops_at_the_band_and_refunds_the_rest
+ 85 CAUGHT  reveal window from the commit one  by test_commit_reverts, test_constructor_reads_and_params, test_phase_and_reveal_end
+ 86 CAUGHT  tier threshold exclusive  by test_tiers_and_usd_boundaries
+ 87 CAUGHT  lowest tier wins  by test_a_price_move_changes_the_tier, test_fee_tiers_discount_the_usdg_fee, test_no_discount_while_the_oracle_is_not_ready
+ 88 MISSED  unordered tiers accepted
+ 89 MISSED  discount above 100% accepted
+ 90 CAUGHT  tiers compare ORRY, not USD  by test_a_price_move_changes_the_tier, test_fee_tiers_discount_the_usdg_fee, test_no_discount_while_the_oracle_is_not_ready
+ 91 MISSED  discount while the oracle is not ready
+ 92 CAUGHT  stake valued at a fixed price  by test_tiers_and_usd_boundaries
+ 93 CAUGHT  orryFor rounds down  by test_negative_and_extreme_ticks, test_rounding_favours_the_protocol, test_sources_follow_each_hub_history
+ 94 CAUGHT  eth needed rounds down  by test_negative_and_extreme_ticks, test_rounding_favours_the_protocol, test_tiers_and_usd_boundaries
+ 95 CAUGHT  stale ETH price accepted  by test_falls_back_to_the_eth_path, test_no_discount_while_the_oracle_is_not_ready, test_not_ready_cases
+ 96 CAUGHT  zero ETH price accepted  by test_not_ready_cases
+ 97 CAUGHT  future ETH round accepted  by test_not_ready_cases
+ 98 CAUGHT  short window  by test_falls_back_to_the_eth_path, test_no_discount_while_the_oracle_is_not_ready, test_not_ready_cases
+ 99 CAUGHT  price inverted on the X192 path  by test_a_price_move_changes_the_tier, test_falls_back_to_the_eth_path, test_fee_tiers_discount_the_usdg_fee
+100 CAUGHT  X128 path scaled wrong  by test_high_ticks_take_the_x128_path_and_match_the_reference, test_negative_and_extreme_ticks
+101 CAUGHT  ETH path without the feed  by test_a_price_move_changes_the_tier, test_falls_back_to_the_eth_path, test_fee_tiers_discount_the_usdg_fee
+102 CAUGHT  USDG hub not preferred  by test_a_one_block_push_barely_moves_the_30_minute_mean, test_usdg_hub_is_preferred_once_it_has_the_history
+103 CAUGHT  source view ignores the USDG hub  by test_falls_back_to_the_eth_path, test_ready_needs_the_eth_feed_only_on_the_eth_path, test_sources_follow_each_hub_history
+104 CAUGHT  orientation not flipped  by test_usdg_hub_orientation_is_flipped_when_orry_is_currency0
+105 CAUGHT  uninitialized hub used  by test_falls_back_to_the_eth_path
+106 CAUGHT  ETH path ignores a stale feed  by test_falls_back_to_the_eth_path, test_not_ready_cases
+107 CAUGHT  ready ignores the feed on the ETH path  by test_falls_back_to_the_eth_path, test_not_ready_cases, test_ready_needs_the_eth_feed_only_on_the_eth_path
+
+# re-runs on dfa1ea9 (tests pinned; constructor tests by try/catch):
+ 64 CAUGHT  pool fee not in the limit  by test_DP11_a_pool_push_moves_the_fill_at_most_the_band, test_a_large_buy_stops_at_the_band_and_refunds_the_rest
+ 67 CAUGHT  both sides sent to the pool  by test_low_decimal_asset_leftover_on_the_smaller_side_is_refunded
+ 91 CAUGHT  discount while the oracle is not ready  by test_ready_is_checked_even_if_the_oracle_still_quotes
+ 88 CAUGHT  unordered tiers accepted  by test_constructor_rules
+ 89 CAUGHT  discount above 100% accepted  by test_constructor_rules
+ 78 CAUGHT  fee cap raised  by test_constructor_rules
+ 79 CAUGHT  short windows accepted  by test_constructor_rules
+ 75 CAUGHT  deviation cap removed  by test_constructor_rules, test_market_constructor_rules
+ 81 CAUGHT  anyone creates  by test_create_records_one_market_per_asset
+ 73 CAUGHT  hooked pool accepted  by test_factory_checks_the_pool_and_reports_its_id
+ 72 CAUGHT  pool currencies unchecked  by test_factory_checks_the_pool_and_reports_its_id
+
+108/108 mutations caught (103 in the first pass; 64, 67, 91 caught after pinning tests; 88, 89 after the constructor-test fix)

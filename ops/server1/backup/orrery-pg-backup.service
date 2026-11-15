@@ -1,0 +1,15 @@
+# /etc/systemd/system/orrery-pg-backup.service
+# One dump of the Orrery database to /opt/orrery/backups (14 days kept). Driven by orrery-pg-backup.timer.
+# Source and restore steps: orrery ops/server1/backup/ and docs/RUNBOOK-INCIDENTS.md.
+[Unit]
+Description=Orrery: daily database dump (14 days kept)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/orrery-pg-backup
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=900

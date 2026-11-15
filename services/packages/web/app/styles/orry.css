@@ -1,0 +1,217 @@
+/* ORRY pages (earn, stake, claim, burn, leaderboard, guides) on the Orrery v3 surfaces.
+   Rules over boxes: one reading card per page head, hairline rows for data, one brand action per surface. */
+
+.rc-page .app-main, .rc-page .docs-main { padding-top: 28px; }
+
+/* Tab row under the site nav */
+.rc-tabs { display: flex; flex-wrap: wrap; gap: 6px 28px; padding: 6px 2px 14px; margin-bottom: 30px; border-bottom: 1px solid var(--hairline); }
+.rc-tabs a { position: relative; display: inline-flex; align-items: baseline; gap: 8px; min-height: 44px; align-items: center; font-weight: 600; font-size: 0.95rem; color: var(--muted); transition: color var(--motion-fast); }
+.rc-tabs a:hover, .rc-tabs a[aria-current="page"] { color: var(--ink); }
+.rc-tabs a[aria-current="page"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -15px; height: 2px; background: var(--brand); }
+.rc-tabs small { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+
+/* Page head with its live reading */
+.rc-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: clamp(28px, 5vw, 72px); align-items: start; margin-bottom: 44px; }
+.rc-head:not(:has(.rc-reading)) { grid-template-columns: minmax(0, 1fr); }
+.rc-head h1 { margin-top: 12px; font-size: clamp(2.5rem, 4.6vw, 4.4rem); line-height: 1.03; max-width: 14ch; }
+.rc-head .page-head-lead { margin-top: 18px; }
+.rc-card { background: #fff; border-radius: var(--radius-card); box-shadow: var(--shadow-float); padding: 22px 24px 18px; }
+.rc-card .wallet { margin-top: 14px; }
+.rc-card-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-family: var(--display); font-weight: 600; font-size: 1.02rem; letter-spacing: -0.02em; }
+.rc-card-title span { font-family: var(--text); font-size: 0.76rem; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+.rc-card-wait { margin-top: 14px; color: var(--muted); font-size: 0.95rem; }
+.rc-big { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 14px 0 8px; }
+.rc-big .rc-fig { font-family: var(--mono); font-weight: 700; font-size: clamp(1.5rem, 2.4vw, 2.05rem); letter-spacing: -0.03em; font-variant-numeric: tabular-nums lining-nums; }
+.rc-fig em { font-style: normal; font-family: var(--text); font-weight: 600; font-size: 0.5em; letter-spacing: 0; color: var(--muted); margin-left: 6px; }
+.rc-fig.is-wait { color: #b4bccb; }
+.rc-card .rc-go { width: 100%; margin: 12px 0 4px; }
+
+/* Hairline rows */
+.rc-rows { margin: 10px 0 0; }
+.rc-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-top: 1px solid #e3e8ee; }
+.rc-row:first-child { border-top: 0; }
+.rc-rows-tight .rc-row { padding: 8px 0; }
+.rc-row dt { color: var(--muted); font-size: 0.9rem; }
+.rc-row dt small { display: block; font-size: 0.75rem; opacity: 0.85; }
+.rc-row dd { margin: 0; text-align: right; font-family: var(--mono); font-size: 0.88rem; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.rc-row dd .rc-fig { font-size: 1rem; }
+
+/* Desk (actions) and side (position) */
+.rc-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 28px; align-items: start; }
+.rc-desk { background: #fff; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); padding: 8px 28px 28px; }
+.rc-desk-body { display: flex; flex-direction: column; gap: 16px; padding-top: 22px; }
+.rc-desk-note { color: #2a3350; font-size: 0.95rem; line-height: 1.55; }
+.rc-go { width: 100%; }
+.rc-side { padding: 18px 4px 0; }
+.rc-side h2, .rc-panel h2 { font-size: clamp(1.5rem, 2.2vw, 1.9rem); }
+.rc-side > .rc-rows { margin-top: 16px; }
+.rc-muted { color: var(--muted); font-size: 0.95rem; margin-top: 12px; }
+.rc-explain { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+.rc-explain p { color: #2a3350; font-size: 0.95rem; line-height: 1.6; }
+.rc-explain .lp-link { margin-top: 14px; }
+.rc-connect { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 18px; padding: 14px 16px; border-radius: 14px; background: var(--paper); }
+.rc-connect p { font-size: 0.92rem; }
+
+/* Earn pools: one section per ORRY pool, divided by a rule, each with its own desk and share */
+.rc-hub { padding-top: 34px; margin-top: 34px; border-top: 1px solid var(--hairline); }
+.rc-head + .rc-hub, .rc-hub:first-child { margin-top: 0; }
+.rc-hub-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 14px 40px; margin-bottom: 22px; }
+.rc-hub-head h2 { font-size: clamp(1.6rem, 2.6vw, 2.2rem); letter-spacing: -0.03em; }
+.rc-hub-figs { display: flex; flex-wrap: wrap; gap: 10px 36px; margin: 0; }
+.rc-hub-figs dt { color: var(--muted); font-size: 0.8rem; font-weight: 600; }
+.rc-hub-figs dd { margin: 2px 0 0; font-family: var(--mono); font-size: 0.92rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rc-hub-sub { font-family: var(--display); font-weight: 600; font-size: 1.15rem; letter-spacing: -0.02em; }
+
+/* Ready to claim, one figure per asset */
+.rc-assets { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 14px 0 8px; padding: 0; }
+.rc-assets .rc-fig { font-family: var(--mono); font-weight: 700; font-size: clamp(1.35rem, 2.1vw, 1.8rem); letter-spacing: -0.03em; font-variant-numeric: tabular-nums lining-nums; }
+.rc-asset-line { display: block; }
+
+/* Claim strip: the figure that a claim button pays */
+.rc-claim { display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 18px; padding: 18px 20px; border-radius: 16px; background: var(--ground-dark); color: #eef1fb; }
+.rc-claim-label { font-size: 0.82rem; color: #b9c3e3; font-weight: 600; }
+.rc-claim-value { display: flex; flex-wrap: wrap; gap: 2px 18px; margin-top: 4px; }
+.rc-claim-value .rc-fig { font-family: var(--mono); font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.rc-claim-value .rc-fig em { color: #9aa5c4; }
+.rc-claim .primary:disabled { background: #2a3760; border-color: #2a3760; color: #8f9bc0; opacity: 1; }
+
+/* Text tabs inside a surface */
+.rc-seg { display: flex; flex-wrap: wrap; gap: 4px 22px; border-bottom: 1px solid #e3e8ee; }
+.rc-seg button { position: relative; min-height: 48px; padding: 0; border: 0; background: transparent; color: var(--muted); font-weight: 700; font-size: 0.95rem; }
+.rc-seg button[aria-selected="true"] { color: var(--ink); }
+.rc-seg button[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--brand); }
+.rc-desk-body .rc-seg { border-bottom: 0; gap: 4px 18px; }
+.rc-desk-body .rc-seg button { min-height: 40px; font-size: 0.88rem; }
+
+/* Amount input */
+.rc-amount label { display: block; font-size: 0.82rem; font-weight: 600; color: #2a3350; margin-bottom: 6px; }
+.rc-amount-box { display: flex; align-items: center; gap: 10px; height: 58px; padding: 0 14px 0 16px; border: 1px solid var(--hairline); border-radius: 14px; background: var(--paper); transition: border-color var(--motion-fast), background var(--motion-fast); }
+.rc-amount-box:focus-within { border-color: var(--brand); background: #fff; outline: 2px solid color-mix(in srgb, var(--brand) 22%, transparent); }
+.rc-amount-box input { flex: 1; min-width: 0; border: 0; background: transparent; font-family: var(--mono); font-size: 1.25rem; font-weight: 700; color: var(--ink); outline: none; font-variant-numeric: tabular-nums; }
+.rc-unit { font-weight: 700; font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.rc-amount-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 26px; margin-top: 4px; font-size: 0.8rem; color: var(--muted); }
+.rc-quick { justify-content: flex-start; }
+.rc-max { min-height: 32px; padding: 4px 10px; border: 1px solid #dfe4ec; border-radius: 8px; background: #fff; color: var(--ink); font-family: var(--mono); font-size: 0.75rem; font-weight: 700; }
+.rc-max:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+.rc-max:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.rc-slip { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+.rc-slip span { margin-right: 4px; }
+.rc-slip button { min-height: 32px; padding: 4px 10px; border: 1px solid #dfe4ec; border-radius: 8px; background: #fff; font-family: var(--mono); font-size: 0.76rem; font-weight: 700; color: var(--ink); }
+.rc-slip button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
+
+.rc-notice { margin-top: 14px; padding: 11px 14px; border-radius: 12px; background: var(--paper); font-size: 0.88rem; line-height: 1.45; color: #2a3350; }
+.rc-notice.ok { background: #e8f4ee; color: var(--success); }
+.rc-notice.error { background: #fdf0f1; color: var(--danger); }
+
+/* Panels below the fold */
+.rc-panel { margin-top: 36px; background: #fff; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); padding: 26px 30px 28px; }
+.rc-panel-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.rc-panel-head p { color: #2a3350; font-size: 0.97rem; max-width: 70ch; }
+.rc-split { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: end; }
+.rc-split-act { display: flex; flex-direction: column; align-items: flex-end; }
+.rc-split-act .secondary { min-width: 160px; }
+.rc-page .secondary:disabled, .rc-checkout .secondary:disabled, .rc-panel .secondary:disabled { opacity: 0.45; cursor: not-allowed; background: transparent; }
+
+/* Claims list */
+.rc-claims { list-style: none; margin: 8px 0 0; padding: 0; }
+.rc-claims li { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 16px 0; border-top: 1px solid #e3e8ee; }
+.rc-claims li:first-child { border-top: 0; }
+.rc-claims li > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rc-claims strong { font-family: var(--display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.015em; }
+.rc-claims span { font-family: var(--mono); font-size: 0.86rem; color: #2a3350; overflow-wrap: anywhere; }
+.rc-claims .secondary { min-width: 150px; flex: none; }
+
+/* Agent stakes */
+.rc-agents-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 36px; margin-top: 18px; }
+.rc-agents-grid h3 { font-size: 1.15rem; margin-bottom: 4px; }
+.rc-agent-form { display: flex; flex-direction: column; gap: 16px; margin-top: 18px; }
+.rc-agents-grid .rc-agent-form { margin-top: 0; }
+.rc-agent-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.rc-agent { padding: 14px 0 16px; border-top: 1px solid #e3e8ee; }
+.rc-agent:first-child { border-top: 0; }
+.rc-agent-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
+.rc-agent-head strong { font-family: var(--display); font-weight: 600; }
+.rc-agent-head span { font-size: 0.8rem; color: var(--muted); }
+.rc-agent-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.rc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rc-inline input { width: 140px; height: 48px; padding: 0 12px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--paper); font-family: var(--mono); font-size: 0.9rem; }
+
+/* Burn sources: share of all burned ORRY per source */
+.rc-sources { list-style: none; margin: 10px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.rc-source-label { display: flex; justify-content: space-between; gap: 12px; font-size: 0.86rem; }
+.rc-source-label span { color: #2a3350; }
+.rc-source-label strong { font-family: var(--mono); font-size: 0.82rem; white-space: nowrap; }
+.rc-bar { display: block; height: 8px; margin-top: 6px; border-radius: 6px; background: #e6eaf0; overflow: hidden; }
+.rc-bar i { display: block; height: 100%; border-radius: 6px; background: var(--brand); transition: width var(--motion-base) var(--ease-out); }
+.rc-sources li:nth-child(2) .rc-bar i { background: var(--ink); }
+.rc-sources li:nth-child(3) .rc-bar i { background: #6f86f0; }
+.rc-sources li:nth-child(4) .rc-bar i { background: #9aa6c4; }
+
+/* Tables */
+.rc-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.92rem; }
+.rc-table th { text-align: left; font-size: 0.78rem; font-weight: 600; color: var(--muted); padding: 10px 10px 10px 0; border-bottom: 1px solid var(--hairline); }
+.rc-table td { padding: 13px 10px 13px 0; border-bottom: 1px solid #e3e8ee; vertical-align: middle; }
+.rc-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rc-table .rank { width: 64px; }
+.rc-table tr.is-top td.rank { color: var(--brand); font-weight: 700; }
+.rc-tx { color: var(--brand); font-size: 0.82rem; }
+.rc-board .rc-seg { margin-bottom: 6px; }
+
+/* Runtime switch: a short wait before the first answer, and the wallet prompt under a held page */
+.rc-gate-wait { min-height: 240px; }
+.rc-exit-connect { margin-top: 24px; }
+.rc-soon + .rc-grid, .rc-soon + .rc-panel { margin-top: 28px; }
+
+/* Held state */
+.rc-soon { margin-top: 8px; padding: 30px 32px; border-radius: var(--radius-card); background: var(--paper); border: 1px dashed #c3ccda; }
+.rc-soon + .rc-soon, .stack .rc-soon, .app-main .stack + .rc-soon { margin-top: 28px; }
+.rc-soon-mark { display: inline-block; font-weight: 700; font-size: 0.82rem; color: var(--brand); }
+.rc-soon h2 { margin-top: 8px; font-size: clamp(1.4rem, 2.2vw, 1.85rem); max-width: 30ch; }
+.rc-soon p:last-child { margin-top: 8px; color: #2a3350; }
+
+/* Checkout on the credits page */
+.rc-checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 22px; }
+.rc-checkout-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
+.rc-checkout-grid > div { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.rc-checkout-grid h3 { font-size: 1.15rem; }
+
+/* Guides */
+.rc-docs code { font-family: var(--mono); font-size: 0.86em; background: #fff; padding: 1px 6px; border-radius: 6px; border: 1px solid #e3e8ee; }
+.rc-docs td:first-child { white-space: nowrap; }
+
+@media (max-width: 1000px) {
+  .rc-head { grid-template-columns: minmax(0, 1fr); }
+  .rc-head h1 { max-width: none; }
+  .rc-grid, .rc-agents-grid, .rc-checkout-grid, .rc-checkout-grid.three { grid-template-columns: minmax(0, 1fr); }
+  .rc-side { padding-top: 6px; }
+}
+@media (max-width: 760px) {
+  .rc-tabs { gap: 0 18px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-bottom: 22px; }
+  .rc-tabs::-webkit-scrollbar { display: none; }
+  .rc-tabs a { white-space: nowrap; }
+  .rc-head { margin-bottom: 28px; }
+  .rc-card { padding: 18px 18px 14px; }
+  .rc-desk { padding: 4px 18px 20px; }
+  .rc-panel { padding: 20px 18px 22px; margin-top: 24px; }
+  .rc-split { grid-template-columns: minmax(0, 1fr); }
+  .rc-split-act { align-items: stretch; }
+  .rc-claims li { flex-direction: column; align-items: stretch; }
+  .rc-claims .secondary { width: 100%; }
+  .rc-table thead { display: none; }
+  .rc-table, .rc-table tbody, .rc-table tr, .rc-table td { display: block; width: 100%; }
+  .rc-table tr { padding: 10px 0; border-bottom: 1px solid #e3e8ee; }
+  .rc-table td { border: 0; padding: 3px 0; text-align: left; }
+  .rc-table .num { text-align: left; }
+  .rc-board .rc-table tr { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 8px; }
+  .rc-board .rc-table td { grid-column: 2; }
+  .rc-board .rc-table td.rank { grid-column: 1; grid-row: 1 / span 4; }
+  .rc-board .rc-table td[data-label]::before { content: attr(data-label); display: inline-block; min-width: 116px; font-family: var(--text); font-size: 0.8rem; color: var(--muted); }
+  .rc-soon { padding: 22px 20px; }
+  .rc-docs td:first-child { white-space: normal; }
+}
+@media (max-width: 480px) {
+  .rc-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .rc-row dd { text-align: left; }
+  .rc-claim .primary { width: 100%; }
+}

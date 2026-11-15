@@ -1,0 +1,126 @@
+# mutate_stake.py on orry/pairs-b 89680e1 (B-1), 2026-11-09, 4 shards (MUT_SHARD=i/4), lane A files skipped
+# 'cashback delay off by one' was reported MISSED by the shard: the script's failure regex stopped at the first ']' and forge printed the revert as CashbackNotReady(1800345600 [1.8e9]); re-run with the fixed regex below
+CAUGHT  unstake keeps earning  by test_deep_run_stake, test_requestUnstake_stops_earning_and_adds_restarting_clock, test_unstake_request_stops_earning_at_once
+CAUGHT  agent cooldown is the plain one  by test_S5_reported_active_stays_locked_for_agent_cooldown, test_deep_run_stake
+CAUGHT  anyone requests an agent unstake  by test_deep_run_stake, test_requestAgentUnstake_reverts
+CAUGHT  time with nobody earning is lost  by test_rewards_with_nobody_earning_return_to_unstreamed
+CAUGHT  accrued not cleared on claim  by test_claimFor_pays_account_only, test_deep_run_stake
+CAUGHT  an ETH-only notify restarts ORRY  by test_notify_sets_rate_and_keeps_remainder_unstreamed
+CAUGHT  agent lock may shrink  by test_deep_run_stake, test_extendAgentLock_reverts
+CAUGHT  notify of nothing accepted  by test_notify_zero_reverts
+CAUGHT  ETH half kept  by test_all_to_stakers_and_all_burned, test_deep_run_stake, test_distribute_at_most_once_per_interval
+CAUGHT  quote forwarded to the staking contract  by test_deep_run_buyback, test_full_loop_hub_fees_become_orry_split_by_the_router, test_router_forwards_registered_quotes_to_the_buyback
+CAUGHT  owner share rounds up  by test_pullBuyback_whole_reserve_at_one_usdg_or_less, test_sync_splits_new_revenue_only
+CAUGHT  coin window not enforced  by test_executeCoin_expires_and_new_proposal_restarts_delay
+CAUGHT  daily pull bound doubled  by test_deep_run_treasury, test_pullBuyback_daily_bound
+CAUGHT  quote reuse allowed  by test_burnForCredits_happy, test_deep_run_treasury
+CAUGHT  malleable high-s signature accepted  by test_signature_malleability_and_shape_refused
+CAUGHT  verification cap never resets  by test_deep_run_treasury, test_verifyWithOrry_daily_cap_per_utc_day
+CAUGHT  pending owner not cleared  by test_two_step_ownership
+CAUGHT  slice interval removed  by test_deep_run_buyback, test_slice_at_most_hourly
+CAUGHT  hop cap doubled  by test_burnEth_burns_what_it_buys, test_burn_eth_output_is_burned_whole_with_the_sink_set, test_buy_with_usdg_in_the_usdg_hub_sends_orry_to_the_router
+CAUGHT  minimum output ignored  by test_slice_reverts_below_min_out_on_a_high_fee_pool
+CAUGHT  PoolManager protocol fee ignored  by test_hop_fee_includes_the_pool_manager_protocol_fee
+CAUGHT  ETH burn not capped  by test_burnEth_burns_what_it_buys, test_burn_eth_output_is_burned_whole_with_the_sink_set, test_deep_run_buyback
+CAUGHT  R-18 spread ten times wider  by test_jit_on_the_shallowest_pool_is_refused, test_listed_pool_spread_bound_both_sides
+CAUGHT  route rule inverted  by test_deep_run_buyback, test_direct_slice_is_capped_at_the_constructor_cap, test_direct_slice_uses_the_usdg_hub_guard
+CAUGHT  direct slice skips the USDG hub guard  by test_direct_slice_uses_the_usdg_hub_guard
+CAUGHT  buyWithQuote skips its hub guard  by test_same_block_guard_is_per_hub
+CAUGHT  quote settled short  by test_buy_with_a_pair_added_after_deployment, test_buy_with_quote_refusals, test_buy_with_usdg_in_the_usdg_hub_sends_orry_to_the_router
+CAUGHT  router also paid the cashback  by test_deep_run_buyback, test_exact_split_on_the_direct_slice_and_quote_buys, test_exact_split_on_the_eth_path_slice
+CAUGHT  sink proposed again after set  by test_propose_execute_rules
+CAUGHT  zero sink accepted  by test_propose_execute_rules
+CAUGHT  burnEth pays cashback  by test_burnEth_also_burns_orry_sent_to_the_buyback, test_burnEth_burns_what_it_buys, test_burn_eth_output_is_burned_whole_with_the_sink_set
+CAUGHT  agent unstake keeps earning  by test_agentStake_follows_current_owner, test_agent_unstake_and_withdraw_flow, test_deep_run_stake
+CAUGHT  second request keeps the old clock  by test_requestUnstake_stops_earning_and_adds_restarting_clock
+CAUGHT  anyone withdraws an agent position  by test_agent_unstake_and_withdraw_flow, test_deep_run_stake
+CAUGHT  division remainder dropped  by test_deep_run_stake, test_notify_restart_carries_scheduled_remainder, test_notify_sets_rate_and_keeps_remainder_unstreamed
+CAUGHT  claimFor pays the caller  by test_claimFor_pays_account_only, test_claim_to_contract_refusing_eth_reverts_its_own_call, test_deep_run_stake
+CAUGHT  per-token rounds up  by test_claimFor_pays_account_only, test_claim_to_contract_refusing_eth_reverts_its_own_call, test_deep_run_stake
+CAUGHT  agent lock unbounded  by test_deep_run_stake, test_extendAgentLock_reverts
+CAUGHT  stakers part rounds up  by test_deep_run_stake, test_dust_skips_notify, test_protocol_money_path_end_to_end
+CAUGHT  empty distribute accepted  by test_nothing_to_distribute, test_router_never_moves_a_token_that_is_not_a_quote, test_router_skips_a_quote_whose_transfer_fails
+CAUGHT  half of a quote forwarded  by test_deep_run_buyback, test_full_loop_hub_fees_become_orry_split_by_the_router, test_router_forwards_registered_quotes_to_the_buyback
+CAUGHT  sync counts the reserve twice  by test_deep_run_treasury, test_pullBuyback_daily_bound, test_slice_bounded_by_the_constructor_cap
+CAUGHT  coin set twice  by test_executeCoin_timing
+CAUGHT  window pulls not recorded  by test_deep_run_treasury, test_pullBuyback_daily_bound
+CAUGHT  quote not marked used  by test_burnForCredits_happy
+CAUGHT  buyer not bound in the quote  by test_burnForCredits_happy, test_burnForCredits_rejections, test_burn_that_misses_supply_reverts_inexact
+CAUGHT  quote signer cap removed  by test_setQuoteSigner
+CAUGHT  ownership start not announced  by test_transfer_to_zero_cancels_and_constructor_emits, test_two_step_ownership
+CAUGHT  burn interval removed  by test_burnEth_burns_what_it_buys, test_deep_run_buyback
+CAUGHT  price limit removed (sell ETH)  by test_price_limit_refuses_a_hub_burn_into_thinner_liquidity
+CAUGHT  slippage tolerance 10%  by test_slice_reverts_below_min_out_on_a_high_fee_pool
+CAUGHT  shallowest pool chosen  by test_dead_pool_is_ignored, test_jit_on_the_shallowest_pool_is_refused, test_slice_uses_the_deepest_listed_pool
+CAUGHT  hub cap converted the wrong way  by test_hub_cap_binds_when_it_is_the_smallest
+CAUGHT  R-18 dead pools count as references  by test_dead_pool_is_ignored
+CAUGHT  route always direct  by test_deep_run_buyback, test_slice_takes_the_eth_path_when_the_usdg_hub_is_shallower
+CAUGHT  buyWithQuote takes native ETH  by test_buy_with_quote_refusals
+CAUGHT  buyWithQuote checks the ETH hub guard  by test_same_block_guard_is_per_hub
+CAUGHT  cashback before the sink is set  by test_buy_with_a_pair_added_after_deployment, test_buy_with_usdg_in_the_usdg_hub_sends_orry_to_the_router, test_deep_run_buyback
+CAUGHT  cashback not paid to the sink  by test_deep_run_buyback, test_exact_split_on_the_direct_slice_and_quote_buys, test_exact_split_on_the_eth_path_slice
+CAUGHT  sink executed again after set  by test_propose_execute_rules
+CAUGHT  proposal keeps the old delay  by test_propose_execute_rules
+CAUGHT  cashback bps unchecked  by test_constructor_rejects_bad_pools
+CAUGHT  plain withdraw before readyAt  by test_deep_run_stake, test_withdraw_reverts_and_pays_after_cooldown
+CAUGHT  agent controller not checked  by test_stakeForAgent_reverts
+CAUGHT  emptied position keeps its staker  by test_agent_unstake_and_withdraw_flow
+CAUGHT  scheduled remainder dropped on restart  by test_deep_run_stake, test_notify_restart_carries_scheduled_remainder
+CAUGHT  intake balance-delta check removed  by test_stake_fee_token_reverts_inexact
+CAUGHT  agentStake ignores the current owner  by test_S5_reported_active_stays_locked_for_agent_cooldown, test_agent_unstake_and_withdraw_flow, test_deep_run_stake
+CAUGHT  anyone extends an agent lock  by test_deep_run_stake, test_extendAgentLock_reverts, test_lock_does_not_follow_the_identity
+CAUGHT  router interval removed  by test_distribute_at_most_once_per_interval
+CAUGHT  forwarded quotes not counted as work  by test_router_forwards_registered_quotes_to_the_buyback, test_router_skips_a_quote_whose_transfer_fails
+CAUGHT  a failed quote transfer stops distribute  by test_router_skips_a_quote_whose_transfer_fails
+CAUGHT  reclaim after the coin is set  by test_deep_run_treasury, test_reclaimReserve_only_while_coinless
+CAUGHT  pull while coinless  by test_pullBuyback_coinless_and_access
+CAUGHT  window resets on every pull  by test_deep_run_treasury, test_pullBuyback_daily_bound
+CAUGHT  quote expiry ignored  by test_burnForCredits_rejections, test_deep_run_treasury
+CAUGHT  inexact burn unchecked  by test_burn_that_misses_supply_reverts_inexact
+CAUGHT  owner withdraw keeps its accrual  by test_deep_run_treasury, test_withdrawOwnerShare
+CAUGHT  ownership transfer not announced  by test_two_step_ownership
+CAUGHT  same-block guard off  by test_deep_run_buyback, test_direct_slice_uses_the_usdg_hub_guard, test_same_block_guard_is_per_hub
+CAUGHT  price limit removed (sell USDG)  by test_price_limit_refuses_a_hop_into_thinner_liquidity
+CAUGHT  hub fee without the hook fee  by test_F1_attack_does_not_pay_at_launch_hub_depth, test_burnEth_burns_what_it_buys, test_burn_eth_output_is_burned_whole_with_the_sink_set
+CAUGHT  bought ORRY kept by the buyback  by test_buy_with_a_pair_added_after_deployment, test_buy_with_usdg_in_the_usdg_hub_sends_orry_to_the_router, test_deep_run_buyback
+CAUGHT  R-18 slice cap ignored  by test_F1_attack_does_not_pay_with_a_deep_hub_under_the_slice_cap, test_deep_run_buyback, test_direct_slice_is_capped_at_the_constructor_cap
+CAUGHT  R-18 spread checked on one side only  by test_jit_on_the_shallowest_pool_is_refused, test_listed_pool_spread_bound_both_sides
+CAUGHT  route never direct  by test_deep_run_buyback, test_direct_slice_is_capped_at_the_constructor_cap, test_direct_slice_uses_the_usdg_hub_guard
+CAUGHT  buyWithQuote takes an unregistered token  by test_buy_with_quote_refusals
+CAUGHT  buyWithQuote interval not recorded  by test_buy_with_quote_refusals, test_buy_with_usdg_in_the_usdg_hub_sends_orry_to_the_router, test_deep_run_buyback
+CAUGHT  cashback share doubled  by test_deep_run_buyback, test_exact_split_on_the_direct_slice_and_quote_buys, test_exact_split_on_the_eth_path_slice
+CAUGHT  cashback delay not enforced  by test_propose_execute_rules
+CAUGHT  anyone proposes the sink  by test_propose_execute_rules, test_the_owner_is_read_live_from_the_treasury
+CAUGHT  pending sink not cleared  by test_propose_execute_rules
+CAUGHT  agent withdraw before leavingAt  by test_S5_reported_active_stays_locked_for_agent_cooldown, test_agent_unstake_and_withdraw_flow, test_deep_run_stake
+CAUGHT  second staker joins a position  by test_partial_agent_withdraw_keeps_staker, test_stakeForAgent_by_wallet_is_keyed_by_owner_and_earns_for_wallet
+CAUGHT  stake skips settling the account  by test_deep_run_stake, test_rewards_with_nobody_earning_return_to_unstreamed, test_two_stakers_pro_rata_and_late_joiner
+CAUGHT  owed not reduced on claim  by test_deep_run_stake, test_rewards_with_nobody_earning_return_to_unstreamed, test_single_staker_receives_the_stream
+CAUGHT  staking reentrancy guard removed  by test_reentrant_claim_is_blocked
+CAUGHT  agent lock not enforced  by test_deep_run_stake, test_lock_blocks_unstake_until_it_ends, test_lock_does_not_follow_the_identity
+CAUGHT  lock keyed by the caller  by test_deep_run_stake, test_extendAgentLock_reverts, test_lock_does_not_follow_the_identity
+CAUGHT  ORRY half not burned  by test_all_to_stakers_and_all_burned, test_deep_run_stake, test_distribute_eth_only_and_orry_only
+CAUGHT  quote forwarding removed  by test_deep_run_buyback, test_full_loop_hub_fees_become_orry_split_by_the_router, test_router_forwards_registered_quotes_to_the_buyback
+CAUGHT  native ETH treated as an ERC-20 quote  by test_deep_run_buyback, test_full_loop_hub_fees_become_orry_split_by_the_router, test_protocol_money_path_end_to_end
+CAUGHT  coin delay skipped  by test_deep_run_treasury, test_executeCoin_expires_and_new_proposal_restarts_delay, test_executeCoin_timing
+CAUGHT  pull by anyone  by test_deep_run_treasury, test_pullBuyback_coinless_and_access
+CAUGHT  whole-reserve rule widened  by test_pullBuyback_daily_bound
+CAUGHT  any signer accepted  by test_burnForCredits_rejections, test_deep_run_treasury, test_verifyWithOrry_rejections_roll_back_the_burn
+CAUGHT  verification cap off by one  by test_deep_run_treasury, test_verifyWithOrry_daily_cap_per_utc_day
+CAUGHT  acceptOwnership by anyone  by test_transfer_to_zero_cancels_and_constructor_emits, test_two_step_ownership
+CAUGHT  verification pays with maxFee 0  by test_deep_run_treasury, test_verifyWithOrry_daily_cap_per_utc_day, test_verifyWithOrry_records_fee_zero_and_moves_no_usdg
+CAUGHT  same-block threshold ten times wider  by test_direct_slice_uses_the_usdg_hub_guard, test_same_block_guard_is_per_hub, test_slice_refused_when_hub_moved_in_block
+CAUGHT  full-fill check removed  by test_partial_fill_is_refused_with_slippage_error
+CAUGHT  hub orientation flipped  by test_F1_attack_does_not_pay_at_launch_hub_depth, test_F1_attack_does_not_pay_with_a_deep_hub_under_the_slice_cap, test_burnEth_also_burns_orry_sent_to_the_buyback
+CAUGHT  burnEth burns nothing  by test_burnEth_also_burns_orry_sent_to_the_buyback, test_burnEth_burns_what_it_buys, test_burn_eth_output_is_burned_whole_with_the_sink_set
+CAUGHT  R-18 listed-pool check skipped  by test_jit_on_the_shallowest_pool_is_refused, test_listed_pool_spread_bound_both_sides
+CAUGHT  treasury allowance ignored  by test_slice_goes_direct_through_a_deeper_usdg_hub, test_slice_nothing_to_buy_when_coinless_or_drained
+CAUGHT  ETH path cap ignores hop 1  by test_dead_pool_is_ignored, test_deep_run_buyback, test_direct_slice_uses_the_usdg_hub_guard
+CAUGHT  buyWithQuote uncapped  by test_buy_with_usdg_in_the_usdg_hub_sends_orry_to_the_router, test_deep_run_buyback
+CAUGHT  maxQuoteIn uncapped  by test_buy_with_usdg_in_the_usdg_hub_sends_orry_to_the_router
+CAUGHT  cashback rounded up  by test_deep_run_buyback, test_exact_split_on_the_direct_slice_and_quote_buys, test_exact_split_on_the_eth_path_slice
+CAUGHT  anyone executes the sink  by test_propose_execute_rules
+CAUGHT  cashback event missing  by test_exact_split_on_the_eth_path_slice
+CAUGHT  cashback delay off by one  by test_burn_eth_output_is_burned_whole_with_the_sink_set, test_exact_split_on_the_direct_slice_and_quote_buys, test_exact_split_on_the_eth_path_slice (re-run)
+
+122/122 mutations caught

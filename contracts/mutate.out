@@ -1,0 +1,51 @@
+CAUGHT  per-tx cap off by one  by test_cap_zero_is_a_decrease_and_token_stays, test_topUp_limits
+CAUGHT  daily cap off by one (topUp)  by test_topUp_limits
+CAUGHT  topUp does not record spend  by test_deepRun, test_topUp_limits, test_topUp_moves_exact_amount_and_counts
+CAUGHT  execute does not record spend  by test_deepRun, test_execute_caps, test_execute_counts_outflow_by_balance_delta
+CAUGHT  execute per-tx check removed  by test_deepRun, test_execute_caps
+CAUGHT  apply increase without delay  by test_deepRun, test_increase_waits_the_delay
+CAUGHT  decrease check inverted  by test_decrease_rejects_increases, test_deepRun
+CAUGHT  token substitution counted as decrease  by test_decrease_rejects_increases
+CAUGHT  propose may drop a token  by test_propose_rules
+CAUGHT  forbidden selector check removed  by test_R04_deferred_pull_via_relayer_grant, test_forbidden_selectors
+CAUGHT  permit2 not forbidden  by test_forbidden_targets
+CAUGHT  capped token allowed as target  by test_forbidden_targets
+CAUGHT  installed-module targets allowed  by test_execute_rechecks_installed_modules, test_forbidden_targets
+CAUGHT  agent call skips install check  by test_not_installed_blocks_agent
+CAUGHT  binding check removed  by test_open_requires_binding
+CAUGHT  float check removed  by test_deepRun, test_topUp_limits, test_topUp_native
+CAUGHT  exact-transfer check removed  by test_hostile_tokens_rejected_on_topUp, test_topUp_checks_the_account_side_too
+CAUGHT  reentrancy guard removed  by test_reentrancy_blocked
+CAUGHT  uninstall without epoch bump  by test_onInstall_and_onUninstall_never_revert_for_any_caller, test_uninstall_revokes_all_sessions_O1
+CAUGHT  install without epoch bump  by test_deepRun, test_install_bumps_epoch_and_type, test_onInstall_and_onUninstall_never_revert_for_any_caller
+CAUGHT  epoch ignored in effective status  by test_deepRun, test_pending_dies_with_uninstall, test_reinstall_without_onUninstall_keeps_old_sessions_revoked
+CAUGHT  signer reuse allowed  by test_deepRun, test_signer_single_use_across_agents_and_accounts
+CAUGHT  decrease keeps pending increase  by test_decrease_and_revoke_cancel_pending, test_deepRun
+CAUGHT  short calldata check removed  by test_execute_guards
+CAUGHT  native outflow check removed  by test_native_outflow_refused_when_native_not_capped
+CAUGHT  signer consent not checked  by test_R02_signer_squatting_without_consent, test_consent_required_and_bound_to_signer
+CAUGHT  consent digest ignores policy  by test_consent_required_and_bound_to_signer
+CAUGHT  account-side top-up delta removed  by test_topUp_checks_the_account_side_too
+CAUGHT  Safe-level module targets allowed  by test_safe_module_is_forbidden_target
+CAUGHT  relayer approval not forbidden  by test_R04_deferred_pull_via_relayer_grant, test_new_forbidden_selectors
+CAUGHT  expiry check removed  by test_deepRun, test_expired_session
+CAUGHT  fee transfer skipped  by test_fee_token_must_deliver_exact_fee, test_pay_verification_moves_exact_fee
+CAUGHT  fee delta check removed  by test_fee_token_must_deliver_exact_fee
+CAUGHT  verification ignores owner change  by test_R03_lens_serves_previous_owner_attestation, test_transfer_voids_verification_and_attestation_until_new_payment
+CAUGHT  maxFee ignored  by test_pay_verification_max_fee_and_missing_agent
+CAUGHT  attester taken from calldata  by test_attest_rules, test_lens_hides_stale_attestations
+CAUGHT  stale observation accepted  by test_transfer_voids_verification_and_attestation_until_new_payment
+CAUGHT  attestation TTL doubled  by test_attest_rules
+CAUGHT  attester key cap removed  by test_admin_caps
+CAUGHT  expectedOwner ignored  by test_payVerification_pins_owner
+MISSED  old attestation kept on payment
+CAUGHT  fee cap removed  by test_admin_caps
+CAUGHT  validFor ignores a ready increase  by test_validFor_window_on_known_safe
+CAUGHT  replaced signer shown as active  by test_expired_and_replaced_signers, test_lens_replaced_signer_shows_no_new_session_data
+CAUGHT  fallback handler not checked  by test_fallback_handler_must_be_the_adapter
+CAUGHT  signer as hidden Safe module not flagged  by test_R01_hidden_safe_module_passes_accountKind
+CAUGHT  validFor window kept when not active  by test_R05_validFor_ignores_instant_unpause, test_lens_reports_signer_code, test_validFor_is_now_when_not_active
+CAUGHT  stale attestation shown  by test_lens_hides_stale_attestations
+CAUGHT  expired shown as active  by test_expired_and_replaced_signers, test_lens_paused_and_expired_reads_expired
+
+48/49 mutations caught

@@ -1,0 +1,165 @@
+# Orrery on the development network 46630, on server 1 beside the mainnet project and apart from it: its own project,
+# container names, database, network and secrets folder. The shared edge Caddy reaches the API as orrery-dev-api.
+#
+#   cd /opt/orrery-dev && docker compose -p orrery-dev --env-file release.env -f compose.dev.yml up -d
+#
+# Secrets in /opt/orrery-dev/secrets (mode 600): the 46630 role keys from ~/.secrets/orrery/46630-*.json, a pg
+# password, and a copy of the bot token. The Discord process runs in test mode (ORRERY_DISCORD_TEST_CHANNEL): it posts
+# only to that private channel and never changes rooms or roles on the community server.
+x-keys: &keys
+  - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
+  - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
+  - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: orrery-dev-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: orrery
+      POSTGRES_DB: orrery
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg-password
+    volumes:
+      - orrery-dev-pg:/var/lib/postgresql/data
+      - /opt/orrery-dev/secrets/pg-password:/run/secrets/pg-password:ro
+    healthcheck: {test: ["CMD", "pg_isready", "-U", "orrery", "-d", "orrery"], interval: 5s, retries: 20}
+    mem_limit: 256m
+    networks: [data]
+
+  api:
+    image: orrery-services:${TAG:?set TAG, or pass --env-file release.env}
+    container_name: orrery-dev-api
+    restart: unless-stopped
+    command: ["src/bin/api.ts"]
+    env_file: [common.env, api.env, discord.env]
+    volumes:
+      - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
+      - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
+      - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
+      - /opt/orrery-dev/secrets/46630-quote-signer.json:/run/keys/quote-signer.json:ro
+      - /opt/orrery-dev/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 320m
+    cpus: 0.4
+    ports: ["127.0.0.1:18797:8787"]
+    networks:
+      data:
+      edge: {aliases: [orrery-dev-api]}
+
+  indexer:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-dev-indexer
+    restart: unless-stopped
+    command: ["src/bin/indexer.ts"]
+    env_file: [common.env]
+    volumes: *keys
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 320m
+    cpus: 0.4
+    ports: ["127.0.0.1:18798:8788"]
+    networks: [data]
+
+  prober:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-dev-prober
+    restart: unless-stopped
+    command: ["src/bin/prober.ts"]
+    env_file: [common.env]
+    volumes: *keys
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 192m
+    cpus: 0.2
+    networks: [data]
+
+  keeper:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-dev-keeper
+    restart: unless-stopped
+    command: ["src/bin/keeper.ts"]
+    env_file: [common.env]
+    environment:
+      ORRERY_KEEPER_KEY_FILE: /run/keys/keeper.json
+    volumes:
+      - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
+      - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
+      - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
+      - /opt/orrery-dev/secrets/46630-keeper.json:/run/keys/keeper.json:ro
+    mem_limit: 192m
+    cpus: 0.2
+    networks: [data]
+
+  # wave R1: clears sealed batches, sends opted-in reveals, and mirrors the 4663 prices into the 46630 dev feeds
+  market-keeper:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-dev-market-keeper
+    restart: unless-stopped
+    command: ["src/bin/market-keeper.ts"]
+    env_file: [common.env]
+    environment:
+      ORRERY_MARKET_KEEPER_KEY_FILE: /run/keys/market-keeper.json
+    volumes:
+      - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
+      - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
+      - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
+      - /opt/orrery-dev/secrets/46630-market-keeper.json:/run/keys/market-keeper.json:ro
+    mem_limit: 160m
+    cpus: 0.2
+    networks: [data]
+
+  market-relay:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-dev-market-relay
+    restart: unless-stopped
+    command: ["src/bin/market-relay.ts"]
+    env_file: [common.env]
+    environment:
+      ORRERY_RELAY_KEY_FILE: /run/keys/reveal-relay.json
+    volumes:
+      - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
+      - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
+      - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
+      - /opt/orrery-dev/secrets/46630-reveal-relay.json:/run/keys/reveal-relay.json:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 160m
+    cpus: 0.2
+    networks: [data]
+
+  dev-feeds:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-dev-feeds
+    restart: unless-stopped
+    command: ["src/bin/dev-feeds.ts"]
+    env_file: [common.env]
+    environment:
+      ORRERY_DEV_FEEDS_KEY_FILE: /run/keys/keeper.json
+    volumes:
+      - /opt/orrery-dev/secrets/46630-keeper.json:/run/keys/keeper.json:ro
+    mem_limit: 128m
+    cpus: 0.1
+    networks: [data]
+
+  discord:
+    image: orrery-services:${TAG:?}
+    container_name: orrery-dev-discord
+    restart: unless-stopped
+    command: ["src/bin/discord.ts"]
+    env_file: [common.env, discord.env]
+    volumes:
+      - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
+      - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
+      - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
+      - /opt/orrery-dev/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
+    depends_on: {postgres: {condition: service_healthy}}
+    mem_limit: 192m
+    cpus: 0.2
+    networks: [data]
+
+volumes:
+  orrery-dev-pg:
+
+networks:
+  data:
+    ipam:
+      config: [{subnet: 10.232.10.0/24}]
+  edge: {external: true, name: infra_default}

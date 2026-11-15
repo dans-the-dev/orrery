@@ -1,0 +1,6 @@
+# Append to /opt/phioradata/infra/Caddyfile on server 1, then reload from a docker cp copy (stale bind mount, see memory
+# reference_lumo_inventory). api.orrery.tech needs an A record to 187.53.130.188.
+api.orrery.tech {
+	encode zstd gzip
+	reverse_proxy orrery-api:8787
+}

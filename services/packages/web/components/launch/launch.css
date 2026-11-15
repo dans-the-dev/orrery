@@ -1,0 +1,37 @@
+/* Lane L5 pages (Agent Launch): the Current Limit tokens and the rc- components, plus the fee split bar, the one figure
+   that is this product's own: where every trade's 1% goes. */
+.launch-page .ln-split { display: flex; flex-wrap: wrap; gap: 0; margin: 4px 0 var(--space-6); }
+.launch-page .ln-split > span { display: block; height: 10px; }
+.launch-page .ln-split > span.s-agent { border-radius: 5px 0 0 5px; }
+.launch-page .ln-split > span.s-owner { border-radius: 0 5px 5px 0; }
+.launch-page .ln-split .s-agent { background: var(--brand); }
+.launch-page .ln-split .s-earn { background: var(--success); }
+.launch-page .ln-split .s-burn { background: var(--warning); }
+.launch-page .ln-split .s-owner { background: var(--ink); opacity: .55; }
+.launch-page .ln-split ol { flex-basis: 100%; display: grid; grid-template-columns: 50fr 20fr 15fr 15fr; list-style: none; padding: 0; margin: 8px 0 0; }
+.launch-page .ln-split li { font-size: .82rem; color: var(--muted); padding-right: 8px; }
+.launch-page .ln-split li b { display: block; font: 600 .95rem var(--mono); color: var(--ink); }
+.launch-page .ln-split-label { flex-basis: 100%; font-size: .92rem; margin: 0 0 10px; }
+.launch-page .ln-coin { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.launch-page .ln-coin strong { font-weight: 700; }
+.launch-page .ln-coin small, .launch-page .ln-sub { color: var(--muted); font-size: .8rem; }
+.launch-page a.ln-coin:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
+.launch-page .ln-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 0 0 var(--space-5); }
+.launch-page .ln-checks { list-style: none; padding: 0; margin: 0 0 var(--space-5); border-top: 1px solid var(--hairline); }
+.launch-page .ln-checks li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+.launch-page .ln-checks li i { font-style: normal; font-weight: 700; }
+.launch-page .ln-checks li.is-ok i { color: var(--success); }
+.launch-page .ln-checks li.is-todo i { color: var(--warning); }
+.launch-page .ln-checks small { display: block; color: var(--muted); font-size: .82rem; }
+.launch-page .ln-field { display: flex; flex-direction: column; gap: 6px; font-size: .86rem; color: var(--muted); margin-bottom: 14px; }
+.launch-page .ln-field input { font: inherit; color: var(--ink); padding: 10px 12px; border: 1px solid var(--hairline); border-radius: var(--radius-sm); background: #fff; min-width: 0; }
+.launch-page .ln-two { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.launch-page .ln-kind-buy { color: var(--success); }
+.launch-page .ln-kind-sell { color: var(--danger); }
+.launch-page .ln-kind-early { color: var(--brand); }
+@media (max-width: 760px) {
+  .launch-page .ln-two { grid-template-columns: 1fr; }
+  .launch-page .ln-split ol { grid-template-columns: 1fr 1fr; row-gap: 8px; }
+}
+.launch-page .ln-desk-title { font-size: 1.15rem; line-height: 1.35; margin: 0 0 10px; letter-spacing: -.01em; }
+.launch-page .rc-panel + .rc-desk, .launch-page .rc-desk + .rc-panel { margin-top: var(--space-5); }

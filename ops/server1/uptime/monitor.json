@@ -1,0 +1,13 @@
+{
+  "name": "Orrery",
+  "check": "check-live.mjs",
+  "wa": {
+    "url": "http://vanitypad-mainnet-wa-1:8796/send",
+    "tokenFile": "/secrets/wa-token"
+  },
+  "alertAfter": 2,
+  "timeoutMs": 150000,
+  "env": {
+    "CHECK_TIMEOUT_MS": "10000"
+  }
+}

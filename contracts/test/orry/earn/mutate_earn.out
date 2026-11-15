@@ -1,0 +1,179 @@
+# python3 test/orry/earn/mutate_earn.py, 2026-11-08, branch orry/pairs-a at 295074d (161 mutations)
+# Run in six scratch copies of contracts/ (RANGE slices 0:27, 27:54, 54:81, 81:108, 108:135, 135:161); every copy printed
+# 'baseline passes' before its first mutant. Lane B's buyback, stake and integration tests are not compiled (single-hub
+# interface, orry/pairs-b brings them over).
+
+CAUGHT  unregistered quote initializes  by test_H1_unregistered_hook_rejects_every_wrong_key, test_only_registered_keys_initialize
+CAUGHT  LP fee not checked  by test_H1_second_initialize_and_other_keys_revert, test_H1_unregistered_hook_rejects_every_wrong_key, test_only_registered_keys_initialize
+CAUGHT  tick spacing not checked  by test_H1_unregistered_hook_rejects_every_wrong_key, test_only_registered_keys_initialize
+CAUGHT  initialized flag never set  by test_H1_unregistered_hook_rejects_every_wrong_key, test_constants_and_key, test_launch_pairs_registered_at_construction
+CAUGHT  key with ORRY as currency1 not recognised  by setUp
+CAUGHT  key with ORRY as currency0 not recognised  by setUp, test_collect_pays_every_currency_exactly, test_registered_pairs_never_change
+CAUGHT  every hub shares the ETH hub's record and oracle  by testFuzz_H4_beforeSwap_never_reverts, testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts
+CAUGHT  fee off by one  by testFuzz_H2_fee_is_exact, test_H2_exact_input_quote_to_orry, test_H2_exact_input_orry_to_quote
+CAUGHT  fee rounds up  by testFuzz_H2_fee_is_exact, test_H2_exact_input_quote_to_orry, test_H2_exact_input_orry_to_quote
+CAUGHT  fee on the specified side  by setUp, testFuzz_H2_fee_is_exact, testFuzz_two_hub_oracles_match_their_ghosts
+CAUGHT  fee claims not minted  by setUp, testFuzz_H2_fee_is_exact, testFuzz_two_hub_oracles_match_their_ghosts
+CAUGHT  fee not charged to the swapper  by setUp, testFuzz_H2_fee_is_exact, testFuzz_two_hub_oracles_match_their_ghosts
+CAUGHT  start price overwritten every swap  by test_start_of_block_price
+CAUGHT  start price never recorded  by testFuzz_H4_beforeSwap_never_reverts, test_start_of_block_price, test_zap_guard_threshold_just_above_one_percent
+CAUGHT  start price recorded as zero  by testFuzz_H4_beforeSwap_never_reverts, test_start_of_block_price, test_zap_guard_threshold_just_below_one_percent
+CAUGHT  onlyPoolManager removed  by test_callbacks_only_from_pool_manager
+CAUGHT  fees sent elsewhere  by test_H3_collect_pays_router_everything, test_collect_one_side_only, test_collect_pays_every_currency_exactly
+CAUGHT  collect skips the claims  by test_H3_collect_pays_router_everything, test_collect_one_side_only, test_collect_pays_every_currency_exactly
+CAUGHT  collect pays ORRY only  by test_H3_collect_pays_router_everything, test_collect_is_reentrancy_safe, test_collect_one_side_only
+CAUGHT  stray tokens kept  by test_H3_collect_pays_router_everything, test_collect_pays_every_currency_exactly
+CAUGHT  stray ETH kept  by test_H3_collect_pays_router_everything, test_collect_is_reentrancy_safe
+CAUGHT  collect event leaves out the stray part  by test_H3_collect_pays_router_everything, test_collect_pays_every_currency_exactly
+CAUGHT  hook reentrancy guard removed  by test_collect_is_reentrancy_safe
+CAUGHT  unused callback answers  by test_unused_callbacks_revert
+CAUGHT  zero router accepted  by test_constructor_rejects_bad_parameters
+CAUGHT  zero treasury accepted  by test_constructor_rejects_bad_parameters
+CAUGHT  protocol fee cap off by one  by test_constructor_rejects_bad_parameters
+CAUGHT  zero tick spacing accepted  by test_constructor_rejects_bad_parameters
+CAUGHT  ETH feed not checked at construction  by test_constructor_rejects_bad_parameters
+CAUGHT  USDG not checked at construction  by test_constructor_rejects_bad_parameters
+CAUGHT  pair admin check removed  by test_pairAdmin_is_the_treasury_owner_read_live, test_propose_and_execute_only_by_the_pair_admin
+CAUGHT  pair admin is the treasury contract  by setUp, test_cap_of_eight_pairs, test_collect_pays_every_currency_exactly
+CAUGHT  propose accepts a registered pair  by test_execute_checks_and_effects, test_propose_checks, test_registered_pairs_never_change
+CAUGHT  propose accepts ORRY as quote  by test_propose_checks
+CAUGHT  propose accepts an address without code  by test_propose_checks
+CAUGHT  propose skips the cap  by test_cap_of_eight_pairs
+CAUGHT  propose skips the feed  by test_propose_checks
+CAUGHT  no delay  by test_propose_checks, test_reproposal_replaces_and_restarts_the_delay
+CAUGHT  execute without a proposal  by test_execute_checks_and_effects, test_registered_pairs_never_change
+CAUGHT  execute ignores the delay  by test_execute_timing_edges, test_reproposal_replaces_and_restarts_the_delay
+CAUGHT  execute delay off by one  by test_execute_timing_edges
+CAUGHT  execute ignores the window  by test_execute_timing_edges
+CAUGHT  window off by one  by test_execute_timing_edges
+CAUGHT  execute skips the cap  by test_cap_of_eight_pairs
+CAUGHT  execute skips the feed  by test_execute_checks_and_effects
+CAUGHT  proposal not cleared  by test_execute_checks_and_effects, test_registered_pairs_never_change
+CAUGHT  feed age off by one  by test_constructor_rejects_bad_parameters
+CAUGHT  feed answer zero accepted  by test_constructor_rejects_bad_parameters, test_propose_checks
+CAUGHT  feed never updated accepted  by test_propose_checks
+CAUGHT  feed without code tried  by test_propose_checks
+CAUGHT  currency order flipped at registration  by setUp
+CAUGHT  feed not stored  by test_execute_checks_and_effects, test_launch_pairs_registered_at_construction
+CAUGHT  registeredAt not stored  by test_execute_checks_and_effects, test_launch_pairs_registered_at_construction
+CAUGHT  pair not listed  by test_H3_collect_pays_router_everything, test_cap_of_eight_pairs, test_collect_is_reentrancy_safe
+CAUGHT  pool not mapped to its quote  by test_launch_pairs_registered_at_construction
+CAUGHT  isPair always true  by test_launch_pairs_registered_at_construction, test_propose_checks
+CAUGHT  unknown quote views answer  by test_constructor_rejects_an_unknown_quote, test_never_twice_and_only_registered_pairs, test_unknown_quote_views_revert
+CAUGHT  seconds weighted by the previously stored tick (spec wording)  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_heldPushMovesTheMeanByAtMostPushTimesHoldOverWindow
+CAUGHT  cumulative step ignores elapsed time  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_heldPushMovesTheMeanByAtMostPushTimesHoldOverWindow
+CAUGHT  latest tick not stored  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_deepRun
+CAUGHT  latest timestamp not stored  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_heldPushMovesTheMeanByAtMostPushTimesHoldOverWindow
+CAUGHT  latest not written back  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_heldPushMovesTheMeanByAtMostPushTimesHoldOverWindow
+CAUGHT  latest updated on every swap  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_pushAndRestoreInOneBlockMovesNothing
+CAUGHT  latest never updated  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_heldPushMovesTheMeanByAtMostPushTimesHoldOverWindow
+CAUGHT  new second does not read slot0  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_heldPushMovesTheMeanByAtMostPushTimesHoldOverWindow
+CAUGHT  checkpoint interval off by one  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_acrossTimestampWrap
+CAUGHT  checkpoint on every update  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_checkpoint_spacedAtLeastInterval
+CAUGHT  checkpoint never written  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_acrossTimestampWrap
+CAUGHT  checkpoint timestamp off by one  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_acrossTimestampWrap
+CAUGHT  checkpoint cumulative dropped  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_extremeTicksForDecades
+CAUGHT  ring position not advanced  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_acrossTimestampWrap
+CAUGHT  ring count not capped  by test_deepRun, test_ring_wrapsAfterCardinality
+CAUGHT  ring count never grows  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_extremeTicksForDecades
+CAUGHT  ring wraps one early  by test_deepRun, test_ring_wrapsAfterCardinality
+CAUGHT  newest checkpoint time not kept  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_checkpoint_spacedAtLeastInterval
+CAUGHT  oracle arithmetic checked (reverts at the 2106 wrap)  by test_beforeSwap_neverReverts_acrossTimestampWrap
+CAUGHT  first entry without the initial tick  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_afterInitialize_writesFirstEntry
+CAUGHT  first entry not counted  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_afterInitialize_writesFirstEntry
+CAUGHT  first checkpoint not written  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_afterInitialize_writesFirstEntry
+CAUGHT  window 0 accepted  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_consult_windowOutOfRange_reverts
+CAUGHT  max window off by one  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_extremeTicksForDecades
+CAUGHT  not-ready check removed  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_consult_notReady_untilTheWindowHasHistory
+CAUGHT  now below the window not checked  by testFuzz_two_hub_oracles_match_their_ghosts, test_consult_notReady_whenNowIsBelowTheWindow, test_deepRun
+CAUGHT  uninitialized hub answers  by test_views_beforeInitialize
+CAUGHT  oldest checkpoint always slot 0  by test_deepRun
+CAUGHT  search excludes a checkpoint at the target  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_consult_picksTheNewestCheckpointAtOrBeforeTheTarget
+CAUGHT  consult uses the oldest checkpoint  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_extremeTicksForDecades
+CAUGHT  running cumulative ignores the open interval  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_consult_floorsTowardNegativeInfinity
+CAUGHT  open interval weighted by the stored tick  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_H8_heldPushMovesTheMeanByAtMostPushTimesHoldOverWindow
+CAUGHT  mean truncates toward zero  by testFuzz_matchesGhost, test_consult_floorsTowardNegativeInfinity, test_consult_picksTheNewestCheckpointAtOrBeforeTheTarget
+CAUGHT  mean floors exact negatives too  by testFuzz_matchesGhost, test_consult_floorsTowardNegativeInfinity, test_consult_notReady_untilTheWindowHasHistory
+CAUGHT  actualWindow reported as the window  by testFuzz_matchesGhost, testFuzz_two_hub_oracles_match_their_ghosts, test_beforeSwap_neverReverts_extremeTicksForDecades
+CAUGHT  lock check removed  by test_deepRun, test_withdraw_respects_lock_then_pays_preview
+CAUGHT  lock not stored  by test_deepRun, test_deposit_mints_liquidity_units_and_refunds, test_lock_after_expiry_counts_held_shares_as_free
+CAUGHT  lock ignores held shares  by test_lock_after_expiry_counts_held_shares_as_free, test_lock_is_share_weighted
+CAUGHT  lock ignores the remaining lock  by test_lock_is_share_weighted
+CAUGHT  minShares ignored  by test_deposit_reverts, test_zap_reverts
+CAUGHT  withdraw minimums ignored  by test_withdraw_reverts
+CAUGHT  minSwapOut ignored  by test_zap_reverts
+CAUGHT  deadline off by one  by test_deposit_reverts, test_withdraw_reverts, test_zap_reverts
+CAUGHT  InsufficientShares removed  by test_withdraw_reverts
+CAUGHT  zero withdraw accepted  by test_withdraw_reverts
+CAUGHT  deposit value not checked  by test_deposit_value_mismatch_reverts
+CAUGHT  zap value not checked  by test_zap_reverts
+MISSED  zap minimum removed
+CAUGHT  hub check removed  by test_views_before_hub_initialized
+CAUGHT  zap swaps the wrong way  by test_deepRun, test_zap_from_quote, test_zap_from_orry
+CAUGHT  inputs ignore the pool's currency order  by setUp, test_E4_late_deposit_gets_only_its_streamed_share, test_E6_donations_change_nothing
+CAUGHT  outputs ignore the pool's currency order  by setUp, test_E4_late_deposit_gets_only_its_streamed_share, test_E6_donations_change_nothing
+CAUGHT  ERC-20 quote payout dropped  by test_E6_donations_change_nothing, test_claimAll_pays_every_vault_and_staking_to_the_caller, test_claimFees_and_claimFor
+CAUGHT  settle pays every token in ORRY  by setUp, test_E4_late_deposit_gets_only_its_streamed_share, test_E6_donations_change_nothing
+CAUGHT  guard reads the ETH hub  by test_zap_guard_threshold_just_above_one_percent, test_zap_guard_upward_move, test_zap_same_block_guard
+CAUGHT  block guard removed  by test_zap_guard_threshold_just_above_one_percent, test_zap_guard_upward_move, test_zap_same_block_guard
+CAUGHT  block guard ten times looser  by test_zap_guard_threshold_just_above_one_percent, test_zap_guard_upward_move, test_zap_same_block_guard
+CAUGHT  block guard lower side removed  by test_zap_guard_threshold_just_above_one_percent, test_zap_guard_upward_move, test_zap_same_block_guard
+CAUGHT  block guard on sqrt price  by test_zap_guard_threshold_just_above_one_percent, test_zap_same_block_guard
+CAUGHT  block guard ignores the block  by test_zap_from_quote, test_zap_from_orry, test_zap_reverts
+CAUGHT  guard checked after the zap swap  by test_zap_guard_threshold_just_above_one_percent, test_zap_guard_upward_move, test_zap_same_block_guard
+CAUGHT  no harvest before a deposit  by test_E4_late_deposit_gets_only_its_streamed_share, test_E6_donations_change_nothing, test_E6_pool_donation_is_streamed_as_fees
+CAUGHT  withdraw principal includes fees  by test_deepRun
+CAUGHT  withdraw fees not streamed  by test_deepRun
+CAUGHT  refund ignores what was used  by setUp, test_E4_late_deposit_gets_only_its_streamed_share, test_E6_donations_change_nothing
+CAUGHT  refunds dropped  by test_deepRun, test_deposit_mints_liquidity_units_and_refunds, test_deposit_orry_limited_refunds_quote
+CAUGHT  harvested not recorded  by test_deepRun, test_harvest_streams_fees_over_the_period
+CAUGHT  remainder not rolled  by test_deepRun, test_new_fees_roll_the_remainder, test_zero_share_time_is_queued_then_restreamed
+CAUGHT  queued not restreamed  by test_zero_share_time_is_queued_then_restreamed
+CAUGHT  zero-share time dropped  by test_zero_share_time_is_queued_then_restreamed
+CAUGHT  restart keeps the old lastUpdate  by test_E6_pool_donation_is_streamed_as_fees, test_claimFees_and_claimFor, test_deepRun
+CAUGHT  stream period doubled on restart  by test_deepRun, test_harvest_streams_fees_over_the_period, test_new_fees_roll_the_remainder
+CAUGHT  stream past the finish  by test_deepRun
+CAUGHT  deposit does not settle the account first  by test_deepRun, test_zero_share_time_is_queued_then_restreamed
+CAUGHT  withdraw does not settle the account first  by test_E4_late_deposit_gets_only_its_streamed_share, test_E6_donations_change_nothing, test_deepRun
+CAUGHT  claim skips the global update  by test_claimAll_pays_every_vault_and_staking_to_the_caller, test_claimFees_and_claimFor, test_refusing_recipient_reverts_only_its_own_call
+CAUGHT  owed quote not cleared  by test_claimFees_and_claimFor, test_deepRun, test_withdraw_pays_streamed_fees_too
+CAUGHT  paid not recorded  by test_claimFees_and_claimFor, test_deepRun, test_zero_share_time_is_queued_then_restreamed
+CAUGHT  claim pays the caller  by test_claimAll_pays_every_vault_and_staking_to_the_caller, test_claimFees_and_claimFor
+CAUGHT  withdraw keeps the fees  by test_E4_late_deposit_gets_only_its_streamed_share, test_E6_donations_change_nothing, test_deepRun
+CAUGHT  pending view ignores live accrual  by test_E6_donations_change_nothing, test_claimAll_pays_every_vault_and_staking_to_the_caller, test_claimFees_and_claimFor
+CAUGHT  preview rounds up  by test_E6_donations_change_nothing, test_deepRun, test_withdraw_pays_streamed_fees_too
+CAUGHT  callback caller not checked  by test_unlockCallback_cannot_be_called_from_another_unlock
+CAUGHT  receive accepts anyone  by test_unlockCallback_and_receive_only_from_pool_manager
+CAUGHT  vault reentrancy guard removed  by test_reentrancy_through_eth_refund_is_blocked
+CAUGHT  failed ETH payout ignored  by test_refusing_recipient_reverts_only_its_own_call
+CAUGHT  second vault per quote allowed  by test_never_twice_and_only_registered_pairs
+CAUGHT  vault not recorded  by test_create_both_launch_vaults, test_never_twice_and_only_registered_pairs
+CAUGHT  vault not listed  by test_claimAll_pays_every_vault_and_staking_to_the_caller, test_claimAll_with_nothing_lists_zeros, test_claimables_match_sources
+CAUGHT  salt ignores the quote  by test_create_both_launch_vaults
+CAUGHT  prediction uses another salt  by test_create_both_launch_vaults
+CAUGHT  claimAll skips staking  by test_claimAll_pays_every_vault_and_staking_to_the_caller
+CAUGHT  claimAll skips the vaults  by test_claimAll_pays_every_vault_and_staking_to_the_caller
+CAUGHT  ETH vault fees left out of the ETH total  by test_claimAll_pays_every_vault_and_staking_to_the_caller
+CAUGHT  vault ORRY left out of the ORRY total  by test_claimAll_pays_every_vault_and_staking_to_the_caller
+CAUGHT  other quotes reported as zero  by test_claimAll_pays_every_vault_and_staking_to_the_caller
+CAUGHT  staker filter removed  by test_agentClaimables_filters_and_flags
+CAUGHT  agent always reported  by test_agentClaimables_filters_and_flags, test_agent_with_zero_owner_is_never_reported
+CAUGHT  zero owner reported  by test_agent_with_zero_owner_is_never_reported
+CAUGHT  length check removed  by test_agentClaimables_filters_and_flags
+CAUGHT  position from the whole vault  by test_claimables_match_sources
+CAUGHT  vault quote not read  by test_claimables_match_sources
+CAUGHT  earn list left empty  by test_claimables_match_sources
+CAUGHT  stake rewards not read  by test_claimables_match_sources
+
+160/161 caught. The one MISSED ("zap minimum removed") is an equivalent mutant: with amountIn 0 or 1 the zap swaps
+nothing and adds zero liquidity, which already reverts ZeroAmount inside the unlock. The redundant check was removed
+from EarnVault.zapDeposit and the mutation from the set, so the final code has 160 mutations, 160 caught.
+
+# B-2 notifyRewards (E-7), 2026-11-08, python3 test/orry/earn/mutate_earn.py notif on pairs-a after the merge of
+# orry/spec fc9d3a5, one scratch copy, 'baseline passes' first:
+CAUGHT  notified ORRY feeds the quote stream  by test_deepRun, test_notifyRewards_rolls_with_fees_and_the_running_period, test_notifyRewards_streams_to_shares_only
+CAUGHT  notified ORRY never streamed  by test_deepRun, test_notifyRewards_rolls_with_fees_and_the_running_period, test_notifyRewards_streams_to_shares_only
+CAUGHT  notify pulls nothing  by test_deepRun, test_notifyRewards_streams_to_shares_only
+CAUGHT  notify skips the global update  by test_deepRun, test_notifyRewards_rolls_with_fees_and_the_running_period
+CAUGHT  notify accepts zero  by test_notifyRewards_zero_reverts
+5/5 caught. Final code: 165 mutations, 165 caught.

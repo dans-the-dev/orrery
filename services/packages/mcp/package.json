@@ -1,0 +1,17 @@
+{
+  "name": "@orrery/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Orrery MCP server: agent checks, policy records, Orrery Data and capped x402 payments for MCP clients",
+  "license": "UNLICENSED",
+  "bin": { "orrery-mcp": "./src/cli.ts" },
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "start": "tsx src/cli.ts" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@orrery/sdk": "workspace:*",
+    "viem": "^2.21.0",
+    "zod": "^4.1.0"
+  }
+}

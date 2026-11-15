@@ -1,0 +1,19 @@
+/* Lane L4 pages (credit, attesters): the Current Limit tokens and the rc- components, plus the line meter, the one
+   figure that is this product's own. */
+.cr-page .cr-field { display: flex; flex-direction: column; gap: 6px; font-size: .86rem; color: var(--muted); margin: 0 0 14px; }
+.cr-page .cr-field input { font: .9rem var(--mono); color: var(--ink); padding: 10px 12px; border: 1px solid var(--hairline); border-radius: var(--radius-sm); background: #fff; min-width: 0; }
+.cr-page .cr-meter { margin: 6px 0 16px; }
+.cr-page .cr-meter-track { position: relative; height: 10px; }
+.cr-page .cr-meter-track > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
+.cr-page .cr-meter-limit { background: color-mix(in srgb, var(--brand) 16%, transparent); }
+.cr-page .cr-meter-drawn { background: var(--brand); }
+.cr-page .cr-meter small { display: flex; justify-content: space-between; font: 600 .74rem var(--mono); color: var(--muted); margin-top: 6px; }
+.cr-page .cr-meter small b:first-child { color: var(--ink); }
+.cr-page .cr-claim { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--hairline); font-size: .9rem; }
+.cr-page .cr-claims { margin-top: 12px; }
+.cr-page tr.cr-out td { color: var(--muted); }
+.cr-page .rc-panel + .rc-panel { margin-top: 24px; }
+@media (max-width: 760px) {
+  .cr-page .cr-claim { flex-wrap: wrap; }
+}
+.cr-page .rc-desk-body > .cr-claim:first-child { border-top: 0; }

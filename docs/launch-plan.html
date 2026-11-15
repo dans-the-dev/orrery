@@ -1,0 +1,569 @@
+<title>Orrery Launch Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Figtree:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: Orrery's own grounds (sage light, navy dark) and cobalt brand. A launch-day strip to scale, then one release
+   rail: preparation, T0 core, the ORRY day anchored on the deploy after graduation, then updates without hours. */
+:root {
+  --ground: #e9efea;
+  --paper: #f5f7f3;
+  --panel: #ffffff;
+  --ink: #141c33;
+  --muted: #59637d;
+  --faint: #8a93a8;
+  --line: #cdd5df;
+  --brand: #3152e9;
+  --brand-soft: #dfe6ff;
+  --on-brand: #ffffff;
+  --go: #12855a;
+  --go-soft: #d8f0e4;
+  --night: rgba(20, 28, 51, 0.10);
+  --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #111d39; --paper: #0b1430; --panel: #16234a; --ink: #e8edf9; --muted: #a3aec8; --faint: #6f7b98;
+    --line: rgba(223, 230, 255, 0.16); --brand: #7b93ff; --brand-soft: rgba(123, 147, 255, 0.16); --on-brand: #0b1430;
+    --go: #5fd39a; --go-soft: rgba(95, 211, 154, 0.14); --night: rgba(223, 230, 255, 0.10); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #111d39; --paper: #0b1430; --panel: #16234a; --ink: #e8edf9; --muted: #a3aec8; --faint: #6f7b98;
+  --line: rgba(223, 230, 255, 0.16); --brand: #7b93ff; --brand-soft: rgba(123, 147, 255, 0.16); --on-brand: #0b1430;
+  --go: #5fd39a; --go-soft: rgba(95, 211, 154, 0.14); --night: rgba(223, 230, 255, 0.10); color-scheme: dark;
+}
+
+body { background: var(--ground); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.wrap {
+  max-width: 900px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 56px;
+  display: grid; gap: 44px;
+}
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 4.6vw, 38px); line-height: 1.12; letter-spacing: -0.025em; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.015em; }
+h3 { font-size: 16.5px; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--brand); }
+.muted { color: var(--muted); }
+code { font-family: var(--font-mono); font-size: 0.84em; background: var(--paper); border: 1px solid var(--line); padding: 0 5px; border-radius: 5px; overflow-wrap: anywhere; }
+
+.eyebrow { font-weight: 700; font-size: 13px; color: var(--brand); display: inline-flex; gap: 10px; align-items: center; }
+.eyebrow .mark { width: 18px; height: 18px; border-radius: 6px; background: var(--brand); display: inline-block; position: relative; }
+.eyebrow .mark::after { content: ""; position: absolute; inset: 5px 4px; border: 2px solid var(--on-brand); border-radius: 50%; border-left-color: transparent; }
+header { display: grid; gap: 14px; }
+.status { max-width: 68ch; font-size: 16px; border-left: 3px solid var(--brand); padding-left: 14px; }
+
+section { display: grid; gap: 14px; }
+.lede { max-width: 68ch; }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
+.stat { padding: 14px 16px; display: grid; gap: 2px; min-width: 0; }
+.stat + .stat { border-left: 1px solid var(--line); }
+.stat b { font-family: var(--font-mono); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13px; color: var(--muted); }
+.src { font-size: 12.5px; color: var(--muted); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.field input, .field select {
+  font: inherit; font-family: var(--font-mono); font-size: 14px; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 40px;
+}
+.field input:focus-visible, .field select:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.clock { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); padding: 18px 16px 14px; display: grid; gap: 10px; }
+.strip { position: relative; height: 54px; margin: 0 10px; }
+.strip .base { position: absolute; left: 0; right: 0; top: 24px; height: 6px; border-radius: 3px; background: var(--paper); border: 1px solid var(--line); }
+.strip .night { position: absolute; top: 24px; height: 6px; background: var(--night); }
+.pinmark { position: absolute; top: 0; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; }
+.pinmark .lab { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.pinmark .pin { width: 4px; height: 22px; border-radius: 2px; background: var(--brand); }
+.pinmark.t0 .pin { background: var(--go); width: 6px; }
+.pinmark.t0 .lab { color: var(--go); }
+.pinmark.tr .pin { background: var(--ink); width: 6px; }
+.ticks { position: relative; height: 16px; margin: 0 10px; }
+.ticks span { position: absolute; transform: translateX(-50%); font-family: var(--font-mono); font-size: 11px; color: var(--faint); white-space: nowrap; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 6px; border-radius: 3px; vertical-align: 2px; margin-right: 6px; background: var(--night); }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+th, td { text-align: left; padding: 9px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font-size: 12px; font-weight: 700; color: var(--muted); background: var(--paper); }
+td.t { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+th.t { text-align: right; }
+tr.is-t0 td:first-child { color: var(--go); font-weight: 700; }
+
+.rail { list-style: none; margin: 0; padding: 0; display: grid; }
+.station { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 16px; position: relative; padding-bottom: 24px; }
+.station::before { content: ""; position: absolute; left: 13px; top: 22px; bottom: 0; width: 2px; background: var(--line); }
+.station:last-child::before { display: none; }
+.station:last-child { padding-bottom: 0; }
+.dot { width: 16px; height: 16px; border-radius: 50%; margin: 5px 0 0 6px; border: 2px solid var(--faint); background: var(--ground); position: relative; z-index: 1; }
+.prep .dot { border-color: var(--brand); background: var(--brand); }
+.core .dot { border-color: var(--go); background: var(--go); }
+.wave .dot { border-color: var(--brand); }
+.update .dot { border-style: dashed; }
+.body { display: grid; gap: 8px; min-width: 0; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.when { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.chip { font-size: 11.5px; font-weight: 700; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.go { color: var(--go); border-color: var(--go); background: var(--go-soft); }
+.chip.brand { color: var(--brand); border-color: var(--brand); }
+.chip.solid { color: var(--on-brand); background: var(--brand); border-color: var(--brand); }
+.prep > .body, .core > .body { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; margin-top: -4px; }
+.why { font-size: 14px; color: var(--muted); }
+.why b { color: var(--ink); font-weight: 700; }
+
+ul.plain { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+ul.plain li::marker { color: var(--brand); }
+details { border-top: 1px solid var(--line); padding-top: 8px; }
+summary { cursor: pointer; font-size: 13.5px; color: var(--brand); font-weight: 700; list-style: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 4px; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "+"; font-family: var(--font-mono); width: 12px; }
+details[open] > summary::before { content: "\2212"; }
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 10px 0 2px; font-size: 14px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; min-width: 0; }
+.post { font-size: 14px; background: var(--paper); border-radius: 10px; padding: 10px 12px; border-left: 2px solid var(--brand); }
+
+.updates { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+.updates li { display: grid; grid-template-columns: minmax(0, 16em) minmax(0, 1fr); gap: 4px 16px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.updates li:first-child { border-top: 0; }
+.updates b { font-weight: 700; }
+
+.compat { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow-x: auto; }
+.compat table { min-width: 620px; }
+.compat td:first-child { font-weight: 700; white-space: nowrap; }
+.tag { font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.tag.ok { color: var(--go); background: var(--go-soft); }
+.tag.new { color: var(--brand); background: var(--brand-soft); }
+.tag.fix { color: var(--on-brand); background: var(--brand); }
+
+.checks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.check { border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; background: var(--panel); }
+.check h3 { font-size: 13px; color: var(--brand); }
+.check ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+.stop { border: 1px solid var(--brand); background: var(--brand-soft); border-radius: 14px; padding: 12px 16px; font-size: 14.5px; max-width: 74ch; }
+
+.never { display: flex; flex-wrap: wrap; gap: 8px; }
+.never span { font-size: 13.5px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; background: var(--panel); }
+
+.decide { list-style: none; counter-reset: d; margin: 0; padding: 0; display: grid; gap: 12px; }
+.decide li { counter-increment: d; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; }
+.decide li::before { content: counter(d); font-family: var(--font-mono); font-weight: 700; font-size: 13px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: var(--on-brand); }
+.decide p + p { color: var(--muted); font-size: 14px; }
+
+footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+
+@media (max-width: 680px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .checks { grid-template-columns: minmax(0, 1fr); }
+  .updates li { grid-template-columns: minmax(0, 1fr); }
+  .facts { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .facts dd { margin-bottom: 6px; }
+  .pinmark .lab { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow"><span class="mark" aria-hidden="true"></span>Orrery · Robinhood Chain 4663 · ORRY</p>
+    <h1>Launch publik: teknologi inti dan utilitas awal ORRY dulu, sisanya lewat update</h1>
+    <p class="status">Di T0 dibuka inti Orrery: batas belanja agen, pembayaran x402 dalam USDG, cek payer bertanda tangan, dan verifikasi agen. ORRY diluncurkan di Pons di jam yang sama. Begitu ORRY lulus kurva, kontrak ORRY di-deploy: Earn, Stake dan Claim langsung terbuka sebagai utilitas awal, lalu tiga fitur yang sudah jadi dibuka tiap 3 jam. Fitur pasar, chat dan utilitas lain menyusul sebagai update yang memakai titik sambung kontrak yang sudah ada, tanpa mengganti kontrak yang sudah live.</p>
+  </header>
+
+  <section aria-labelledby="today-h">
+    <h2 id="today-h">Posisi hari ini</h2>
+    <div class="stats">
+      <div class="stat"><b>0 ETH</b><span>di 3 wallet deploy v1; butuh 0,0007 ETH</span></div>
+      <div class="stat"><b>97 + 39</b><span>tes kontrak dan services v1 lulus</span></div>
+      <div class="stat"><b>267 + 83</b><span>tes kontrak dan services ORRY lulus</span></div>
+      <div class="stat"><b>8,24 jt</b><span>gas uji deploy v1 di fork 4663</span></div>
+    </div>
+    <p class="src">Saldo dibaca 8 Nov 2026 dari RPC 4663. Tes: build/v1 <code>e6c8aab</code> dan orry/integration <code>9dee3b6</code>. Gas: uji deploy v1 dan treasury di fork 4663, 8 Nov.</p>
+  </section>
+
+  <section aria-labelledby="sched-h">
+    <h2 id="sched-h">Jadwal hari launch</h2>
+    <p class="lede muted">Isi jam T0 dan perkiraan jam deploy ORRY. Deploy ORRY bergantung pada kapan kurva Pons lulus, jadi jamnya digeser begitu kurva penuh. Wave ORRY terbuka sendiri lewat saklar rilis, dihitung dari jam deploy itu.</p>
+    <div class="controls">
+      <div class="field">
+        <label for="t0">T0, jam WIB (usulan)</label>
+        <input id="t0" type="datetime-local" value="2026-11-12T21:00">
+      </div>
+      <div class="field">
+        <label for="tr">Deploy ORRY, jam setelah T0</label>
+        <select id="tr">
+          <option value="2">2 jam</option>
+          <option value="4" selected>4 jam</option>
+          <option value="8">8 jam</option>
+          <option value="24">24 jam</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="gap">Jarak antar wave</label>
+        <select id="gap">
+          <option value="2">2 jam</option>
+          <option value="3" selected>3 jam</option>
+          <option value="4">4 jam</option>
+        </select>
+      </div>
+    </div>
+    <div class="clock">
+      <div class="strip" id="strip" role="img" aria-label="Garis waktu hari launch"><div class="base"></div></div>
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+      <div class="legend"><span><i></i>pukul 00.00 sampai 06.00 WIB (rilis tetap jalan otomatis)</span></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rilis</th><th>Isi</th><th class="t">WIB</th><th class="t">UTC</th><th class="t">New York</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="rail-h">
+    <h2 id="rail-h">Urutan rilis</h2>
+    <ol class="rail">
+
+      <li class="station prep">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when">Sebelum T0</span><h3>Persiapan</h3><span class="chip solid">HARUS SELESAI DULU</span></div>
+          <ul class="plain">
+            <li><b>Kontrak multi-pair selesai</b> (ORRY/ETH dan ORRY/USDG), termasuk saluran cashback dan reward luar di vault Earn. Selesai 9 Nov.</li>
+            <li><b>Cek jalur update selesai</b>: dua hal harus ditambahkan ke kontrak launch sebelum deploy, yaitu saluran cashback di buyback dan reward luar di vault Earn. Lane A dan B sedang mengerjakannya. Sisanya tersambung ke titik sambung yang ada atau lewat kontrak baru. Detail di bagian "Update tanpa bertentangan".</li>
+            <li><b>Saklar rilis runtime</b>: sudah dibangun di API dan web (8 Nov). Fitur terbuka sendiri pada jamnya tanpa restart dan tanpa build ulang. Walk pengunjung baru dengan kontrak multi-pair asli lulus: semua fitur tertahan tampil Coming soon, claim dan withdraw tetap jalan, stake terbuka 17 detik setelah dibuka lewat script admin tanpa reload, lalu bisa ditahan lagi. Tinggal digabung ke paket launch.</li>
+            <li><b>Paket launch ORRY sudah digabung ke build/v1</b> (9 Nov, <code>ff7c975</code>): 477 tes kontrak, 96 tes services, web lint, tes dan build lulus. Uji deploy ORRY multi-pair di fork 4663 dengan peluncuran Pons asli: 25/25 nilai baca-ulang cocok.</li>
+            <li><b>Dana dan kunci</b>: 0,0007 ETH ke 3 wallet v1, sekitar 0,0004 ETH untuk deploy ORRY multi-pair (17,56 juta gas di fork 4663, pada 0,02 gwei), saldo kerja keeper. Semua kunci sudah dibuat dan dibackup, termasuk quote signer dan keeper ORRY (9 Nov).</li>
+            <li><b>Hosting siap dijalankan</b> (9 Nov): paket server 1 untuk API, indexer, prober dan keeper sudah dibangun dan dicek, runbook di <code>docs/HOSTING-4663.md</code>. RPC resmi 4663 gratis dan sanggup melayani indexer, dengan cadangan otomatis. Web ke Vercel di orrery.tech. Dinyalakan setelah deploy v1.</li>
+            <li><b>Handle X tayang di situs</b>: <code>@OrreryHQ</code> sudah di kode, tetapi baru lulus setelah web di-deploy dan tombol X serta <code>twitter:site</code> dicek di domain live. Foto profil dan header X dipasang.</li>
+            <li><b>Walk pengunjung baru di mainnet</b> setelah deploy v1, dari landing dengan wallet baru. Walk terakhir di jaringan pengembangan 46630, 7 Nov.</li>
+          </ul>
+          <details>
+            <summary>Cara kerja saklar rilis</summary>
+            <ul class="plain">
+              <li>Satu tabel <code>releases</code> di Postgres API: fitur ke jam buka (UTC), <code>null</code> berarti ditahan. Diubah lewat satu script admin yang mencatat perubahan.</li>
+              <li><code>GET /v1/releases</code> publik. Web membacanya tiap menit dan memakai jam server.</li>
+              <li>API menjawab 404 untuk fitur yang belum buka. Web menampilkan "Coming soon" dari satu daftar yang sama untuk nav, halaman ORRY dan docs.</li>
+              <li>Menggeser wave cukup mengubah jamnya. Menarik kembali: set <code>null</code>.</li>
+              <li>Diuji dulu dengan semua wave tertahan, lalu satu wave dibuka di 46630.</li>
+            </ul>
+          </details>
+        </div>
+      </li>
+
+      <li class="station core">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when" data-at="0">T0</span><h3>Launch publik: inti Orrery</h3><span class="chip go">LULUS DI 46630 DAN FORK 4663</span></div>
+          <ul class="plain">
+            <li>Operator: Safe agen dengan batas per pembayaran, per hari dan float, daftar kontrak yang diizinkan, jeda kenaikan batas minimal 1 jam</li>
+            <li>Agen membayar USDG lewat x402 dari signer-nya sendiri, di dalam batas</li>
+            <li>Signer lookup publik dan halaman agen</li>
+            <li>Credits: pack cek dibayar USDG, API key, cek bertanda tangan EIP-712, SDK</li>
+            <li>Verifikasi agen 5 USDG, masuk ke treasury</li>
+            <li>Docs</li>
+            <li>ORRY diluncurkan owner di Pons dari wallet owner</li>
+          </ul>
+          <p class="why"><b>Kenapa ini inti:</b> inilah janji tagline, "Let agents pay. Keep spend in range.": operator memasang batas, agen membayar, merchant mengecek. Rehearsal penuh dan walk pengunjung baru lulus di 46630; deploy v1 dan treasury lulus di fork 4663.</p>
+        </div>
+      </li>
+
+      <li class="station core">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when" data-at="r">Deploy ORRY</span><h3>Utilitas awal ORRY</h3><span class="chip go">TERBUKA SAAT DEPLOY</span></div>
+          <ul class="plain">
+            <li>Earn: setor ke hub ORRY/ETH dan ORRY/USDG, dapat 85% fee swap</li>
+            <li>Stake: bagian dari pendapatan protokol, dalam ETH dan ORRY</li>
+            <li>Claim dan Distribute: semua reward dalam satu transaksi</li>
+          </ul>
+          <p class="why"><b>Kenapa tidak ditahan:</b> ini utilitas awal yang harus ada begitu ORRY beredar, dan Earn hanya butuh hub dan staking. Jamnya ikut kurva Pons: kontrak ORRY butuh harga pool Pons untuk membuka hub.</p>
+        </div>
+      </li>
+
+      <li class="station wave">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when" data-at="1">Wave 1</span><h3>Leaderboard</h3><span class="chip brand">SUDAH JADI · DITAHAN</span></div>
+          <p>Peringkat staker terbesar dan pendapatan terbesar.</p>
+          <p class="why"><b>Kenapa jam ini:</b> saat deploy, belum ada staker. Setelah beberapa jam papan sudah berisi nama.</p>
+          <details>
+            <summary>Detail</summary>
+            <dl class="facts">
+              <dt>Ditahan</dt><dd>Halaman <code>/leaderboard</code> dan rute leaderboard di API.</dd>
+              <dt>Cek</dt><dd>Wallet uji yang stake muncul di urutan yang benar, angka cocok dengan lens.</dd>
+            </dl>
+            <p class="post">The first ORRY stakers are on the board. See who leads Orrery.</p>
+          </details>
+        </div>
+      </li>
+
+      <li class="station wave">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when" data-at="2">Wave 2</span><h3>Stake di belakang agen</h3><span class="chip brand">SUDAH JADI · DITAHAN</span></div>
+          <p>Operator stake ORRY di belakang agennya; jumlahnya tampil di setiap cek agen itu.</p>
+          <p class="why"><b>Kenapa jam ini:</b> butuh agen terverifikasi di mainnet. Setelah beberapa jam, agen pertama sudah verifikasi sejak T0.</p>
+          <details>
+            <summary>Detail</summary>
+            <dl class="facts">
+              <dt>Ditahan</dt><dd>Bagian "Stake behind an agent" di <code>/stake</code>. Stake biasa dan unstake tetap terbuka.</dd>
+              <dt>Cek</dt><dd>Cek bertanda tangan untuk agen itu membawa jumlah stake dan jadwal kunci.</dd>
+            </dl>
+            <p class="post">Back your agent with ORRY. Every signed check now shows the stake behind it.</p>
+          </details>
+        </div>
+      </li>
+
+      <li class="station wave">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when" data-at="3">Wave 3</span><h3>Halaman Burn</h3><span class="chip brand">SUDAH JADI · DITAHAN</span></div>
+          <p>Total ORRY yang dibakar dan sumbernya, tiap baris dengan transaksinya.</p>
+          <p class="why"><b>Kenapa jam ini:</b> burn pertama datang dari Distribute, yang jalan tiap jam setelah fee pool terkumpul. Saat deploy halaman ini masih kosong.</p>
+          <details>
+            <summary>Detail</summary>
+            <dl class="facts">
+              <dt>Ditahan</dt><dd>Halaman <code>/burn</code> dan rute burn di API.</dd>
+              <dt>Cek</dt><dd>Burn dari Distribute terakhir tampil dengan hash transaksinya.</dd>
+            </dl>
+            <p class="post">Every ORRY burn, with its transaction. Orrery's burn page is live.</p>
+          </details>
+        </div>
+      </li>
+
+      <li class="station wave">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when" data-at="c">Deploy + 48 jam</span><h3>Bayar dengan ORRY</h3><span class="chip brand">SUDAH JADI · JEDA KONTRAK</span></div>
+          <p>Pack cek dan verifikasi agen dibayar dengan ORRY, lalu dibakar.</p>
+          <p class="why"><b>Kenapa jam ini:</b> treasury baru menerima ORRY 48 jam setelah koin diusulkan; jeda ini ada di kontrak. Begitu <code>executeCoin</code> jalan, checkout ORRY dibuka.</p>
+          <details>
+            <summary>Detail</summary>
+            <dl class="facts">
+              <dt>Ditahan</dt><dd>Bagian "Pay with ORRY" di <code>/credits</code> dan rute quote di API.</dd>
+              <dt>Cek</dt><dd>Satu pack dibeli dengan ORRY, supply ORRY turun tepat sejumlah itu, kredit masuk ke API key.</dd>
+            </dl>
+            <p class="post">Pay for Orrery checks and agent verification in ORRY. Every ORRY spent is burned.</p>
+          </details>
+        </div>
+      </li>
+
+      <li class="station update">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="body">
+          <div class="head"><span class="when">Setelah launch</span><h3>Update bertahap</h3><span class="chip">TANPA JAM</span></div>
+          <p class="muted">Tampil sebagai Coming soon tanpa tanggal. Satu update per rilis, dengan satu hari jeda untuk memantau. Urutan menurut kebutuhan.</p>
+          <ul class="updates">
+            <li><b>1 · Fitur pasar R1</b><span class="muted">Dark Pool, Private Swap, Saham. Sedang dibangun; fee bisa dibayar ORRY dengan diskon, tier stake dalam USD.</span></li>
+            <li><b>2 · Cek bayar per pakai</b><span class="muted">Satu cek dibayar ORRY dengan harga USD tetap, tanpa pack.</span></li>
+            <li><b>3 · Facilitator x402 untuk merchant lain</b><span class="muted">Diskon untuk staker, ORRY sebagai alat bayar lewat Permit2, direktori merchant terverifikasi.</span></li>
+            <li><b>4 · Komunitas</b><span class="muted">Community Chat on-chain, Reward Pool, event, Achievement Board, tip, nama on-chain, boost, pass.</span></li>
+            <li><b>5 · Fitur pasar R2</b><span class="muted">Shield V2, Prediction, limit order. Paymaster: gas agen dibayar ORRY.</span></li>
+            <li><b>6 · Attester dan Credit</b><span class="muted">Attester terbuka dengan kunci 1 juta ORRY, jaminan Credit dalam ORRY.</span></li>
+            <li><b>7 · Fitur pasar R3</b><span class="muted">Perps, Lend dan Multiply, Pair trading, Vault.</span></li>
+            <li><b>8 · Agent Launch</b><span class="muted">Coin agen berpasangan dengan ORRY, prioritas untuk staker.</span></li>
+            <li><b>9 · Fitur pasar R4</b><span class="muted">Penerbitan RWA dan alat launch.</span></li>
+            <li><b>10 · Discord tahap 3</b><span class="muted">Pesan Community Chat dan event on-chain dicerminkan ke Discord, setelah chat dan event dibangun.</span></li>
+            <li><b>11 · Pair baru</b><span class="muted">SOL, HYPE dan lainnya, setelah token resmi dan feed harganya ada di 4663.</span></li>
+          </ul>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="compat-h">
+    <h2 id="compat-h">Update tanpa bertentangan dengan kontrak yang sudah live</h2>
+    <p class="lede muted">Kontrak launch tidak di-upgrade. Update datang sebagai kontrak baru yang tersambung lewat titik sambung yang sudah disiapkan sejak launch. Semua yang belum punya titik sambung diperbaiki sebelum deploy.</p>
+    <div class="compat" id="compat">
+      <table>
+        <thead><tr><th>Update</th><th>Tersambung ke</th><th>Cara</th></tr></thead>
+        <tbody>
+          <tr><td>Cashback dan referral</td><td>OrryBuyback</td><td><span class="tag fix">DIPERBAIKI SEBELUM DEPLOY</span> Router dan link buyback permanen, jadi buyback diberi saluran cashback: 10% ORRY hasil buyback, dipasang sekali oleh treasury setelah jeda 48 jam.</td></tr>
+          <tr><td>Reward Earn dari luar (Agent Launch)</td><td>Vault Earn</td><td><span class="tag fix">DIPERBAIKI SEBELUM DEPLOY</span> Vault dibuat factory tetap, jadi diberi <code>notifyRewards</code>. Tanpa ini Agent Launch memaksa LP pindah vault.</td></tr>
+          <tr><td>Fitur pasar R1 sampai R4</td><td>Treasury, staking</td><td><span class="tag new">KONTRAK BARU</span> Fee USDG ke treasury, tier diskon membaca stake, satu kontrak per pasar.</td></tr>
+          <tr><td>Attester terbuka</td><td>OrreryAttestor</td><td><span class="tag ok">TITIK SAMBUNG ADA</span> <code>setAttester</code>, plus pembagi fee lewat <code>setTreasury</code>.</td></tr>
+          <tr><td>Cek bayar per pakai</td><td>OrreryTreasury</td><td><span class="tag ok">TITIK SAMBUNG ADA</span> Quote bertanda tangan yang sudah dipakai checkout ORRY.</td></tr>
+          <tr><td>x402 dalam ORRY</td><td>Facilitator, Permit2</td><td><span class="tag new">KONTRAK BARU</span> Permit2 dari wallet float agen. Modul kebijakan melarang approval di akun agen, jadi lewat float.</td></tr>
+          <tr><td>Paymaster gas</td><td>Hook ORRY</td><td><span class="tag new">KONTRAK BARU</span> Membaca harga TWAP dari hook.</td></tr>
+          <tr><td>Chat, Reward Pool, event, Achievement</td><td>Staking (moderasi)</td><td><span class="tag new">KONTRAK BARU</span> Pool dan event berdiri sendiri, moderasi membaca stake.</td></tr>
+          <tr><td>Pair baru</td><td>Registry pair di hook</td><td><span class="tag ok">TITIK SAMBUNG ADA</span> Ditambah treasury dengan jeda 48 jam, maksimal 8 pair, wajib feed Chainlink.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="rule-h">
+    <h2 id="rule-h">Aturan tiap wave</h2>
+    <div class="checks">
+      <div class="check">
+        <h3>15 menit sebelum</h3>
+        <ul>
+          <li>Indexer tidak tertinggal dari kepala chain</li>
+          <li>Keeper dan relayer punya saldo gas</li>
+          <li>Error RPC dan API di level normal</li>
+          <li>Tidak ada transaksi gagal beruntun di log</li>
+        </ul>
+      </div>
+      <div class="check">
+        <h3>Saat jamnya</h3>
+        <ul>
+          <li>Fitur terbuka sendiri, kartu Coming soon hilang</li>
+          <li>Walk pengunjung baru untuk fitur itu, storage kosong</li>
+          <li>Post X yang sudah dijadwalkan, plus klip 10 sampai 20 detik</li>
+        </ul>
+      </div>
+      <div class="check">
+        <h3>Sesudahnya</h3>
+        <ul>
+          <li>Pantau 30 menit: error console, log API</li>
+          <li>Catat hasilnya di halaman ini</li>
+          <li>Wave berikutnya hanya kalau semuanya hijau</li>
+        </ul>
+      </div>
+    </div>
+    <p class="stop"><b>Aturan berhenti:</b> kalau satu cek merah, wave itu digeser, bukan dipaksa. Jamnya diubah lewat saklar rilis dan post X ikut digeser. Fitur yang sudah terbuka tidak ditutup lagi kecuali ia sendiri yang rusak.</p>
+  </section>
+
+  <section aria-labelledby="never-h">
+    <h2 id="never-h">Tidak pernah ditahan</h2>
+    <p class="lede muted">Semua yang menyentuh dana yang sudah masuk, dan semua yang dijanjikan tagline.</p>
+    <div class="never">
+      <span>Withdraw dari Earn</span><span>Unstake dan withdraw stake</span><span>Claim reward</span><span>Jeda dan cabut sesi agen oleh operator</span><span>Signer lookup</span><span>Saldo dan posisi</span><span>Kredit yang sudah dibeli</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="decide-h">
+    <h2 id="decide-h">Keputusan owner</h2>
+    <ol class="decide">
+      <li><div><p><b>Jam T0 dan jarak antar wave.</b> Usulan: T0 21.00 WIB, jarak 3 jam.</p><p>21.00 WIB adalah 09.00 di New York, jadi wave ORRY jatuh di jam aktif pengguna Amerika.</p></div></li>
+      <li><div><p><b>Bangun saklar rilis runtime.</b> Usulan: ya, sebelum T0.</p><p>Tanpa saklar, tiap wave butuh restart API dan build ulang web di tengah malam WIB.</p></div></li>
+      <li><div><p><b>Gabung paket launch ORRY ke build/v1</b> setelah multi-pair dan cek jalur update lulus. Usulan: ya.</p><p>Deploy v1 dan ORRY lalu memakai satu cabang yang sudah dites bersama.</p></div></li>
+      <li><div><p><b>Buat kunci quote signer dan keeper ORRY.</b> Usulan: ya, disimpan di <code>~/.secrets/orrery/</code> dan dibackup.</p><p>Tanpa quote signer, checkout ORRY tetap tertutup; tanpa keeper, Distribute dan buyback hanya jalan kalau ada yang memanggil.</p></div></li>
+      <li><div><p><b>Kirim ETH dan ketik CONFIRM</b> untuk deploy v1, lalu deploy ORRY setelah kurva lulus.</p><p>Deploy hanya jalan dengan dana dan CONFIRM dari owner.</p></div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>Sumber: orrery build/v1 <code>e6c8aab</code>, orry/integration <code>9dee3b6</code>, orry/spec (R-1 sampai R-47), <code>docs/MAINNET-4663.md</code>, <code>docs/ORRY-DEPLOY-4663.md</code>, <code>docs/ORRY-MARKETS-PLAN.md</code>, <code>docs/ORRY-CHAT-PLAN.md</code>, <code>docs/ORRY-UTILITIES-PLAN.md</code>.</p>
+    <p>Walk pengunjung baru: 46630, 7 Nov 2026. Metode: skill publik-launch-skill.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const WIB_OFFSET_H = 7;
+  const t0Input = document.getElementById("t0");
+  const trInput = document.getElementById("tr");
+  const gapInput = document.getElementById("gap");
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+  const s0 = store.get("rc-plan-t0"), sTr = store.get("rc-plan-tr"), sGap = store.get("rc-plan-gap");
+  if (s0 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s0)) t0Input.value = s0;
+  if (sTr && ["2", "4", "8", "24"].includes(sTr)) trInput.value = sTr;
+  if (sGap && ["2", "3", "4"].includes(sGap)) gapInput.value = sGap;
+
+  const fmt = (tz) => new Intl.DateTimeFormat("id-ID", { timeZone: tz, weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false });
+  const wib = fmt("Asia/Jakarta"), utc = fmt("UTC"), ny = fmt("America/New_York");
+  const hourWib = (d) => Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", hour12: false }).format(d)) % 24;
+
+  function t0Utc() {
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(t0Input.value);
+    if (!m) return null;
+    return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - WIB_OFFSET_H, +m[5]));
+  }
+
+  function render() {
+    const start = t0Utc();
+    if (!start) return;
+    const tr = Number(trInput.value), gap = Number(gapInput.value);
+    store.set("rc-plan-t0", t0Input.value); store.set("rc-plan-tr", String(tr)); store.set("rc-plan-gap", String(gap));
+    const H = 3_600_000;
+    const times = {
+      0: start,
+      r: new Date(start.getTime() + tr * H),
+      1: new Date(start.getTime() + (tr + gap) * H),
+      2: new Date(start.getTime() + (tr + 2 * gap) * H),
+      3: new Date(start.getTime() + (tr + 3 * gap) * H),
+      c: new Date(start.getTime() + (tr + 48) * H),
+    };
+    const items = [
+      { k: "0", label: "T0", what: "Inti Orrery, ORRY diluncurkan di Pons" },
+      { k: "r", label: "Deploy ORRY", what: "Earn, Stake, Claim (perkiraan, ikut kurva Pons)" },
+      { k: "1", label: "Wave 1", what: "Leaderboard" },
+      { k: "2", label: "Wave 2", what: "Stake di belakang agen" },
+      { k: "3", label: "Wave 3", what: "Halaman Burn" },
+      { k: "c", label: "Deploy + 48 jam", what: "Bayar dengan ORRY" },
+    ];
+    document.getElementById("rows").innerHTML = items.map((w) => {
+      const d = times[w.k];
+      return `<tr class="${w.k === "0" ? "is-t0" : ""}"><td>${w.label}</td><td>${w.what}</td><td class="t">${wib.format(d)}</td><td class="t">${utc.format(d)}</td><td class="t">${ny.format(d)}</td></tr>`;
+    }).join("");
+
+    document.querySelectorAll("[data-at]").forEach((el) => {
+      const k = el.dataset.at;
+      const d = times[k];
+      if (k === "0") el.textContent = `T0 · ${wib.format(d)} WIB`;
+      else if (k === "r") el.textContent = `Deploy ORRY · T0 + ${tr} jam · ${wib.format(d)} WIB`;
+      else if (k === "c") el.textContent = `Deploy + 48 jam · ${wib.format(d)} WIB`;
+      else el.textContent = `Wave ${k} · deploy + ${Number(k) * gap} jam · ${wib.format(d)} WIB`;
+    });
+
+    // Strip to scale: one hour before T0 to one hour after wave 3 (the 48 hour step is in the table only).
+    const endMs = times[3].getTime() + H;
+    const from = start.getTime() - H;
+    const span = (endMs - from) / H;
+    const pct = (ms) => ((ms - from) / (span * H)) * 100;
+    const strip = document.getElementById("strip");
+    strip.querySelectorAll(".pinmark, .night").forEach((n) => n.remove());
+    for (let h = -6; h <= span; h++) {
+      const d = new Date(from + h * H);
+      if (hourWib(d) === 0) {
+        const night = document.createElement("div");
+        night.className = "night";
+        const left = Math.max(0, pct(d.getTime()));
+        const right = Math.min(100, pct(d.getTime() + 6 * H));
+        night.style.left = `${left}%`;
+        night.style.width = `${Math.max(0, right - left)}%`;
+        strip.appendChild(night);
+      }
+    }
+    [["0", "T0", "t0"], ["r", "RC", "tr"], ["1", "W1", ""], ["2", "W2", ""], ["3", "W3", ""]].forEach(([k, lab, cls]) => {
+      const m = document.createElement("div");
+      m.className = `pinmark ${cls}`;
+      m.style.left = `${pct(times[k].getTime())}%`;
+      m.innerHTML = `<span class="lab">${lab}</span><span class="pin"></span>`;
+      strip.appendChild(m);
+    });
+    strip.setAttribute("aria-label", items.slice(0, 5).map((w) => `${w.label} ${wib.format(times[w.k])} WIB`).join(", "));
+
+    const ticks = document.getElementById("ticks");
+    const step = span > 18 ? 4 : span > 12 ? 3 : 2;
+    let html = "";
+    for (let h = 0; h <= span; h += step) {
+      const d = new Date(from + h * H);
+      html += `<span style="left:${(h / span) * 100}%">${String(hourWib(d)).padStart(2, "0")}.00</span>`;
+    }
+    ticks.innerHTML = html;
+  }
+
+  t0Input.addEventListener("input", render);
+  trInput.addEventListener("change", render);
+  gapInput.addEventListener("change", render);
+  render();
+})();
+</script>

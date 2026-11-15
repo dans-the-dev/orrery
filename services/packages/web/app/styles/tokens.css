@@ -1,0 +1,14 @@
+/* Current Limit design tokens */
+:root {
+  --ground-light:#eef2ec; --ground-dark:#111c39; --ink:#18213b; --brand:#3152e9; --brand-on:#ffffff;
+  --success:#167b62; --warning:#a46013; --danger:#d33542; --hairline:#aab5ca;
+  --display:"Comfortaa",sans-serif; --text:"Figtree",sans-serif; --mono:"JetBrains Mono",monospace;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px; --space-9:96px;
+  --radius-sm:4px; --radius-md:12px; --radius-lg:28px; --radius-nav:30px;
+  --shadow-nav:0 12px 35px rgba(0,0,0,.14); --shadow-object:0 36px 80px rgba(0,0,0,.28); --shadow-paper:14px 20px 0 rgba(0,0,0,.09);
+  --motion-fast:160ms; --motion-base:360ms; --motion-slow:900ms; --ease-out:cubic-bezier(.2,.8,.2,1); --ease-in-out:cubic-bezier(.65,0,.35,1);
+  --font-hero:clamp(3.1rem,6.2vw,6.5rem); --font-h2:clamp(2.3rem,4vw,4.5rem); --font-h3:clamp(1.4rem,2vw,2rem); --font-body:1.06rem; --font-small:.84rem;
+}
+[data-theme="dark"] { --page-ground:var(--ground-dark); --page-ink:var(--ground-light); --page-hairline:color-mix(in srgb,var(--ground-light) 28%,transparent); }
+[data-theme="light"] { --page-ground:var(--ground-light); --page-ink:var(--ink); --page-hairline:var(--hairline); }
+@media(max-width:600px) { :root { --font-hero:clamp(2.8rem,11vw,4.4rem); --font-h2:2.5rem; --font-h3:1.5rem; --font-body:1rem; --font-small:.8rem; --space-9:64px; } }
