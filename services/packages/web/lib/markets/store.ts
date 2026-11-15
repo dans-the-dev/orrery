@@ -18,7 +18,7 @@ export interface SealedOrder {
   assetDecimals: number;
   account: Address;
   batch: string;
-  order: { sellAsset: boolean; amountIn: string; limitPrice: string; mode: Mode; payFeeInRcore: boolean };
+  order: { sellAsset: boolean; amountIn: string; limitPrice: string; mode: Mode; payFeeInOrry: boolean };
   salt: Hex;
   commitment: Hex;
   commitTx?: Hex;
@@ -27,17 +27,17 @@ export interface SealedOrder {
   commitEnd: number;
   revealEnd: number;
   state: SealState;
-  /** Revealed by Runcore's relay (opt-in): this page does not ask the wallet to reveal it. */
+  /** Revealed by Orrery's relay (opt-in): this page does not ask the wallet to reveal it. */
   relay?: boolean;
   /** Last status the relay reported: queued, sent, revealed or failed. */
   relayStatus?: string;
   /** Set when a reveal request was closed in the wallet: automatic reveal waits for the person's click. */
   waitForClick?: boolean;
-  outcome?: { status: FillStatus | "expired"; inputUsed: string; output: string; usdgFee: string; rcoreFee: string; price?: string; clearTx?: Hex };
+  outcome?: { status: FillStatus | "expired"; inputUsed: string; output: string; usdgFee: string; orryFee: string; price?: string; clearTx?: Hex };
   createdAt: number;
 }
 
-const KEY = "runcore.markets.orders.v1";
+const KEY = "orrery.markets.orders.v1";
 const EMPTY: SealedOrder[] = [];
 let cache: SealedOrder[] | null = null;
 const listeners = new Set<() => void>();

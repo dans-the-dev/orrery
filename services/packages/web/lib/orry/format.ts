@@ -20,7 +20,7 @@ export function amount(v: bigint | undefined | null, opts: { decimals?: number; 
 }
 
 export const eth = (v?: bigint | null) => amount(v, { frac: 5 });
-export const rcore = (v?: bigint | null) => amount(v, { frac: 2 });
+export const orry = (v?: bigint | null) => amount(v, { frac: 2 });
 
 /** Parses what a person typed into base units, or undefined when it is not a positive amount. */
 export function parseAmount(s: string, decimals = 18): bigint | undefined {

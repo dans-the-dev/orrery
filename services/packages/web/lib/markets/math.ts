@@ -1,5 +1,5 @@
 import { USDG_DECIMALS } from "../config";
-import { amount, parseAmount } from "../rcore/format";
+import { amount, parseAmount } from "../orry/format";
 
 /**
  * Price units of the market (ISealedBatchMarket.Order.limitPrice and BatchResult.price): USDG base units per 1e18

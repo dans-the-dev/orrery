@@ -2,11 +2,11 @@
 
 import { erc20Abi, type Address } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
-import { iEarnVaultAbi, iEarnVaultFactoryAbi } from "@runcore/shared";
-import { RCORE } from "./config";
+import { iEarnVaultAbi, iEarnVaultFactoryAbi } from "@orrery/shared";
+import { ORRY } from "./config";
 
 /**
- * Multi-pair Earn (R-35 to R-38): one vault per RCORE/X hub, listed by the Earn vault factory on chain. Read from the
+ * Multi-pair Earn (R-35 to R-38): one vault per ORRY/X hub, listed by the Earn vault factory on chain. Read from the
  * chain so withdrawals and fee claims never depend on the Earn release or the API.
  */
 
@@ -26,7 +26,7 @@ export interface EarnVaultInfo {
 
 /** Every Earn vault the factory created, in the factory's order, with its quote token's symbol and decimals. */
 export function useVaults(): { vaults: EarnVaultInfo[]; loaded: boolean } {
-  const factory = RCORE.earnFactory;
+  const factory = ORRY.earnFactory;
   const list = useReadContract({ address: factory ?? ZERO, abi: iEarnVaultFactoryAbi, functionName: "vaults", query: { enabled: Boolean(factory), staleTime: 60_000, refetchInterval: 60_000 } });
   const vaults = (list.data as readonly Address[] | undefined) ?? [];
   const quotes = useReadContracts({
@@ -60,7 +60,7 @@ export interface EarnPosition extends EarnVaultInfo {
   shares?: bigint;
   unlockAt: number;
   feesQuote?: bigint;
-  feesRcore?: bigint;
+  feesOrry?: bigint;
 }
 
 /** This account's share, unlock time and fees in every vault. */
@@ -86,30 +86,30 @@ export function useEarnPositions(account?: Address): { positions: EarnPosition[]
       shares: s?.status === "success" ? (s.result as bigint) : undefined,
       unlockAt: u?.status === "success" ? Number(u.result) : 0,
       feesQuote: fees?.[0],
-      feesRcore: fees?.[1],
+      feesOrry: fees?.[1],
     };
   });
   return { positions, loaded: loaded && (!account || vaults.length === 0 || isFetched), refetch: () => void refetch() };
 }
 
 export const hasShares = (p: EarnPosition) => (p.shares ?? 0n) > 0n;
-export const hasFees = (p: EarnPosition) => (p.feesQuote ?? 0n) > 0n || (p.feesRcore ?? 0n) > 0n;
+export const hasFees = (p: EarnPosition) => (p.feesQuote ?? 0n) > 0n || (p.feesOrry ?? 0n) > 0n;
 
 export interface AssetMeta {
   symbol: string;
   decimals: number;
 }
-/** Symbol and decimals of every asset RCORE pays in: RCORE, ETH (the zero address) and each vault's quote token. */
+/** Symbol and decimals of every asset ORRY pays in: ORRY, ETH (the zero address) and each vault's quote token. */
 export function useAssetMeta(): (asset: Address) => AssetMeta | undefined {
   const { vaults } = useVaults();
   return (asset) => {
     const a = asset.toLowerCase();
     if (a === NATIVE_ETH) return { symbol: "ETH", decimals: 18 };
-    if (RCORE.token && a === RCORE.token.toLowerCase()) return { symbol: "RCORE", decimals: 18 };
+    if (ORRY.token && a === ORRY.token.toLowerCase()) return { symbol: "ORRY", decimals: 18 };
     const q = vaults.find((v) => v.quote.address.toLowerCase() === a)?.quote;
     return q ? { symbol: q.symbol, decimals: q.decimals } : undefined;
   };
 }
 
-/** Display digits per asset: ETH five, RCORE and stable quotes two. */
+/** Display digits per asset: ETH five, ORRY and stable quotes two. */
 export const assetFrac = (symbol: string) => (symbol === "ETH" ? 5 : 2);

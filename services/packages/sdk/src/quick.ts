@@ -8,7 +8,8 @@ import { robinhoodChain } from "@orrery/shared";
 import { AgentClient, OrreryApi, verifyCheck } from "./index";
 
 /**
- * Orrery v1 on Robinhood Chain 4663 (the repository's deployments/4663.json). The RPC is one that publishes
+ * Orrery v1 on Robinhood Chain 4663. The contract addresses stay null until `deploy-4663.ts` writes
+ * deployments/4663.json and they are copied here; until then every call needs them passed in. The RPC is one that publishes
  * transactions: an agent sends its own top-ups, and rpc-robinhood.blockmachine.io (the web's read endpoint) answers
  * eth_sendRawTransaction with "publishing transactions not supported by this endpoint" (seen on mainnet, 2026-11-11).
  */
@@ -16,10 +17,10 @@ export const ORRERY_MAINNET = {
   chainId: 4663,
   rpcUrl: "https://robinhood-rpc.publicnode.com",
   apiUrl: "https://api.orrery.tech",
-  module: "0x2934c34afd7b5410d05ddd638982eed1d49f0d4c",
-  attestor: "0xc18a0dc74f5326786f5ade357354159c63282bd0",
-  lens: "0xc10bb949d79d906e042d940cf5226c9f2c783ed9",
-} as const satisfies { chainId: number; rpcUrl: string; apiUrl: string; module: Address; attestor: Address; lens: Address };
+  module: null,
+  attestor: null,
+  lens: null,
+} as { readonly chainId: 4663; readonly rpcUrl: string; readonly apiUrl: string; readonly module: Address | null; readonly attestor: Address | null; readonly lens: Address | null };
 
 type Env = Record<string, string | undefined>;
 const processEnv = (): Env => (globalThis as { process?: { env?: Env } }).process?.env ?? {};
@@ -57,5 +58,7 @@ export async function checkPayment(
   const rpcUrl = opts.rpcUrl ?? ORRERY_MAINNET.rpcUrl;
   const publicClient = opts.publicClient ?? (createPublicClient({ chain: chainFor(ORRERY_MAINNET.chainId, rpcUrl), transport: http(rpcUrl) }) as PublicClient);
   const res = await new OrreryApi(opts.apiUrl ?? ORRERY_MAINNET.apiUrl, apiKey).checkPayer(payer);
-  return verifyCheck(publicClient, opts.attestor ?? ORRERY_MAINNET.attestor, res, { payer });
+  const attestor = opts.attestor ?? ORRERY_MAINNET.attestor;
+  if (!attestor) throw new Error("Pass the Orrery attestor address for this network.");
+  return verifyCheck(publicClient, attestor, res, { payer });
 }

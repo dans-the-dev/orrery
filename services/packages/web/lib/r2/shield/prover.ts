@@ -1,4 +1,4 @@
-// Origin: Hushwave packages/sdk/src/prover.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
+// Origin: Hushwave packages/sdk/src/prover.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
 // docs/updates/L3-R2-SPEC.md 6).
 import { Barretenberg, UltraHonkBackend } from "@aztec/bb.js";
 import { Noir, type CompiledCircuit, type InputMap } from "@noir-lang/noir_js";

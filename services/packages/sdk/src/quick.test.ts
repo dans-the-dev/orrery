@@ -5,10 +5,12 @@ import { ORRERY_MAINNET, agentFromEnv } from "./quick";
 describe("agentFromEnv", () => {
   const key = generatePrivateKey();
 
-  it("needs only the signer key on Robinhood Chain", () => {
-    const agent = agentFromEnv({ ORRERY_SIGNER_KEY: key });
+  it("defaults to Robinhood Chain and asks for the module until a deployment is recorded", () => {
+    if (!ORRERY_MAINNET.module) {
+      expect(() => agentFromEnv({ ORRERY_SIGNER_KEY: key })).toThrow(/ORRERY_MODULE/);
+    }
+    const agent = agentFromEnv({ ORRERY_SIGNER_KEY: key, ORRERY_MODULE: ORRERY_MAINNET.module ?? "0xfbbc06cd0ae2d7ab5f23247ceda6377941080397" });
     expect(agent.signer).toBe(privateKeyToAccount(key).address);
-    expect(agent.module.toLowerCase()).toBe(ORRERY_MAINNET.module);
     expect(agent.publicClient.chain?.id).toBe(4663);
     // the default must be an endpoint that publishes transactions: the agent sends its own top-ups
     expect(ORRERY_MAINNET.rpcUrl).not.toContain("blockmachine");

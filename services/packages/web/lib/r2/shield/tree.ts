@@ -1,5 +1,5 @@
-// Origin: Hushwave packages/sdk/src/tree.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
-// docs/updates/L3-R2-SPEC.md 6). Mirrors RuncoreShield's incremental tree.
+// Origin: Hushwave packages/sdk/src/tree.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
+// docs/updates/L3-R2-SPEC.md 6). Mirrors OrreryShield's incremental tree.
 import { hash2 } from "./hash";
 
 export const DEPTH = 20;
@@ -11,7 +11,7 @@ export const ZEROS: bigint[] = (() => {
   return z;
 })();
 
-/** Append-only Poseidon2 tree mirroring RuncoreShield's incremental tree. */
+/** Append-only Poseidon2 tree mirroring OrreryShield's incremental tree. */
 export class MerkleTree {
   private levels: bigint[][] = Array.from({ length: DEPTH + 1 }, () => []);
 

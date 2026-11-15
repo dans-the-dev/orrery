@@ -3,9 +3,9 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
 import { API_URL } from "../config";
-import { big, get } from "../rcore/api";
-import type { RcoreFeature } from "../rcore/config";
-import { useReleases } from "../rcore/releases";
+import { big, get } from "../orry/api";
+import type { OrryFeature } from "../orry/config";
+import { useReleases } from "../orry/releases";
 import { isAddr, isZeroAddr } from "./logic";
 
 /**
@@ -26,11 +26,11 @@ export interface CommunityAddresses {
   templates: Address | null;
   referrals: Address | null;
   cashback: Address | null;
-  rcore: Address | null;
+  orry: Address | null;
   priceOracle: Address | null;
 }
 
-/** `GET /v1/community/config`, amounts as bigints (USD in USDG base units, RCORE in 18 decimals). */
+/** `GET /v1/community/config`, amounts as bigints (USD in USDG base units, ORRY in 18 decimals). */
 export interface CommunityConfig {
   chainId: number;
   addresses: CommunityAddresses;
@@ -66,7 +66,7 @@ export function parseCommunityConfig(o: J): CommunityConfig {
       templates: addr(a.templates),
       referrals: addr(a.referrals),
       cashback: addr(a.cashback),
-      rcore: addr(a.rcore),
+      orry: addr(a.orry),
       priceOracle: addr(a.priceOracle),
     },
     postFeeUsd: big(o.postFeeUsd),
@@ -95,13 +95,13 @@ export const useCommunityConfig = (enabled = true) =>
 
 /** Contracts each feature needs before its page or action opens. */
 const NEEDS: Record<CommunityFeature, (keyof CommunityAddresses)[]> = {
-  chat: ["chat", "rcore"],
+  chat: ["chat", "orry"],
   achievements: ["pool"],
-  passes: ["passes", "rcore"],
-  "burn-to-boost": ["boost", "rcore"],
+  passes: ["passes", "orry"],
+  "burn-to-boost": ["boost", "orry"],
   cashback: ["cashback"],
   referrals: ["referrals"],
-  "template-market": ["templates", "rcore"],
+  "template-market": ["templates", "orry"],
 };
 
 export interface Community {
@@ -114,8 +114,8 @@ export interface Community {
 
 export function useCommunity(): Community {
   const releases = useReleases();
-  // The switch keys features by name; the community names are release features on the server, not RCORE pages here.
-  const open = (f: CommunityFeature) => releases.isOpen(f as unknown as RcoreFeature);
+  // The switch keys features by name; the community names are release features on the server, not ORRY pages here.
+  const open = (f: CommunityFeature) => releases.isOpen(f as unknown as OrryFeature);
   // The config is read only once a community feature is open. Before that every community page shows its held state, the
   // nav (on every page) asks nothing, and an API without the community routes is never called.
   const anyOpen = releases.ready && COMMUNITY_FEATURES.some(open);

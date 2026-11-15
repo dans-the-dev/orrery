@@ -1,5 +1,5 @@
-// Origin: Hushwave packages/sdk/src/eip712.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
-// docs/updates/L3-R2-SPEC.md 6). Changed: the domain name is "Runcore Shield", as RuncoreShield.DOMAIN_SEPARATOR.
+// Origin: Hushwave packages/sdk/src/eip712.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
+// docs/updates/L3-R2-SPEC.md 6). Changed: the domain name is "Orrery Shield", as OrreryShield.DOMAIN_SEPARATOR.
 import { encodeAbiParameters, keccak256, toBytes, type Address, type Hex } from "viem";
 
 export const KIND = { send: 1, withdraw: 2 } as const;
@@ -18,19 +18,19 @@ export const ACTION_TYPES = {
 } as const;
 
 export function actionDomain(chainId: number, pool: Address) {
-  return { name: "Runcore Shield", version: "1", chainId, verifyingContract: pool } as const;
+  return { name: "Orrery Shield", version: "1", chainId, verifyingContract: pool } as const;
 }
 
 const DOMAIN_TYPEHASH = keccak256(
   toBytes("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
 );
 
-/** Same value as RuncoreShield.DOMAIN_SEPARATOR. */
+/** Same value as OrreryShield.DOMAIN_SEPARATOR. */
 export function domainSeparator(chainId: number, pool: Address): Hex {
   return keccak256(
     encodeAbiParameters(
       [{ type: "bytes32" }, { type: "bytes32" }, { type: "bytes32" }, { type: "uint256" }, { type: "address" }],
-      [DOMAIN_TYPEHASH, keccak256(toBytes("Runcore Shield")), keccak256(toBytes("1")), BigInt(chainId), pool],
+      [DOMAIN_TYPEHASH, keccak256(toBytes("Orrery Shield")), keccak256(toBytes("1")), BigInt(chainId), pool],
     ),
   );
 }

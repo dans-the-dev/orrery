@@ -1,6 +1,6 @@
 "use client";
 
-import type { ShieldEventsResponse } from "@runcore/shared";
+import type { ShieldEventsResponse } from "@orrery/shared";
 import { API_URL } from "../../config";
 import type { TransactProver } from "./prover";
 import { eventFromJson, type PoolEvent } from "./wallet";
@@ -25,7 +25,7 @@ export function getProver(): Promise<TransactProver> {
 
 /** Every shield event from the API, in chain order (never held by the release switch). */
 export async function loadShieldEvents(): Promise<PoolEvent[]> {
-  if (!API_URL) throw new Error("The Runcore API is not configured in this build.");
+  if (!API_URL) throw new Error("The Orrery API is not configured in this build.");
   const out: PoolEvent[] = [];
   let after: string | null = null;
   for (let page = 0; page < 10_000; page++) {

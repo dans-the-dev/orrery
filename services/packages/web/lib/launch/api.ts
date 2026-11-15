@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { LaunchAccountResponse, LaunchCoinResponse, LaunchCoinsResponse, LaunchEligibilityResponse } from "@runcore/shared";
+import type { LaunchAccountResponse, LaunchCoinResponse, LaunchCoinsResponse, LaunchEligibilityResponse } from "@orrery/shared";
 import type { Address } from "viem";
 import { API_URL } from "../config";
 
@@ -18,7 +18,7 @@ export class LaunchApiError extends Error {
 }
 
 async function call<T>(path: string): Promise<T> {
-  if (!API_URL) throw new LaunchApiError(0, "The Runcore API is not configured in this build.");
+  if (!API_URL) throw new LaunchApiError(0, "The Orrery API is not configured in this build.");
   const r = await fetch(`${API_URL}${path}`, { headers: { accept: "application/json" } });
   const body = (await r.json().catch(() => ({}))) as T & { error?: string };
   if (!r.ok) throw new LaunchApiError(r.status, body.error ?? `Request failed (${r.status}).`);

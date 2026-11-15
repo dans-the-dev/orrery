@@ -3,12 +3,12 @@
 import { useEffect, useRef } from "react";
 import { erc20Abi, type Abi, type Address, type Hex } from "viem";
 import { usePublicClient, useReadContracts } from "wagmi";
-import { iFeeTiersAbi, iRcorePriceOracleAbi, iSealedBatchMarketAbi } from "@runcore/shared";
+import { iFeeTiersAbi, iOrryPriceOracleAbi, iSealedBatchMarketAbi } from "@orrery/shared";
 import { activeChain } from "../config";
-import { useNow, useTx } from "../rcore/chain";
+import { useNow, useTx } from "../orry/chain";
 import { relayReveal, relayStatus } from "./api";
-import { span } from "../rcore/format";
-import { RCORE } from "../rcore/config";
+import { span } from "../orry/format";
+import { ORRY } from "../orry/config";
 import type { FillStatus, Mode } from "./api";
 import { removeOrder, saveOrder, updateOrder, useSealedOrders, type SealedOrder } from "./store";
 
@@ -40,9 +40,9 @@ export function phaseAt(now: number, start: number, commitSeconds: number, revea
 export interface MarketChain {
   asset?: Address;
   usdg?: Address;
-  rcore?: Address;
+  orry?: Address;
   feeTiers?: Address;
-  rcorePrice?: Address;
+  orryPrice?: Address;
   start?: number;
   commitSeconds?: number;
   revealSeconds?: number;
@@ -51,13 +51,13 @@ export interface MarketChain {
   commitFeeUsd?: bigint;
   maxOrders?: number;
   expiry?: number;
-  /** Lever L3: extra discount on a fee paid in RCORE, basis points. */
-  rcoreFeeDiscountBps?: number;
+  /** Lever L3: extra discount on a fee paid in ORRY, basis points. */
+  orryFeeDiscountBps?: number;
   /** R1b: whether unmatched Swap orders fill against the market's Uniswap v4 pool, and how far from the clearing price. */
   poolListed?: boolean;
   maxDeviationBps?: number;
 }
-const FIXED = ["asset", "usdg", "rcore", "feeTiers", "rcorePrice", "start", "commitSeconds", "revealSeconds", "feeBps", "minNotionalUsdg", "commitFeeUsd", "MAX_ORDERS", "EXPIRY", "rcoreFeeDiscountBps", "remainderPool", "maxDeviationBps"] as const;
+const FIXED = ["asset", "usdg", "orry", "feeTiers", "orryPrice", "start", "commitSeconds", "revealSeconds", "feeBps", "minNotionalUsdg", "commitFeeUsd", "MAX_ORDERS", "EXPIRY", "orryFeeDiscountBps", "remainderPool", "maxDeviationBps"] as const;
 
 export function useMarketChain(market?: Address): MarketChain & { loaded: boolean } {
   const { data, isFetched } = useReadContracts({
@@ -77,9 +77,9 @@ export function useMarketChain(market?: Address): MarketChain & { loaded: boolea
     loaded: isFetched,
     asset: v<Address>(0),
     usdg: v<Address>(1),
-    rcore: v<Address>(2),
+    orry: v<Address>(2),
     feeTiers: v<Address>(3),
-    rcorePrice: v<Address>(4),
+    orryPrice: v<Address>(4),
     start: n(5),
     commitSeconds: n(6),
     revealSeconds: n(7),
@@ -88,35 +88,35 @@ export function useMarketChain(market?: Address): MarketChain & { loaded: boolea
     commitFeeUsd: v<bigint>(10),
     maxOrders: n(11),
     expiry: n(12),
-    rcoreFeeDiscountBps: n(13),
+    orryFeeDiscountBps: n(13),
     poolListed: v<readonly [unknown, boolean]>(14)?.[1],
     maxDeviationBps: n(15),
   };
 }
 
-/** Fee discount from RCORE stake (lever L2, thresholds in USD at the RCORE price: R-44, R-46), the tier table, and the
- * RCORE price for the sealing fee (2.3, 2.4). Every discount is 0 while the RCORE price is not ready. */
+/** Fee discount from ORRY stake (lever L2, thresholds in USD at the ORRY price: R-44, R-46), the tier table, and the
+ * ORRY price for the sealing fee (2.3, 2.4). Every discount is 0 while the ORRY price is not ready. */
 export interface FeeView {
   discountBps: number;
   tiers: { minStakeUsd: bigint; discountBps: number }[];
   /** USD value (USDG base units) of the account's earning stake now. */
   stakeUsd?: bigint;
-  rcoreReady?: boolean;
-  /** RCORE that the sealing fee costs right now; 0n when the market charges none. */
-  commitFeeRcore?: bigint;
+  orryReady?: boolean;
+  /** ORRY that the sealing fee costs right now; 0n when the market charges none. */
+  commitFeeOrry?: bigint;
   loaded: boolean;
 }
 export function useFeeView(cfg: MarketChain, account?: Address): FeeView {
   const ft = cfg.feeTiers ?? ZERO;
-  const rp = cfg.rcorePrice ?? ZERO;
+  const rp = cfg.orryPrice ?? ZERO;
   const base = useReadContracts({
     allowFailure: true,
     contracts: [
       { address: ft, abi: iFeeTiersAbi, functionName: "tierCount" },
-      { address: rp, abi: iRcorePriceOracleAbi, functionName: "ready" },
+      { address: rp, abi: iOrryPriceOracleAbi, functionName: "ready" },
       { address: ft, abi: iFeeTiersAbi, functionName: "discountBps", args: [account ?? ZERO] },
     ],
-    query: { enabled: Boolean(cfg.feeTiers && cfg.rcorePrice), refetchInterval: 15_000 },
+    query: { enabled: Boolean(cfg.feeTiers && cfg.orryPrice), refetchInterval: 15_000 },
   });
   const count = Math.min(Number(base.data?.[0]?.status === "success" ? base.data[0].result : 0), 8);
   const ready = base.data?.[1]?.status === "success" ? (base.data[1].result as boolean) : undefined;
@@ -128,10 +128,10 @@ export function useFeeView(cfg: MarketChain, account?: Address): FeeView {
   const extra = useReadContracts({
     allowFailure: true,
     contracts: [
-      { address: rp, abi: iRcorePriceOracleAbi, functionName: "rcoreFor", args: [cfg.commitFeeUsd ?? 0n] },
+      { address: rp, abi: iOrryPriceOracleAbi, functionName: "orryFor", args: [cfg.commitFeeUsd ?? 0n] },
       { address: ft, abi: iFeeTiersAbi, functionName: "stakeUsd", args: [account ?? ZERO] },
     ],
-    query: { enabled: Boolean(cfg.rcorePrice), refetchInterval: 15_000 },
+    query: { enabled: Boolean(cfg.orryPrice), refetchInterval: 15_000 },
   });
   const commitFee = cfg.commitFeeUsd === undefined ? undefined : cfg.commitFeeUsd === 0n || ready === false ? 0n : extra.data?.[0]?.status === "success" ? (extra.data[0].result as bigint) : undefined;
   return {
@@ -141,12 +141,12 @@ export function useFeeView(cfg: MarketChain, account?: Address): FeeView {
       .map((t) => (t.status === "success" ? { minStakeUsd: (t.result as readonly [bigint, number])[0], discountBps: Number((t.result as readonly [bigint, number])[1]) } : null))
       .filter((t): t is { minStakeUsd: bigint; discountBps: number } => t !== null),
     stakeUsd: account && extra.data?.[1]?.status === "success" ? (extra.data[1].result as bigint) : undefined,
-    rcoreReady: ready,
-    commitFeeRcore: commitFee,
+    orryReady: ready,
+    commitFeeOrry: commitFee,
   };
 }
 
-/** Wallet balances of the market's two sides and RCORE. */
+/** Wallet balances of the market's two sides and ORRY. */
 export function useBalances(cfg: MarketChain, account?: Address) {
   const a = account ?? ZERO;
   const { data, refetch } = useReadContracts({
@@ -154,12 +154,12 @@ export function useBalances(cfg: MarketChain, account?: Address) {
     contracts: [
       { address: cfg.asset ?? ZERO, abi: erc20Abi, functionName: "balanceOf", args: [a] },
       { address: cfg.usdg ?? ZERO, abi: erc20Abi, functionName: "balanceOf", args: [a] },
-      { address: cfg.rcore ?? ZERO, abi: erc20Abi, functionName: "balanceOf", args: [a] },
+      { address: cfg.orry ?? ZERO, abi: erc20Abi, functionName: "balanceOf", args: [a] },
     ],
     query: { enabled: Boolean(account && cfg.asset && cfg.usdg), refetchInterval: 12_000 },
   });
   const v = (i: number) => (data?.[i]?.status === "success" ? (data[i].result as bigint) : undefined);
-  return { asset: v(0), usdg: v(1), rcore: cfg.rcore ? v(2) : undefined, refetch };
+  return { asset: v(0), usdg: v(1), orry: cfg.orry ? v(2) : undefined, refetch };
 }
 
 /** Holdings of every listed stock token for one wallet, by asset address. */
@@ -194,13 +194,13 @@ export function useBatchChain(market?: Address, batch?: bigint) {
     contracts: Array.from({ length: count }, (_, i) => ({ address: market ?? ZERO, abi: marketAbi, functionName: "orderAt", args: [batch ?? 0n, BigInt(i)] })),
     query: { enabled: enabled && count > 0, refetchInterval: 12_000 },
   });
-  type R = { cleared: boolean; price: bigint; roundId: bigint; assetFilled: bigint; usdgFilled: bigint; usdgFees: bigint; rcoreFeesBurned: bigint; ordersDropped: number; assetViaPool: bigint; usdgViaPool: bigint };
+  type R = { cleared: boolean; price: bigint; roundId: bigint; assetFilled: bigint; usdgFilled: bigint; usdgFees: bigint; orryFeesBurned: bigint; ordersDropped: number; assetViaPool: bigint; usdgViaPool: bigint };
   const result = head.data?.[1]?.status === "success" ? (head.data[1].result as R) : undefined;
   const orders = (rows.data ?? [])
     .map((r) => {
       if (r.status !== "success") return null;
-      const [account, o] = r.result as readonly [Address, { sellAsset: boolean; amountIn: bigint; limitPrice: bigint; mode: number; payFeeInRcore: boolean }];
-      return { account, sellAsset: o.sellAsset, amountIn: o.amountIn, limitPrice: o.limitPrice, mode: Number(o.mode) as Mode, payFeeInRcore: o.payFeeInRcore };
+      const [account, o] = r.result as readonly [Address, { sellAsset: boolean; amountIn: bigint; limitPrice: bigint; mode: number; payFeeInOrry: boolean }];
+      return { account, sellAsset: o.sellAsset, amountIn: o.amountIn, limitPrice: o.limitPrice, mode: Number(o.mode) as Mode, payFeeInOrry: o.payFeeInOrry };
     })
     .filter((x) => x !== null);
   return { loaded: head.isFetched, count, orders, result };
@@ -235,9 +235,9 @@ export function useSeal() {
     assetDecimals: number;
     account: Address;
     timing: { start: number; commitSeconds: number; revealSeconds: number };
-    order: { sellAsset: boolean; amountIn: bigint; limitPrice: bigint; mode: Mode; payFeeInRcore: boolean };
+    order: { sellAsset: boolean; amountIn: bigint; limitPrice: bigint; mode: Mode; payFeeInOrry: boolean };
     approvals: Approval[];
-    /** Opt-in: hand the order and salt to Runcore's relay, which reveals it with revealFor. */
+    /** Opt-in: hand the order and salt to Orrery's relay, which reveals it with revealFor. */
     relay?: boolean;
   }) {
     let id: string | undefined;
@@ -285,7 +285,7 @@ export function useSeal() {
         const r = await pub.getTransactionReceipt({ hash });
         updateOrder(id, { state: "sealed", commitTx: hash, commitBlock: r.blockNumber.toString() });
         if (p.relay) {
-          step("Handing the order to Runcore's relay.");
+          step("Handing the order to Orrery's relay.");
           try {
             const r = await relayReveal({ market: p.market, account: p.account, batch: batch.toString(), order: { ...p.order, amountIn: p.order.amountIn.toString(), limitPrice: p.order.limitPrice.toString(), mode: p.order.mode === 1 ? "swap" : "limit" }, salt });
             if (r.status === "failed") throw new Error(r.reason ?? "relay refused");
@@ -294,7 +294,7 @@ export function useSeal() {
             // The order stays with this page, which reveals it as usual.
             return `Sealed in batch ${batch}. The relay did not take it, so your wallet asks you to reveal it from this page.`;
           }
-          return `Sealed in batch ${batch}. Runcore's relay reveals it during the reveal window; you can close this page.`;
+          return `Sealed in batch ${batch}. Orrery's relay reveals it during the reveal window; you can close this page.`;
         }
       } catch (e) {
         removeOrder(id);
@@ -398,14 +398,14 @@ export function useAutoReveal(account?: Address) {
       const r = (await pub.readContract({ address: o.market, abi: marketAbi, functionName: "result", args: [BigInt(o.batch)] })) as { cleared: boolean; price: bigint };
       if (!r.cleared) {
         const expiry = Number((await pub.readContract({ address: o.market, abi: marketAbi, functionName: "EXPIRY" })) as bigint);
-        if (Math.floor(Date.now() / 1000) > o.revealEnd + expiry) updateOrder(o.id, { state: "settled", outcome: { status: "expired", inputUsed: "0", output: "0", usdgFee: "0", rcoreFee: "0" } });
+        if (Math.floor(Date.now() / 1000) > o.revealEnd + expiry) updateOrder(o.id, { state: "settled", outcome: { status: "expired", inputUsed: "0", output: "0", usdgFee: "0", orryFee: "0" } });
         return;
       }
       const [filled, dropped] = await Promise.all([
         pub.getContractEvents({ address: o.market, abi: iSealedBatchMarketAbi, eventName: "OrderFilled", args, fromBlock }),
         pub.getContractEvents({ address: o.market, abi: iSealedBatchMarketAbi, eventName: "OrderDropped", args, fromBlock }),
       ]);
-      const f = filled[0]?.args as { inputUsed?: bigint; output?: bigint; usdgFee?: bigint; rcoreFee?: bigint } | undefined;
+      const f = filled[0]?.args as { inputUsed?: bigint; output?: bigint; usdgFee?: bigint; orryFee?: bigint } | undefined;
       const tx = (filled[0] ?? dropped[0])?.transactionHash;
       const amountIn = BigInt(o.order.amountIn);
       let status: FillStatus = "unfilled";
@@ -418,7 +418,7 @@ export function useAutoReveal(account?: Address) {
           inputUsed: String(f?.inputUsed ?? 0n),
           output: String(f?.output ?? 0n),
           usdgFee: String(f?.usdgFee ?? 0n),
-          rcoreFee: String(f?.rcoreFee ?? 0n),
+          orryFee: String(f?.orryFee ?? 0n),
           price: r.price.toString(),
           clearTx: tx ?? undefined,
         },

@@ -6,29 +6,29 @@ import { API_URL } from "../config";
 import { useReleases } from "./releases";
 
 /**
- * Reads from the RCORE API (docs/RCORE-BUILD-SPEC.md section 5). Amounts arrive as decimal strings in base units; the
+ * Reads from the ORRY API (docs/ORRY-BUILD-SPEC.md section 5). Amounts arrive as decimal strings in base units; the
  * parsers below turn them into bigints and accept numbers or strings for counts and times.
  */
 
 export interface Pair {
   eth: bigint;
-  rcore: bigint;
+  orry: bigint;
 }
-/** (quote, RCORE) amounts of one hub or vault, base units of each. */
+/** (quote, ORRY) amounts of one hub or vault, base units of each. */
 export interface QuotePair {
   quote: bigint;
-  rcore: bigint;
+  orry: bigint;
 }
 export interface QuoteAsset {
   address: Address;
   symbol: string;
   decimals: number;
 }
-/** An amount of one asset; RCORE is an asset too. */
+/** An amount of one asset; ORRY is an asset too. */
 export interface AssetAmount extends QuoteAsset {
   amount: bigint;
 }
-/** One RCORE/X hub and its Earn vault (multi-pair, lane C's RcoreHubView). */
+/** One ORRY/X hub and its Earn vault (multi-pair, lane C's OrryHubView). */
 export interface EarnHub {
   quote: QuoteAsset;
   initialized: boolean;
@@ -37,11 +37,11 @@ export interface EarnHub {
   totalShares: bigint;
   fees7d: QuotePair;
   feesAllTime: QuotePair;
-  /** RCORE added to this vault's LPs as rewards (RewardsNotified), last 7 days and all time; 0 without a vault. */
+  /** ORRY added to this vault's LPs as rewards (RewardsNotified), last 7 days and all time; 0 without a vault. */
   notified7d: bigint;
   notifiedAllTime: bigint;
-  /** RCORE base units per 1 whole quote token, or undefined until the hub has a price. */
-  rcorePerQuote?: bigint;
+  /** ORRY base units per 1 whole quote token, or undefined until the hub has a price. */
+  orryPerQuote?: bigint;
 }
 export interface EarnStats {
   hubs: EarnHub[];
@@ -77,9 +77,9 @@ export interface AccountView {
   stakeLeaving: bigint;
   stakeReadyAt: number;
   stakeRewardsEth: bigint;
-  stakeRewardsRcore: bigint;
+  stakeRewardsOrry: bigint;
   agents: AgentPosition[];
-  /** Claimed plus pending, Earn and Stake, per asset: RCORE, ETH, then the other quotes. */
+  /** Claimed plus pending, Earn and Stake, per asset: ORRY, ETH, then the other quotes. */
   earnedAllTime: AssetAmount[];
 }
 export interface BoardRow {
@@ -87,8 +87,8 @@ export interface BoardRow {
   address: string;
   stake?: bigint;
   earned?: AssetAmount[];
-  /** The ranking key of earners: everything earned, valued in RCORE at the hubs' current prices. */
-  valueRcore?: bigint;
+  /** The ranking key of earners: everything earned, valued in ORRY at the hubs' current prices. */
+  valueOrry?: bigint;
 }
 export interface BurnItem {
   tx: Hex;
@@ -103,7 +103,7 @@ export interface Burns {
   items: BurnItem[];
 }
 export interface Quote {
-  rcoreAmount: bigint;
+  orryAmount: bigint;
   quoteId: Hex;
   expiry: number;
   sig: Hex;
@@ -142,7 +142,7 @@ export const time = (v: unknown): number => {
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000" as Address;
 const quotePair = (v: unknown): QuotePair => {
   const o = (v ?? {}) as J;
-  return { quote: big(o.quote), rcore: big(o.rcore) };
+  return { quote: big(o.quote), orry: big(o.orry) };
 };
 const quoteAsset = (v: unknown): QuoteAsset => {
   const o = (v ?? {}) as J;
@@ -152,7 +152,7 @@ const assetAmounts = (v: unknown): AssetAmount[] =>
   (Array.isArray(v) ? (v as J[]) : []).map((a) => ({ ...quoteAsset({ address: a.asset, symbol: a.symbol, decimals: a.decimals }), amount: big(a.amount) }));
 const pair = (v: unknown): Pair => {
   const o = (v ?? {}) as J;
-  return { eth: big(o.eth), rcore: big(o.rcore) };
+  return { eth: big(o.eth), orry: big(o.orry) };
 };
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -187,7 +187,7 @@ export const parseEarn = (o: J): EarnStats => ({
     feesAllTime: quotePair(h.feesAllTime),
     notified7d: big(h.notified7d),
     notifiedAllTime: big(h.notifiedAllTime),
-    rcorePerQuote: h.rcorePerQuote === null || h.rcorePerQuote === undefined ? undefined : big(h.rcorePerQuote) || undefined,
+    orryPerQuote: h.orryPerQuote === null || h.orryPerQuote === undefined ? undefined : big(h.orryPerQuote) || undefined,
   })),
   updatedAt: o.updatedAt === undefined ? undefined : time(o.updatedAt),
 });
@@ -223,7 +223,7 @@ export const parseAccount = (o: J): AccountView => {
     stakeLeaving: big(c.stakeLeaving),
     stakeReadyAt: time(c.stakeReadyAt),
     stakeRewardsEth: big(c.stakeRewardsEth),
-    stakeRewardsRcore: big(c.stakeRewardsRcore),
+    stakeRewardsOrry: big(c.stakeRewardsOrry),
     agents,
     earnedAllTime: assetAmounts(o.earnedAllTime),
   };
@@ -236,7 +236,7 @@ export const parseBoard = (o: unknown): BoardRow[] => {
     address: String(r.address ?? ""),
     stake: r.stake === undefined ? undefined : big(r.stake),
     earned: r.earned === undefined ? undefined : assetAmounts(r.earned),
-    valueRcore: r.valueRcore === undefined ? undefined : big(r.valueRcore),
+    valueOrry: r.valueOrry === undefined ? undefined : big(r.valueOrry),
   }));
 };
 
@@ -254,7 +254,7 @@ export const parseQuote = (o: J): Quote => {
   const q = ((o.quote as J | undefined) ?? o) as J;
   const vc = (o.domain as J | undefined)?.verifyingContract;
   return {
-    rcoreAmount: big(q.rcoreAmount),
+    orryAmount: big(q.orryAmount),
     quoteId: String(q.quoteId) as Hex,
     expiry: time(q.expiry),
     sig: String(o.signature ?? q.signature ?? o.sig) as Hex,
@@ -272,19 +272,19 @@ const live = { refetchInterval: 15_000, retry: 1 } as const;
 // shows its Coming soon state (withdrawals and claims read the never-held account route instead).
 export const useEarnStats = () => {
   const open = useReleases().isOpen("earn");
-  return useQuery({ queryKey: ["rcore", "earn"], queryFn: async () => parseEarn(await get<J>("/v1/rcore/earn")), enabled: Boolean(API_URL) && open, ...live });
+  return useQuery({ queryKey: ["orry", "earn"], queryFn: async () => parseEarn(await get<J>("/v1/orry/earn")), enabled: Boolean(API_URL) && open, ...live });
 };
 export const useStakeStats = () => {
   const open = useReleases().isOpen("stake");
-  return useQuery({ queryKey: ["rcore", "stake"], queryFn: async () => parseStake(await get<J>("/v1/rcore/stake")), enabled: Boolean(API_URL) && open, ...live });
+  return useQuery({ queryKey: ["orry", "stake"], queryFn: async () => parseStake(await get<J>("/v1/orry/stake")), enabled: Boolean(API_URL) && open, ...live });
 };
 export const useAccountView = (address?: Address) =>
   useQuery({
-    queryKey: ["rcore", "account", address?.toLowerCase()],
-    queryFn: async () => parseAccount(await get<J>(`/v1/rcore/accounts/${address}`)),
+    queryKey: ["orry", "account", address?.toLowerCase()],
+    queryFn: async () => parseAccount(await get<J>(`/v1/orry/accounts/${address}`)),
     enabled: Boolean(API_URL && address),
     ...live,
   });
 export const useBoard = (kind: "stakers" | "earners", limit = 50) =>
-  useQuery({ queryKey: ["rcore", "leaderboard", kind, limit], queryFn: async () => parseBoard(await get<unknown>(`/v1/rcore/leaderboard?kind=${kind}&limit=${limit}`)), enabled: Boolean(API_URL), ...live });
-export const useBurns = (limit = 25) => useQuery({ queryKey: ["rcore", "burns", limit], queryFn: async () => parseBurns(await get<J>(`/v1/rcore/burns?limit=${limit}`)), enabled: Boolean(API_URL), ...live });
+  useQuery({ queryKey: ["orry", "leaderboard", kind, limit], queryFn: async () => parseBoard(await get<unknown>(`/v1/orry/leaderboard?kind=${kind}&limit=${limit}`)), enabled: Boolean(API_URL), ...live });
+export const useBurns = (limit = 25) => useQuery({ queryKey: ["orry", "burns", limit], queryFn: async () => parseBurns(await get<J>(`/v1/orry/burns?limit=${limit}`)), enabled: Boolean(API_URL), ...live });

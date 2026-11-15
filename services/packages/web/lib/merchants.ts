@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
 import { API_URL } from "./config";
-import { get } from "./rcore/api";
+import { get } from "./orry/api";
 
 /** `GET /v1/merchants/:address` (services facilitator-public.ts). USD amounts carry 6 decimals. */
 export interface MerchantView {

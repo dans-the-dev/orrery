@@ -65,13 +65,13 @@ describe("operator one-click setup", () => {
     const text = agentEnvFile({ signerKey: `0x${"ab".repeat(32)}`, signer: owner, chainId: 4663, rpcUrl: "https://rpc.example", module, account: safe, agentId: 42n });
     const env = Object.fromEntries(text.split("\n").filter((l) => l && !l.startsWith("#")).map((l) => l.split("=") as [string, string]));
     expect(env).toEqual({
-      RUNCORE_SIGNER_KEY: `0x${"ab".repeat(32)}`,
-      RUNCORE_SIGNER_ADDRESS: owner,
-      RUNCORE_CHAIN_ID: "4663",
-      RUNCORE_RPC_URL: "https://rpc.example",
-      RUNCORE_MODULE: module,
-      RUNCORE_ACCOUNT: safe,
-      RUNCORE_AGENT_ID: "42",
+      ORRERY_SIGNER_KEY: `0x${"ab".repeat(32)}`,
+      ORRERY_SIGNER_ADDRESS: owner,
+      ORRERY_CHAIN_ID: "4663",
+      ORRERY_RPC_URL: "https://rpc.example",
+      ORRERY_MODULE: module,
+      ORRERY_ACCOUNT: safe,
+      ORRERY_AGENT_ID: "42",
     });
   });
 });

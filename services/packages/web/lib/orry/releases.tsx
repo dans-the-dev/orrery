@@ -3,11 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { API_URL } from "../config";
-import { contractsReady, FEATURES_FALLBACK, RCORE_ROUTES, type RcoreFeature } from "./config";
+import { contractsReady, FEATURES_FALLBACK, ORRY_ROUTES, type OrryFeature } from "./config";
 import { fallbackOpen, nextOpening, openFeatures, parseReleases, serverNow, type ReleaseSnapshot } from "./release-logic";
 
 /**
- * Runtime release switch (lane C's ReleasesResponse, rcore/services): reads `GET /v1/releases` on load and about once
+ * Runtime release switch (lane C's ReleasesResponse, orry/services): reads `GET /v1/releases` on load and about once
  * a minute, and opens each feature when the
  * server's clock reaches its time (server time plus the time elapsed since the answer). Opening or pulling back a
  * wave needs no rebuild and no reload. While the API cannot be reached, the build's fallback list applies (held when
@@ -19,10 +19,10 @@ export interface Releases {
   /** False until the first answer or the fallback: gates show a short wait instead of a held page that then opens. */
   ready: boolean;
   source: ReleaseSource;
-  isOpen: (f: RcoreFeature) => boolean;
+  isOpen: (f: OrryFeature) => boolean;
   /** Open and its contracts configured in this build. */
-  isLive: (f: RcoreFeature) => boolean;
-  /** The first open RCORE page for the nav, or undefined while every page is held. */
+  isLive: (f: OrryFeature) => boolean;
+  /** The first open ORRY page for the nav, or undefined while every page is held. */
   navHref?: string;
 }
 
@@ -66,9 +66,9 @@ export function ReleasesProvider({ children }: { children: ReactNode }) {
       open = fallbackOpen(FEATURES_FALLBACK);
       source = "fallback";
     } else return HELD;
-    const isOpen = (f: RcoreFeature) => open.has(f);
-    const isLive = (f: RcoreFeature) => open.has(f) && contractsReady(f);
-    return { ready: true, source, isOpen, isLive, navHref: RCORE_ROUTES.find((r) => isLive(r.feature))?.href };
+    const isOpen = (f: OrryFeature) => open.has(f);
+    const isLive = (f: OrryFeature) => open.has(f) && contractsReady(f);
+    return { ready: true, source, isOpen, isLive, navHref: ORRY_ROUTES.find((r) => isLive(r.feature))?.href };
     // tick re-runs this at each opening time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q.data, q.isError, tick]);

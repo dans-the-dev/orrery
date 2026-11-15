@@ -1,4 +1,4 @@
-// Origin: Hushwave packages/sdk/src/hash.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
+// Origin: Hushwave packages/sdk/src/hash.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
 // docs/updates/L3-R2-SPEC.md 6).
 import { permute } from "@zkpassport/poseidon2";
 

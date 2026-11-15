@@ -1,7 +1,7 @@
-import type { RcoreFeature } from "../rcore/config";
+import type { OrryFeature } from "../orry/config";
 
-/** Wave R1 market pages (docs/RCORE-R1-SPEC.md section 5). Each opens with its release switch feature. */
-export const MARKET_ROUTES: { feature: Extract<RcoreFeature, "stocks" | "swap" | "darkpool">; href: string; label: string }[] = [
+/** Wave R1 market pages (docs/ORRY-R1-SPEC.md section 5). Each opens with its release switch feature. */
+export const MARKET_ROUTES: { feature: Extract<OrryFeature, "stocks" | "swap" | "darkpool">; href: string; label: string }[] = [
   { feature: "stocks", href: "/stocks", label: "Stocks" },
   { feature: "swap", href: "/swap", label: "Private Swap" },
   { feature: "darkpool", href: "/dark-pool", label: "Dark Pool" },
@@ -11,8 +11,8 @@ export const MARKET_ROUTES: { feature: Extract<RcoreFeature, "stocks" | "swap" |
 /** Price tolerance choices for Private Swap, in basis points around the stock's current price. */
 export const SWAP_TOLERANCE_BPS = [50, 100, 200] as const;
 
-/** Burn sources added by the markets (spec 2.4): 5 commit fee, 6 trading fee paid in RCORE. */
+/** Burn sources added by the markets (spec 2.4): 5 commit fee, 6 trading fee paid in ORRY. */
 export const MARKET_BURN_SOURCES: Record<number, string> = {
   5: "Market orders, sealing fee",
-  6: "Market trading fees paid in RCORE",
+  6: "Market trading fees paid in ORRY",
 };

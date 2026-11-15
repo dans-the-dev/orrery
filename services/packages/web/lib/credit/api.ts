@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { AttestersResponse, CreditAccountResponse, CreditLinesResponse, CreditPoolsResponse } from "@runcore/shared";
+import type { AttestersResponse, CreditAccountResponse, CreditLinesResponse, CreditPoolsResponse } from "@orrery/shared";
 import { API_URL } from "../config";
-import { get } from "../rcore/api";
-import type { RcoreFeature } from "../rcore/config";
+import { get } from "../orry/api";
+import type { OrryFeature } from "../orry/config";
 
 /** Lane L4 pages (docs/updates/L4-CREDIT-SPEC.md 7). Each opens with its release switch feature. */
-export const CREDIT_ROUTES: { feature: Extract<RcoreFeature, "credit" | "attesters">; href: string; label: string }[] = [
+export const CREDIT_ROUTES: { feature: Extract<OrryFeature, "credit" | "attesters">; href: string; label: string }[] = [
   { feature: "credit", href: "/credit", label: "Credit" },
   { feature: "attesters", href: "/attesters", label: "Attesters" },
 ];

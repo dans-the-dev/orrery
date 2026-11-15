@@ -3,11 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { isAddress, type Address, type Hex } from "viem";
 import { API_URL } from "../config";
-import { ApiError, big, post, time } from "../rcore/api";
+import { ApiError, big, post, time } from "../orry/api";
 import { stockLogo, type StockLogo } from "./logos";
 
 /**
- * Reads from the markets API (docs/RCORE-R1-SPEC.md section 5) in lane C's frozen shapes
+ * Reads from the markets API (docs/ORRY-R1-SPEC.md section 5) in lane C's frozen shapes
  * (services/packages/shared/src/markets.ts on r1/services ff5f9d4). Amounts arrive as decimal strings in base units,
  * times as chain unix seconds; the parsers turn them into bigints and numbers and fill missing fields with neutral values.
  */
@@ -32,7 +32,7 @@ export interface MarketParams {
   maxOrders: number;
   expirySeconds: number;
   maxDeviationBps?: number;
-  rcoreFeeDiscountBps?: number;
+  orryFeeDiscountBps?: number;
 }
 export interface Market {
   market: Address;
@@ -56,7 +56,7 @@ export interface BatchResult {
   assetFilled: bigint;
   usdgFilled: bigint;
   usdgFees: bigint;
-  rcoreFeesBurned: bigint;
+  orryFeesBurned: bigint;
   ordersFilled: number;
   ordersUnfilled: number;
   ordersDropped: number;
@@ -83,13 +83,13 @@ export interface OrderTerms {
   amountIn: bigint;
   limitPrice: bigint;
   mode: Mode;
-  payFeeInRcore: boolean;
+  payFeeInOrry: boolean;
 }
 export interface Fill {
   inputUsed: bigint;
   output: bigint;
   usdgFee: bigint;
-  rcoreFee: bigint;
+  orryFee: bigint;
   tx?: Hex;
 }
 export interface BookOrder extends OrderTerms {
@@ -140,12 +140,12 @@ const parseTerms = (o: J): OrderTerms => ({
   amountIn: big(o.amountIn),
   limitPrice: big(o.limitPrice),
   mode: parseMode(o.mode),
-  payFeeInRcore: o.payFeeInRcore === true || o.payFeeInRcore === "true",
+  payFeeInOrry: o.payFeeInOrry === true || o.payFeeInOrry === "true",
 });
 
 const parseFill = (v: unknown): Fill | undefined => {
   const o = obj(v);
-  return o ? { inputUsed: big(o.inputUsed), output: big(o.output), usdgFee: big(o.usdgFee), rcoreFee: big(o.rcoreFee), tx: hex(o.tx) } : undefined;
+  return o ? { inputUsed: big(o.inputUsed), output: big(o.output), usdgFee: big(o.usdgFee), orryFee: big(o.orryFee), tx: hex(o.tx) } : undefined;
 };
 
 /** Lane C reports "filled" for any fill; the web reads a fill that used less than the input as partial. */
@@ -188,7 +188,7 @@ export function parseMarket(o: J, chainId: number): Market {
       maxOrders: num(p.maxOrders, 64),
       expirySeconds: num(p.expirySeconds, 86_400),
       maxDeviationBps: p.maxDeviationBps === undefined ? undefined : num(p.maxDeviationBps),
-      rcoreFeeDiscountBps: p.rcoreFeeDiscountBps === undefined ? undefined : num(p.rcoreFeeDiscountBps),
+      orryFeeDiscountBps: p.orryFeeDiscountBps === undefined ? undefined : num(p.orryFeeDiscountBps),
     },
   };
 }
@@ -202,7 +202,7 @@ const parseResult = (v: unknown): BatchResult | undefined => {
     assetFilled: big(o.assetFilled),
     usdgFilled: big(o.usdgFilled),
     usdgFees: big(o.usdgFees),
-    rcoreFeesBurned: big(o.rcoreFeesBurned),
+    orryFeesBurned: big(o.orryFeesBurned),
     ordersFilled: num(o.ordersFilled),
     ordersUnfilled: num(o.ordersUnfilled),
     ordersDropped: num(o.ordersDropped),
@@ -312,7 +312,7 @@ export const useOrderHistory = (address?: Address, limit = 50) =>
   });
 
 /**
- * Opt-in reveal relay (spec 5, `revealFor`; lane C r1/services f3538d0): Runcore's server holds the order and salt
+ * Opt-in reveal relay (spec 5, `revealFor`; lane C r1/services f3538d0): Orrery's server holds the order and salt
  * until the batch's reveal window opens, then reveals for the trader. Shown only when NEXT_PUBLIC_MARKETS_RELAY=1.
  */
 export const RELAY_ENABLED = process.env.NEXT_PUBLIC_MARKETS_RELAY === "1" && Boolean(API_URL);
@@ -331,6 +331,6 @@ const parseRelay = (o: J): RelayState => ({
   tx: hex(o.tx),
   reason: typeof o.reason === "string" ? o.reason : undefined,
 });
-export const relayReveal = async (p: { market: Address; account: Address; batch: string; order: { sellAsset: boolean; amountIn: string; limitPrice: string; mode: "limit" | "swap"; payFeeInRcore: boolean }; salt: Hex }) =>
+export const relayReveal = async (p: { market: Address; account: Address; batch: string; order: { sellAsset: boolean; amountIn: string; limitPrice: string; mode: "limit" | "swap"; payFeeInOrry: boolean }; salt: Hex }) =>
   parseRelay(await post<J>("/v1/markets/relay/reveals", p));
 export const relayStatus = async (market: Address, batch: string, account: Address) => parseRelay(await get<J>(`/v1/markets/relay/reveals/${market}/${batch}/${account}`));

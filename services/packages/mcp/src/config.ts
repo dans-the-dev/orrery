@@ -21,12 +21,13 @@ export interface McpConfig {
   maxPaymentUsd: number;
 }
 
-/** Orrery v1 on 4663 (`docs/MAINNET-4663.md`, deployed 2026-11-11). */
-const ATTESTOR_4663: Address = "0xc18a0dc74f5326786f5ade357354159c63282bd0";
-const MODULE_4663: Address = "0x2934c34afd7b5410d05ddd638982eed1d49f0d4c";
+/** Orrery v1 on 4663: null until the mainnet deployment writes its addresses (`docs/MAINNET-4663.md`). */
+const ATTESTOR_4663: Address | null = null;
+const MODULE_4663: Address | null = null;
 
-function addr(env: NodeJS.ProcessEnv, name: string, dflt: Address): Address {
+function addr(env: NodeJS.ProcessEnv, name: string, dflt: Address | null): Address {
   const v = env[name] || dflt;
+  if (!v) throw new Error(`Set ${name}: Orrery has no default deployment on this chain yet`);
   if (!isAddress(v)) throw new Error(`${name} must be a 0x address`);
   return v as Address;
 }

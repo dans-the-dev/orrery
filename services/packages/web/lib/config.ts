@@ -15,8 +15,8 @@ export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://rpc-robinhood
  */
 export const AGENT_RPC_URL = env(process.env.NEXT_PUBLIC_AGENT_RPC_URL) ?? (CHAIN_ID === 4663 ? "https://robinhood-rpc.publicnode.com" : RPC_URL);
 export const API_URL = env(process.env.NEXT_PUBLIC_API_URL);
-export const X_URL = "https://x.com/RunCoretech";
-export const X_HANDLE = "@RunCoretech";
+export const X_URL = "https://x.com/OrreryHQ";
+export const X_HANDLE = "@OrreryHQ";
 export const DISCORD_URL = "https://discord.gg/zk3dybhead";
 export const WALLET_DIRECTORY_URL = "https://ethereum.org/en/wallets/find-wallet/";
 

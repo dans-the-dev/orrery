@@ -1,8 +1,8 @@
 /**
- * Where RCORE can be bought and sold, for the buttons beside the hero's CA pill. Pure, so the tests run without the app.
+ * Where ORRY can be bought and sold, for the buttons beside the hero's CA pill. Pure, so the tests run without the app.
  *
- * The default is the one venue RCORE trades on today: its Pons launch page (checked on 2026-11-11, on the curve). The
- * server-side `RUNCORE_TRADE_LINKS` replaces the list without a code change, for example once RCORE graduates into a
+ * The default is the one venue ORRY trades on today: its Pons launch page (checked on 2026-11-11, on the curve). The
+ * server-side `ORRERY_TRADE_LINKS` replaces the list without a code change, for example once ORRY graduates into a
  * pool: `Name|https://url,Name|https://url`, with `{ca}` standing for the token address. An entry that is not an https
  * URL is dropped, and an empty or unusable value falls back to the default.
  */

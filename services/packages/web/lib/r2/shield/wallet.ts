@@ -1,5 +1,5 @@
-// Origin: Hushwave packages/sdk/src/wallet.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
-// docs/updates/L3-R2-SPEC.md 6). Changed: RuncoreShield inserts a deposit at once (no queue, no screener) and computes
+// Origin: Hushwave packages/sdk/src/wallet.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
+// docs/updates/L3-R2-SPEC.md 6). Changed: OrreryShield inserts a deposit at once (no queue, no screener) and computes
 // its commitment from the net amount, so a deposit is recognised from the `Deposited` event's own amount and fee.
 import type { Address, Hex } from "viem";
 import { tryDecryptNote } from "./encryption";

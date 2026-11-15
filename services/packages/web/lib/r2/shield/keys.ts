@@ -1,5 +1,5 @@
-// Origin: Hushwave packages/sdk/src/keys.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
-// docs/updates/L3-R2-SPEC.md 6). Changed: the key-derivation domain, wording and labels are Runcore's.
+// Origin: Hushwave packages/sdk/src/keys.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
+// docs/updates/L3-R2-SPEC.md 6). Changed: the key-derivation domain, wording and labels are Orrery's.
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { bytesToHex, concat, hexToBytes, keccak256, toBytes, type Address, type Hex } from "viem";
 import { FIELD_SIZE, hash1, hash2 } from "./hash";
@@ -11,13 +11,13 @@ import { FIELD_SIZE, hash1, hash2 } from "./hash";
  */
 export function accountKeyTypedData(chainId: number) {
   return {
-    domain: { name: "Runcore Shield", version: "1", chainId },
+    domain: { name: "Orrery Shield", version: "1", chainId },
     types: {
       AccountKeys: [{ name: "purpose", type: "string" }],
     },
     primaryType: "AccountKeys" as const,
     message: {
-      purpose: "Create my Runcore Shield keys. This signature cannot move funds.",
+      purpose: "Create my Orrery Shield keys. This signature cannot move funds.",
     },
   };
 }
@@ -34,7 +34,7 @@ export interface AccountKeys {
 }
 
 function derive(seed: Uint8Array, label: string): bigint {
-  return BigInt(keccak256(concat([seed, toBytes(`runcore-shield/${label}`)])));
+  return BigInt(keccak256(concat([seed, toBytes(`orrery-shield/${label}`)])));
 }
 
 /** Derives account keys from the wallet's signature over {@link accountKeyTypedData}. */

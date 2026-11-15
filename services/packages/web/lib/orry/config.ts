@@ -2,16 +2,16 @@ import type { Address } from "viem";
 import { CHAIN_ID } from "../config";
 
 /**
- * RCORE features and addresses (docs/RCORE-BUILD-SPEC.md section 6). Which features are open is decided at runtime by
- * `GET /v1/releases` (lib/rcore/releases.tsx); opening a wave needs no rebuild. `NEXT_PUBLIC_RCORE_FEATURES` (a comma
+ * ORRY features and addresses (docs/ORRY-BUILD-SPEC.md section 6). Which features are open is decided at runtime by
+ * `GET /v1/releases` (lib/orry/releases.tsx); opening a wave needs no rebuild. `NEXT_PUBLIC_ORRY_FEATURES` (a comma
  * list of the names below) is only the fallback while that API cannot be reached, and unset means everything held.
  * A held feature renders "Coming soon".
  */
-export const RCORE_FEATURES = ["earn", "stake", "agent-stake", "claim", "burn", "leaderboard", "checkout", "payg-checks", "stocks", "swap", "darkpool", "facilitator", "merchant-badge", "data", "data-providers", "mcp", "predict", "limit-orders", "paymaster", "shield", "attesters", "credit", "credit-bond", "launch", "launch-priority"] as const;
-export type RcoreFeature = (typeof RCORE_FEATURES)[number];
+export const ORRY_FEATURES = ["earn", "stake", "agent-stake", "claim", "burn", "leaderboard", "checkout", "payg-checks", "stocks", "swap", "darkpool", "facilitator", "merchant-badge", "data", "data-providers", "mcp", "predict", "limit-orders", "paymaster", "shield", "attesters", "credit", "credit-bond", "launch", "launch-priority"] as const;
+export type OrryFeature = (typeof ORRY_FEATURES)[number];
 
 /** Build-time fallback list, read only while the releases API is unreachable. */
-export const FEATURES_FALLBACK = process.env.NEXT_PUBLIC_RCORE_FEATURES;
+export const FEATURES_FALLBACK = process.env.NEXT_PUBLIC_ORRY_FEATURES;
 
 /** The same two words everywhere a held feature is named. */
 export const COMING_SOON = "Coming soon";
@@ -21,26 +21,26 @@ export const SOON_TAG = "Soon";
 const env = (v: string | undefined) => (v && /^0x[0-9a-fA-F]{40}$/.test(v) ? (v as Address) : undefined);
 
 /** Real deployment addresses, no defaults. A feature whose contracts are not configured shows "Coming soon" too. */
-export const RCORE = {
-  token: env(process.env.NEXT_PUBLIC_RCORE_TOKEN),
-  /** Multi-pair Earn: the factory lists one vault per RCORE/X hub (ETH, USDG, ...). */
-  earnFactory: env(process.env.NEXT_PUBLIC_RCORE_EARN_FACTORY),
-  staking: env(process.env.NEXT_PUBLIC_RCORE_STAKING),
-  claimAll: env(process.env.NEXT_PUBLIC_RCORE_CLAIM_ALL),
-  router: env(process.env.NEXT_PUBLIC_RCORE_REWARDS_ROUTER),
-  treasury: env(process.env.NEXT_PUBLIC_RCORE_TREASURY),
-  /** Wave R1: every market (one per stock token) and its fee tiers and RCORE price are read from the factory. */
+export const ORRY = {
+  token: env(process.env.NEXT_PUBLIC_ORRY_TOKEN),
+  /** Multi-pair Earn: the factory lists one vault per ORRY/X hub (ETH, USDG, ...). */
+  earnFactory: env(process.env.NEXT_PUBLIC_ORRY_EARN_FACTORY),
+  staking: env(process.env.NEXT_PUBLIC_ORRY_STAKING),
+  claimAll: env(process.env.NEXT_PUBLIC_ORRY_CLAIM_ALL),
+  router: env(process.env.NEXT_PUBLIC_ORRY_REWARDS_ROUTER),
+  treasury: env(process.env.NEXT_PUBLIC_ORRY_TREASURY),
+  /** Wave R1: every market (one per stock token) and its fee tiers and ORRY price are read from the factory. */
   marketFactory: env(process.env.NEXT_PUBLIC_MARKET_FACTORY),
   /** Wave 3: one payment address (splitter) per merchant, created by this factory. */
   splitterFactory: env(process.env.NEXT_PUBLIC_SPLITTER_FACTORY),
   /** Lane L2: the open listing of third-party data providers (DataProviderRegistry). */
   dataRegistry: env(process.env.NEXT_PUBLIC_DATA_REGISTRY),
-  /** Lane L3 (wave R2): prediction markets, the limit order book, the RCORE paymaster, Shield. */
+  /** Lane L3 (wave R2): prediction markets, the limit order book, the ORRY paymaster, Shield. */
   predictFactory: env(process.env.NEXT_PUBLIC_PREDICT_FACTORY),
   limitBook: env(process.env.NEXT_PUBLIC_LIMIT_BOOK),
   paymaster: env(process.env.NEXT_PUBLIC_PAYMASTER),
   shield: env(process.env.NEXT_PUBLIC_SHIELD),
-  /** Lane L4: third-party attesters (AttesterRegistry and its fee splitter) and Runcore Credit (CreditPoolFactory). */
+  /** Lane L4: third-party attesters (AttesterRegistry and its fee splitter) and Orrery Credit (CreditPoolFactory). */
   attesterRegistry: env(process.env.NEXT_PUBLIC_ATTESTER_REGISTRY),
   attesterSplitter: env(process.env.NEXT_PUBLIC_ATTESTER_SPLITTER),
   creditFactory: env(process.env.NEXT_PUBLIC_CREDIT_FACTORY),
@@ -50,7 +50,7 @@ export const RCORE = {
 };
 
 /** Contracts each feature needs before it can open. Burn and leaderboard read the API only. */
-const NEEDS: Record<RcoreFeature, (keyof typeof RCORE)[]> = {
+const NEEDS: Record<OrryFeature, (keyof typeof ORRY)[]> = {
   earn: ["token", "earnFactory"],
   stake: ["token", "staking"],
   "agent-stake": ["token", "staking"],
@@ -81,13 +81,13 @@ const NEEDS: Record<RcoreFeature, (keyof typeof RCORE)[]> = {
 };
 
 /** The feature's contracts are configured in this build (a release time alone cannot open a feature without them). */
-export const contractsReady = (f: RcoreFeature) => NEEDS[f].every((k) => Boolean(RCORE[k]));
+export const contractsReady = (f: OrryFeature) => NEEDS[f].every((k) => Boolean(ORRY[k]));
 
 /** Explorer for transaction links; Blockscout on 4663, configurable elsewhere. */
 export const EXPLORER_URL =
   process.env.NEXT_PUBLIC_EXPLORER_URL || (CHAIN_ID === 4663 ? "https://robinhoodchain.blockscout.com" : undefined);
 
-export const RCORE_ROUTES: { feature: RcoreFeature; href: string; label: string }[] = [
+export const ORRY_ROUTES: { feature: OrryFeature; href: string; label: string }[] = [
   { feature: "earn", href: "/earn", label: "Earn" },
   { feature: "stake", href: "/stake", label: "Stake" },
   { feature: "claim", href: "/claim", label: "Claim" },

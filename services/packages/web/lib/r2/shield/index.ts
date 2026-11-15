@@ -1,4 +1,4 @@
-// Runcore Shield client (lane L3): notes, keys, the note tree, transaction building and the browser prover. Ported from
+// Orrery Shield client (lane L3): notes, keys, the note tree, transaction building and the browser prover. Ported from
 // Hushwave's SDK (MIT); see each file's origin line.
 export * from "./eip712";
 export * from "./encryption";

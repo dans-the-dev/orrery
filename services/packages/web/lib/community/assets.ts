@@ -3,10 +3,10 @@
 import { erc20Abi, type Address } from "viem";
 import { useReadContracts } from "wagmi";
 import { ADDRESSES, USDG_DECIMALS } from "../config";
-import { amount } from "../rcore/format";
+import { amount } from "../orry/format";
 import { isZeroAddr, sameAddr } from "./logic";
 
-/** Symbol and decimals of a Reward Pool asset: address(0) is ETH, the config names RCORE, others are read from the token. */
+/** Symbol and decimals of a Reward Pool asset: address(0) is ETH, the config names ORRY, others are read from the token. */
 export interface AssetMeta {
   symbol: string;
   decimals: number;
@@ -14,10 +14,10 @@ export interface AssetMeta {
 
 const ETH: AssetMeta = { symbol: "ETH", decimals: 18 };
 
-export function useAssetMeta(assets: string[], rcore: Address | null): (asset: string) => AssetMeta | undefined {
+export function useAssetMeta(assets: string[], orry: Address | null): (asset: string) => AssetMeta | undefined {
   const known = (a: string): AssetMeta | undefined => {
     if (isZeroAddr(a)) return ETH;
-    if (sameAddr(a, rcore)) return { symbol: "RCORE", decimals: 18 };
+    if (sameAddr(a, orry)) return { symbol: "ORRY", decimals: 18 };
     if (sameAddr(a, ADDRESSES.usdg)) return { symbol: "USDG", decimals: USDG_DECIMALS };
     return undefined;
   };

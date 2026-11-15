@@ -4,9 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BaseError, ContractFunctionRevertedError, type Abi, type Address, type Hex } from "viem";
 import { useBalance, useConnection, usePublicClient, useReadContract, useReadContracts, useWriteContract } from "wagmi";
-import { iEarnVaultAbi, iEarnVaultFactoryAbi, iRcoreRewardsRouterAbi, iRcoreStakingAbi, iRcoreTokenAbi } from "@runcore/shared";
+import { iEarnVaultAbi, iEarnVaultFactoryAbi, iOrryRewardsRouterAbi, iOrryStakingAbi, iOrryTokenAbi } from "@orrery/shared";
 import { activeChain } from "../config";
-import { RCORE } from "./config";
+import { ORRY } from "./config";
 import { span, utc } from "./format";
 
 export function useNow(step = 1000) {
@@ -29,22 +29,22 @@ const ZERO = "0x0000000000000000000000000000000000000000" as Address;
 
 /** Periods set in the constructors: lock, cooldowns, stream, distribute interval. Read once. Earn periods come from the
  * factory's first vault (every vault is built with the same constants). */
-export function useRcoreConstants() {
-  const { data: firstVault } = useReadContract({ address: RCORE.earnFactory ?? ZERO, abi: iEarnVaultFactoryAbi, functionName: "vaultAt", args: [0n], query: { enabled: Boolean(RCORE.earnFactory), staleTime: Infinity } });
+export function useOrryConstants() {
+  const { data: firstVault } = useReadContract({ address: ORRY.earnFactory ?? ZERO, abi: iEarnVaultFactoryAbi, functionName: "vaultAt", args: [0n], query: { enabled: Boolean(ORRY.earnFactory), staleTime: Infinity } });
   const v = (firstVault as Address | undefined) ?? ZERO;
-  const s = RCORE.staking ?? ZERO;
-  const r = RCORE.router ?? ZERO;
+  const s = ORRY.staking ?? ZERO;
+  const r = ORRY.router ?? ZERO;
   const { data } = useReadContracts({
     allowFailure: true,
     contracts: [
       { address: v, abi: iEarnVaultAbi, functionName: "DEPOSIT_LOCK" },
       { address: v, abi: iEarnVaultAbi, functionName: "STREAM_PERIOD" },
-      { address: s, abi: iRcoreStakingAbi, functionName: "PLAIN_COOLDOWN" },
-      { address: s, abi: iRcoreStakingAbi, functionName: "AGENT_COOLDOWN" },
-      { address: s, abi: iRcoreStakingAbi, functionName: "STREAM_PERIOD" },
-      { address: r, abi: iRcoreRewardsRouterAbi, functionName: "MIN_INTERVAL" },
+      { address: s, abi: iOrryStakingAbi, functionName: "PLAIN_COOLDOWN" },
+      { address: s, abi: iOrryStakingAbi, functionName: "AGENT_COOLDOWN" },
+      { address: s, abi: iOrryStakingAbi, functionName: "STREAM_PERIOD" },
+      { address: r, abi: iOrryRewardsRouterAbi, functionName: "MIN_INTERVAL" },
     ],
-    query: { staleTime: Infinity, enabled: Boolean(firstVault || RCORE.staking || RCORE.router) },
+    query: { staleTime: Infinity, enabled: Boolean(firstVault || ORRY.staking || ORRY.router) },
   });
   const n = (i: number) => {
     const x = data?.[i];
@@ -53,26 +53,26 @@ export function useRcoreConstants() {
   return {
     depositLock: firstVault ? n(0) : undefined,
     earnStream: firstVault ? n(1) : undefined,
-    plainCooldown: RCORE.staking ? n(2) : undefined,
-    agentCooldown: RCORE.staking ? n(3) : undefined,
-    stakeStream: RCORE.staking ? n(4) : undefined,
-    distributeInterval: RCORE.router ? n(5) : undefined,
+    plainCooldown: ORRY.staking ? n(2) : undefined,
+    agentCooldown: ORRY.staking ? n(3) : undefined,
+    stakeStream: ORRY.staking ? n(4) : undefined,
+    distributeInterval: ORRY.router ? n(5) : undefined,
   };
 }
 
 /** Live stake, rewards and balances of one address, straight from the contracts (fresh after every transaction). Earn
- * positions, one per vault, come from useEarnPositions (lib/rcore/earn.ts). */
+ * positions, one per vault, come from useEarnPositions (lib/orry/earn.ts). */
 export function useAccountChain(address?: Address) {
-  const s = RCORE.staking ?? ZERO;
-  const t = RCORE.token ?? ZERO;
+  const s = ORRY.staking ?? ZERO;
+  const t = ORRY.token ?? ZERO;
   const a = address ?? ZERO;
   const { data, refetch, isFetched } = useReadContracts({
     allowFailure: true,
     contracts: [
-      { address: s, abi: iRcoreStakingAbi, functionName: "plainStake", args: [a] },
-      { address: s, abi: iRcoreStakingAbi, functionName: "pendingRewards", args: [a] },
-      { address: s, abi: iRcoreStakingAbi, functionName: "earningBalance", args: [a] },
-      { address: t, abi: iRcoreTokenAbi, functionName: "balanceOf", args: [a] },
+      { address: s, abi: iOrryStakingAbi, functionName: "plainStake", args: [a] },
+      { address: s, abi: iOrryStakingAbi, functionName: "pendingRewards", args: [a] },
+      { address: s, abi: iOrryStakingAbi, functionName: "earningBalance", args: [a] },
+      { address: t, abi: iOrryTokenAbi, functionName: "balanceOf", args: [a] },
     ],
     query: { enabled: Boolean(address), refetchInterval: 12_000 },
   });
@@ -81,8 +81,8 @@ export function useAccountChain(address?: Address) {
     const x = data?.[i];
     return has && x && x.status === "success" ? (x.result as T) : undefined;
   };
-  const plain = ok<readonly [bigint, bigint, bigint | number]>(0, RCORE.staking);
-  const rewards = ok<readonly [bigint, bigint]>(1, RCORE.staking);
+  const plain = ok<readonly [bigint, bigint, bigint | number]>(0, ORRY.staking);
+  const rewards = ok<readonly [bigint, bigint]>(1, ORRY.staking);
   return {
     loaded: isFetched,
     refetch: () => {
@@ -93,9 +93,9 @@ export function useAccountChain(address?: Address) {
     stakeLeaving: plain?.[1],
     stakeReadyAt: Number(plain?.[2] ?? 0),
     rewardsEth: rewards?.[0],
-    rewardsRcore: rewards?.[1],
-    earning: ok<bigint>(2, RCORE.staking),
-    rcoreBalance: ok<bigint>(3, RCORE.token),
+    rewardsOrry: rewards?.[1],
+    earning: ok<bigint>(2, ORRY.staking),
+    orryBalance: ok<bigint>(3, ORRY.token),
     ethBalance: ethBal.data?.value,
   };
 }
@@ -110,7 +110,7 @@ const ERRORS: Record<string, (args: readonly unknown[]) => string> = {
   DeadlinePassed: () => "The transaction waited too long. Send it again.",
   InsufficientShares: () => "That is more than your shares.",
   ZeroAmount: () => "Enter an amount above zero.",
-  HubNotRegistered: () => "The RCORE pool opens soon. Deposits start then.",
+  HubNotRegistered: () => "The ORRY pool opens soon. Deposits start then.",
   NothingReady: () => "Nothing is ready to withdraw yet.",
   InsufficientActive: () => "That is more than your active stake.",
   NotAgentController: () => "Only the agent's owner or its agent wallet can stake behind it.",
@@ -123,8 +123,8 @@ const ERRORS: Record<string, (args: readonly unknown[]) => string> = {
   QuoteExpired: () => "The quote expired. Get a new one.",
   QuoteUsed: () => "This quote was already used. Get a new one.",
   BadQuoteSignature: () => "The quote was not accepted. Get a new one.",
-  CoinNotSet: () => "RCORE payments open soon.",
-  DailyVerificationCap: () => "RCORE verifications for today are complete. Pay in USDG or come back after 00:00 UTC.",
+  CoinNotSet: () => "ORRY payments open soon.",
+  DailyVerificationCap: () => "ORRY verifications for today are complete. Pay in USDG or come back after 00:00 UTC.",
   InexactBurn: () => "The burn did not match the amount.",
   EthTransferFailed: () => "The ETH payout did not go through to your address.",
   // Sealed batch markets (wave R1).
@@ -194,11 +194,11 @@ export function useTx() {
   }
 
   async function ensureAllowance(owner: Address, spender: Address, amount: bigint, step: (t: string) => void) {
-    if (!pub || !RCORE.token) throw new Error("RCORE is not configured.");
-    const current = await pub.readContract({ address: RCORE.token, abi: iRcoreTokenAbi, functionName: "allowance", args: [owner, spender] });
+    if (!pub || !ORRY.token) throw new Error("ORRY is not configured.");
+    const current = await pub.readContract({ address: ORRY.token, abi: iOrryTokenAbi, functionName: "allowance", args: [owner, spender] });
     if (current >= amount) return;
-    step("Approve RCORE in your wallet.");
-    await send({ address: RCORE.token, abi: iRcoreTokenAbi as Abi, functionName: "approve", args: [spender, amount] });
+    step("Approve ORRY in your wallet.");
+    await send({ address: ORRY.token, abi: iOrryTokenAbi as Abi, functionName: "approve", args: [spender, amount] });
   }
 
   async function run(label: string, fn: (h: { send: typeof send; step: (t: string) => void; ensureAllowance: typeof ensureAllowance }) => Promise<string | void>) {

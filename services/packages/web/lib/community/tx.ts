@@ -4,14 +4,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { BaseError, ContractFunctionRevertedError, erc20Abi, parseAbi, type Abi, type Address, type Hex } from "viem";
 import { useConnection, usePublicClient, useWriteContract } from "wagmi";
-import { big } from "../rcore/api";
-import { explain, type Notice } from "../rcore/chain";
-import { span, utc } from "../rcore/format";
+import { big } from "../orry/api";
+import { explain, type Notice } from "../orry/chain";
+import { span, utc } from "../orry/format";
 import { usd } from "./logic";
 
 /**
- * Writes from the connected wallet to the community contracts. Same flow as the RCORE pages (simulate, send, wait for the
- * receipt, refresh every read), with the RCORE address taken from the community config and plain messages for the
+ * Writes from the connected wallet to the community contracts. Same flow as the ORRY pages (simulate, send, wait for the
+ * receipt, refresh every read), with the ORRY address taken from the community config and plain messages for the
  * community contracts' errors.
  */
 
@@ -19,7 +19,7 @@ import { usd } from "./logic";
 export const communityErrorsAbi = parseAbi([
   "error ZeroAddress()",
   "error PriceNotReady()",
-  "error PriceAboveMax(uint256 rcoreNeeded, uint256 maxRcore)",
+  "error PriceAboveMax(uint256 orryNeeded, uint256 maxOrry)",
   "error InexactTransfer()",
   "error UnknownRoom()",
   "error BelowRoomStake(uint256 stakeUsd, uint256 minStakeUsd)",
@@ -65,16 +65,16 @@ const until = (t: unknown) => Number(t ?? 0) - Math.floor(Date.now() / 1000);
 
 const ERRORS: Record<string, (a: readonly unknown[]) => string> = {
   ZeroAddress: () => "Enter a wallet address.",
-  PriceNotReady: () => "The RCORE price is not ready yet. Try again in a moment.",
-  PriceAboveMax: () => "The RCORE price moved since the quote. Send it again at the new price.",
-  InexactTransfer: () => "The RCORE transfer did not match the amount.",
+  PriceNotReady: () => "The ORRY price is not ready yet. Try again in a moment.",
+  PriceAboveMax: () => "The ORRY price moved since the quote. Send it again at the new price.",
+  InexactTransfer: () => "The ORRY transfer did not match the amount.",
   UnknownRoom: () => "That room was not found.",
   BelowRoomStake: (a) => `This room is for wallets with ${usd(big(a[1]))} or more earning in Stake. Yours is ${usd(big(a[0]))}.`,
   BadText: () => "The message is empty or longer than the room allows.",
   UnknownMessage: () => "That message was not found.",
   SelfTip: () => "Tips go to other people's messages.",
   ZeroAmount: () => "Enter an amount above zero.",
-  BelowReportStake: () => "Reporting needs more RCORE earning in Stake.",
+  BelowReportStake: () => "Reporting needs more ORRY earning in Stake.",
   AlreadyReported: () => "You already reported this message.",
   BadName: () => "Use 3 to 20 characters: a to z, 0 to 9 and underscore.",
   NameTaken: () => "That name belongs to another wallet.",
@@ -124,7 +124,7 @@ interface Call {
 export interface TxSteps {
   send: (c: Call) => Promise<Hex>;
   step: (t: string) => void;
-  /** Approves `amount` of RCORE to `spender` unless the allowance already covers it. */
+  /** Approves `amount` of ORRY to `spender` unless the allowance already covers it. */
   approve: (token: Address, spender: Address, amount: bigint) => Promise<void>;
 }
 export type Run = (label: string, fn: (h: TxSteps) => Promise<string | void>) => Promise<boolean>;
@@ -158,7 +158,7 @@ export function useCommunityTx() {
       if (!pub || !account) throw new Error("Connect a wallet first.");
       const current = await pub.readContract({ address: token, abi: erc20Abi, functionName: "allowance", args: [account, spender] });
       if (current >= amount) return;
-      step("Approve RCORE in your wallet.");
+      step("Approve ORRY in your wallet.");
       await send({ address: token, abi: erc20Abi as Abi, functionName: "approve", args: [spender, amount] });
     };
     try {

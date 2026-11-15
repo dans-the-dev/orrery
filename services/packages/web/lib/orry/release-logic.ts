@@ -54,7 +54,7 @@ export function nextOpening(snap: ReleaseSnapshot, serverNowMs: number): number 
 export const serverNow = (snap: ReleaseSnapshot, receivedAtMs: number, nowMs: number) => snap.serverTimeMs + Math.max(0, nowMs - receivedAtMs);
 
 /**
- * While the API cannot be reached: the build's NEXT_PUBLIC_RCORE_FEATURES list, and nothing open when it is unset.
+ * While the API cannot be reached: the build's NEXT_PUBLIC_ORRY_FEATURES list, and nothing open when it is unset.
  */
 export function fallbackOpen(raw: string | undefined): Set<string> {
   if (!raw) return new Set();

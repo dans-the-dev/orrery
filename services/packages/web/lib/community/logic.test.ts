@@ -11,7 +11,7 @@ describe("community helpers", () => {
     expect(utf8Bytes("🚀")).toBe(4);
   });
 
-  it("validates names like RcoreNames.isValid", () => {
+  it("validates names like OrryNames.isValid", () => {
     expect(validName("abc")).toBe(true);
     expect(validName("a_1_b_2_c_3_d_4_e_5_")).toBe(true);
     expect(validName("ab")).toBe(false);

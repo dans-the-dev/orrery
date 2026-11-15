@@ -12,7 +12,7 @@ import {
   transferWithAuthorizationTypes,
   type PaymentPayload,
   type PaymentRequired,
-} from "@runcore/shared";
+} from "@orrery/shared";
 import { API_URL, activeChain } from "@/lib/config";
 
 /**
@@ -40,14 +40,14 @@ export interface AccountView {
   planUntil: string | null;
   month: { checks: number; freeChecks: number; freeChecksLeft: number };
   apiKey: { active: boolean; createdAt: string | null };
-  purchases: { at: string; product: string; paidIn: "USDG" | "RCORE"; amount: string | null; credits: string; tx: string | null }[];
+  purchases: { at: string; product: string; paidIn: "USDG" | "ORRY"; amount: string | null; credits: string; tx: string | null }[];
   usage: {
     daily: { day: string; checks: number; freeChecks: number; creditsSpent: string }[];
     monthly: { month: string; checks: number; freeChecks: number; paidChecks: number }[];
   };
 }
 
-const storageKey = (a: Address) => `runcore-session-${a.toLowerCase()}`;
+const storageKey = (a: Address) => `orrery-session-${a.toLowerCase()}`;
 const readToken = (a: Address): string | null => {
   try {
     const raw = sessionStorage.getItem(storageKey(a));

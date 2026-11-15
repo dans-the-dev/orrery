@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { DataCatalogResponse, DataProvidersResponse } from "@runcore/shared";
+import type { DataCatalogResponse, DataProvidersResponse } from "@orrery/shared";
 import { API_URL } from "../config";
-import { get } from "../rcore/api";
+import { get } from "../orry/api";
 
 /** Lane L2 reads: the data catalogue with prices (`GET /v1/data`), the signer, and the provider listing. */
 

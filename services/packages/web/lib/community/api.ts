@@ -11,9 +11,9 @@ import type {
   CommunityTemplate,
   MostActiveResponse,
   ReferralSummary,
-} from "@runcore/shared";
+} from "@orrery/shared";
 import { API_URL } from "../config";
-import { get } from "../rcore/api";
+import { get } from "../orry/api";
 
 /**
  * Reads from the community API (lane L1). Amounts stay decimal strings in base units as the API sends them; the views turn

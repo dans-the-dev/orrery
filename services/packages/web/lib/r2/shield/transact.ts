@@ -1,4 +1,4 @@
-// Origin: Hushwave packages/sdk/src/transact.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
+// Origin: Hushwave packages/sdk/src/transact.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
 // docs/updates/L3-R2-SPEC.md 6). Changed: the protocol fee floor is the pool's own `withdrawFeeFloor(to, amount)` (it carries the staker
 // discount), passed in by the caller.
 import { secp256k1 } from "@noble/curves/secp256k1";
@@ -61,7 +61,7 @@ export interface BuildTransactArgs {
   relayer: Address;
 }
 
-/** Arguments for RuncoreShield.transact, minus the proof. */
+/** Arguments for OrreryShield.transact, minus the proof. */
 export interface TxArgsBase {
   root: bigint;
   nullifiers: [bigint, bigint];

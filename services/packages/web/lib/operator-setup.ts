@@ -60,7 +60,7 @@ export function createSafeCall(stack: SafeStack, owner: Address, saltNonce: bigi
 
 /**
  * Step 2, sent by the Safe as one delegatecall to MultiSendCallOnly: enable the adapter as a module and initialise the
- * Safe7579 account with the Runcore policy module installed as its executor. Both calls go to the Safe itself. The Safe's
+ * Safe7579 account with the Orrery policy module installed as its executor. Both calls go to the Safe itself. The Safe's
  * address is part of this calldata, which is why it cannot ride inside step 1 (the address depends on step 1's calldata).
  */
 export function prepareAccountCall(stack: SafeStack, safe: Address, policyModule: Address): { to: Address; data: Hex; operation: 1 } {
@@ -99,7 +99,7 @@ export interface Remembered {
   account?: string;
   agentId?: string;
 }
-const key = (chainId: number, owner: string) => `runcore.operator.${chainId}.${owner.toLowerCase()}`;
+const key = (chainId: number, owner: string) => `orrery.operator.${chainId}.${owner.toLowerCase()}`;
 
 /** The account and agent this wallet last opened here. Public values only; a signer key is never stored. */
 export function recall(chainId: number, owner: string): Remembered {
@@ -121,14 +121,14 @@ export function remember(chainId: number, owner: string, v: Remembered): void {
 /** The file the operator hands to the agent: everything `AgentClient` needs, as environment variables. */
 export function agentEnvFile(a: { signerKey: Hex; signer: Address; chainId: number; rpcUrl: string; module: Address; account: Address; agentId: bigint }): string {
   return [
-    `# Runcore agent signer for agent #${a.agentId} on chain ${a.chainId}. Keep this file with the agent only.`,
-    `RUNCORE_SIGNER_KEY=${a.signerKey}`,
-    `RUNCORE_SIGNER_ADDRESS=${a.signer}`,
-    `RUNCORE_CHAIN_ID=${a.chainId}`,
-    `RUNCORE_RPC_URL=${a.rpcUrl}`,
-    `RUNCORE_MODULE=${a.module}`,
-    `RUNCORE_ACCOUNT=${a.account}`,
-    `RUNCORE_AGENT_ID=${a.agentId}`,
+    `# Orrery agent signer for agent #${a.agentId} on chain ${a.chainId}. Keep this file with the agent only.`,
+    `ORRERY_SIGNER_KEY=${a.signerKey}`,
+    `ORRERY_SIGNER_ADDRESS=${a.signer}`,
+    `ORRERY_CHAIN_ID=${a.chainId}`,
+    `ORRERY_RPC_URL=${a.rpcUrl}`,
+    `ORRERY_MODULE=${a.module}`,
+    `ORRERY_ACCOUNT=${a.account}`,
+    `ORRERY_AGENT_ID=${a.agentId}`,
     "",
   ].join("\n");
 }

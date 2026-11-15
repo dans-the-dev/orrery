@@ -1,4 +1,4 @@
-// Origin: Hushwave packages/sdk/src/encryption.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
+// Origin: Hushwave packages/sdk/src/encryption.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
 // docs/updates/L3-R2-SPEC.md 6). Changed: the key-derivation info string.
 import { xchacha20poly1305 } from "@noble/ciphers/chacha";
 import { secp256k1 } from "@noble/curves/secp256k1";
@@ -10,7 +10,7 @@ import { bytesToHex, hexToBytes, type Hex } from "viem";
 // Payload v1: version (1) | asset (20) | amount (16) | blinding (32) = 69 bytes.
 const VERSION = 1;
 const PAYLOAD_LEN = 69;
-const INFO = new TextEncoder().encode("runcore-shield-note-v1");
+const INFO = new TextEncoder().encode("orrery-shield-note-v1");
 
 export interface NotePlain {
   asset: bigint;

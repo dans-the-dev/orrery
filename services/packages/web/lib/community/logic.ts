@@ -2,10 +2,10 @@
  * Community pages, pure part (lane L1, docs/updates/L1-COMMUNITY-SPEC.md). No imports, so the tests run without the app.
  */
 
-/** UTF-8 byte length, as `RcoreChat.post` counts `bytes(text).length`. */
+/** UTF-8 byte length, as `OrryChat.post` counts `bytes(text).length`. */
 export const utf8Bytes = (s: string): number => new TextEncoder().encode(s).length;
 
-/** `RcoreNames.isValid`: 3 to 20 characters of a to z, 0 to 9 and underscore. */
+/** `OrryNames.isValid`: 3 to 20 characters of a to z, 0 to 9 and underscore. */
 export const validName = (s: string): boolean => /^[a-z0-9_]{3,20}$/.test(s);
 
 /** The cap passed with a paid call: the live quote plus 1% headroom, rounded up. */

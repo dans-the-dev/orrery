@@ -1,4 +1,4 @@
-// Origin: Hushwave packages/sdk/src/note.ts (MIT, hushwave 94ae19f), ported for Runcore Shield (lane L3,
+// Origin: Hushwave packages/sdk/src/note.ts (MIT, hushwave 94ae19f), ported for Orrery Shield (lane L3,
 // docs/updates/L3-R2-SPEC.md 6).
 import { FIELD_SIZE, hash2, hash3 } from "./hash";
 
