@@ -6,7 +6,6 @@ import { Nav } from "@/components/Nav";
 import { PayerConsole } from "@/components/PayerConsole";
 import { Faq } from "@/components/motion/Faq";
 import { FlowStrip } from "@/components/motion/Flow";
-import { OrreryHero } from "@/components/motion/OrreryHero";
 import { Magnetic, Tilt } from "@/components/motion/Pointer";
 
 const FACTS = [
@@ -98,9 +97,9 @@ export default function Home() {
         <Nav />
         <section className="lp-hero">
           <div className="lp-hero-copy">
-            <p className="kicker">Payment bounds for AI agents</p>
             <h1>
-              <span className="rl"><span>Every agent payment on a visible orbit.</span></span>
+              <span className="rl"><span>Every agent payment</span></span>
+              <span className="rl"><span className="accent">on a visible orbit.</span></span>
             </h1>
             <p className="lp-lead load-rise" style={{ ["--d" as string]: "0.28s" }}>Plot public caps for the agent that pays. Whoever receives its USDG can take a reading of the payer and get that reading back signed.</p>
             <div className="lp-actions load-rise" style={{ ["--d" as string]: "0.38s" }}>
@@ -111,7 +110,8 @@ export default function Home() {
           </div>
           <div className="lp-hero-stage">
             <Tilt className="hero-tilt" max={4}>
-              <OrreryHero label="A brass orrery: three agents travel their orbits around a sun, inside a dashed cap ring none of them crosses" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="lp-hero-plate" src="/art/orrery-plate.webp" alt="A rose gold mechanical orrery: blued steel planets and one ruby planet on fixed orbits around a polished sun" width={1040} height={768} fetchPriority="high" />
             </Tilt>
             <PayerConsole />
           </div>

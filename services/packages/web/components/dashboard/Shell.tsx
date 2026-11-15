@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import { BrandMark } from "@/components/Brand";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { useConnection } from "wagmi";
@@ -46,8 +47,8 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
     <div className="dsh-app">
       <aside className={`dsh-side${menuOpen ? " is-open" : ""}`} aria-label="Dashboard">
         <Link className="dsh-brand" href={DASHBOARD_HREF} aria-label="Orrery dashboard">
-          <img src="/art/mark.svg" alt="" width={28} height={28} />
-          <span>orrery</span>
+          <BrandMark />
+          <span>Orrery</span>
         </Link>
         <nav className="dsh-nav">
           {CONSOLE_SECTIONS.map((s) => (

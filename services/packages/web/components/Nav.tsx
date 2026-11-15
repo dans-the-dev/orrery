@@ -20,11 +20,11 @@ type NavLink = { href: string; label: string; match?: string[] };
 /** A protocol section: its pages, and the first open one (none while the whole section is held). */
 type Section = { label: string; pages: { href: string; label: string }[]; liveHref?: string };
 
-const HOME: NavLink = { href: "/", label: "Home" };
+const HOME: NavLink = { href: "/", label: "Product" };
 // Agent limits and credits are sections of the dashboard, so the site nav carries one link to it.
 const CORE: NavLink[] = [
   { href: DASHBOARD_HREF, label: "Dashboard" },
-  { href: "/signer", label: "Signer readings" },
+  { href: "/signer", label: "Readings" },
 ];
 const DOCS: NavLink = { href: "/docs", label: "Docs" };
 
@@ -146,6 +146,7 @@ export function Nav() {
             <DiscordIcon />
           </a>
         ) : null}
+        {X_URL || DISCORD_URL ? <span className="nav-divider" aria-hidden="true" /> : null}
         <WalletButton />
       </div>
     </nav>

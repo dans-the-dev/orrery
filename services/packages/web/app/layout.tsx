@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Albert_Sans, IBM_Plex_Mono, Jost } from "next/font/google";
+import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { headers } from "next/headers";
 import { cookieToInitialState } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
@@ -8,8 +8,8 @@ import { X_HANDLE } from "@/components/social";
 import { Providers } from "./providers";
 import "./globals.css";
 
-const display = Jost({ subsets: ["latin"], weight: ["300", "400", "500"], variable: "--font-display" });
-const text = Albert_Sans({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-text" });
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-display" });
+const text = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-text" });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500", "700"], variable: "--font-mono" });
 
 export const metadata: Metadata = {

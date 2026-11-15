@@ -1,0 +1,22 @@
+{
+ "elevenlabs_flow_id": "1sTSNiAXs5abXLokn7wK",
+ "node_id": "7i3RJCWWBMMw35mTz8QA",
+ "model": "gpt-image-2",
+ "based_on": "Design Styles 2026-11-12/08-mainspring",
+ "generations": {
+  "orrery-mainspring-1": "4hQj5yvHDTDsV3RreqcD",
+  "orrery-mainspring-2": "2cgiACDXLfuMcWz45his",
+  "orrery-mainspring-3": "n76UcCeDnzsQzsFa1602",
+  "orrery-mainspring-4": "UDMMcFeI8CCGqXDddDsS"
+ },
+ "header_edit": {
+  "node_id": "9q4PuAj8P7IVwKolc6Ju",
+  "reference_node": "IsYGj3FvZqg8sHHbDanD",
+  "generations": {
+   "orrery-header-1": "2dj67bytVwOmEVkPY2M4",
+   "orrery-header-2": "uNOH3MWid5BLsA29Oo0D",
+   "orrery-header-3": "T2BHOxzU4AlA2oXe31Zy",
+   "orrery-header-4": "qgUtCRQn8jzjMm1upfOV"
+  }
+ }
+}

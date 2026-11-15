@@ -1,5 +1,5 @@
 """Orrery art set: every illustration is a view through an eyepiece (a night disc) or a star plate (a night panel),
-drawn in brass linework with violet and starlight accents. Writes SVGs into services/packages/web/public/art.
+drawn in rose gold linework with blued steel and silver accents (the Mainspring theme, design/mainspring). Writes SVGs into services/packages/web/public/art.
 
 Run: python3 design/art/build_art.py
 """
@@ -9,13 +9,13 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[2] / "services/packages/web/public/art"
 
-NIGHT = "#161b45"
-DEEP = "#0d1030"
-BRASS = "#d8b25c"
-BRASS_SOFT = "#f1dca4"
-VIOLET = "#8f7ff2"
-STAR = "#f5f3ff"
-FAINT = "rgba(241,220,164,.34)"
+NIGHT = "#0f1a2e"
+DEEP = "#0a1222"
+BRASS = "#d9967a"
+BRASS_SOFT = "#ebc2ae"
+VIOLET = "#5b7fbf"
+STAR = "#e9ecef"
+FAINT = "rgba(235,194,174,.34)"
 
 
 def stars(seed, w, h, n, cx=None, cy=None, r=None):
@@ -41,7 +41,7 @@ def eyepiece(name, seed, body, size=400):
     r = c - 8
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}" width="{size}" height="{size}" role="img" aria-hidden="true">
 <defs>
-<radialGradient id="g" cx="42%" cy="38%" r="70%"><stop offset="0" stop-color="#232a63"/><stop offset=".7" stop-color="{NIGHT}"/><stop offset="1" stop-color="{DEEP}"/></radialGradient>
+<radialGradient id="g" cx="42%" cy="38%" r="70%"><stop offset="0" stop-color="#1b2c4d"/><stop offset=".7" stop-color="{NIGHT}"/><stop offset="1" stop-color="{DEEP}"/></radialGradient>
 <clipPath id="c"><circle cx="{c}" cy="{c}" r="{r}"/></clipPath>
 </defs>
 <circle cx="{c}" cy="{c}" r="{r}" fill="url(#g)"/>
@@ -55,7 +55,7 @@ def eyepiece(name, seed, body, size=400):
 
 def plate(name, seed, body, w=400, h=300):
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-hidden="true">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f255a"/><stop offset="1" stop-color="{DEEP}"/></linearGradient></defs>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17263f"/><stop offset="1" stop-color="{DEEP}"/></linearGradient></defs>
 <rect width="{w}" height="{h}" rx="26" fill="url(#g)"/>
 {stars(seed, w, h, 40)}
 <g fill="none" stroke="{FAINT}" stroke-width="1">{''.join(f'<line x1="{x}" y1="14" x2="{x}" y2="{h-14}" stroke-dasharray="2 6"/>' for x in range(50, w, 75))}</g>
@@ -154,7 +154,7 @@ def build():
 
     # Jobs: plates 400x300
     plate("job-cap", 5,
-          orbit(200, 150, 150, 70, -6, dash="7 6", color="#f08a8a", w=2) + orbit(200, 150, 112, 50, -6) +
+          orbit(200, 150, 150, 70, -6, dash="7 6", color="#d65c6c", w=2) + orbit(200, 150, 112, 50, -6) +
           orbit(200, 150, 72, 32, -6, color=FAINT) + sun(200, 150, 14) +
           planet(*on_ellipse(200, 150, 112, 50, -6, 30), 13) + planet(*on_ellipse(200, 150, 72, 32, -6, 200), 9, BRASS_SOFT))
     hands = f'<g stroke="{BRASS_SOFT}" stroke-width="4" stroke-linecap="round"><line x1="200" y1="150" x2="200" y2="82"/><line x1="200" y1="150" x2="248" y2="150"/></g>'
@@ -172,7 +172,7 @@ def build():
              f'<g transform="translate(270 110) rotate(18)"><rect x="-38" y="-18" width="76" height="36" rx="9" fill="{BRASS_SOFT}"/><circle cx="-22" cy="0" r="5" fill="{DEEP}"/><rect x="-10" y="-5" width="36" height="10" rx="3" fill="{DEEP}" opacity=".7"/></g>'
              f'<line x1="232" y1="128" x2="214" y2="160" stroke="{BRASS_SOFT}" stroke-width="2"/>')
     eyepiece("signer-lookup", 9,
-             planet(150, 170, 34, "#6f62d6") + orbit(150, 170, 70, 26, -20, color=FAINT) +
+             planet(150, 170, 34, "#3d5a8f") + orbit(150, 170, 70, 26, -20, color=FAINT) +
              f'<circle cx="240" cy="236" r="64" fill="rgba(143,127,242,.16)" stroke="{BRASS}" stroke-width="7"/>'
              f'<line x1="286" y1="282" x2="330" y2="326" stroke="{BRASS}" stroke-width="14" stroke-linecap="round"/>' + check(240, 236, 1.6))
     disc = lambda y: (f'<path d="M{C-72} {y} L{C-72} {y+16} A72 22 0 0 0 {C+72} {y+16} L{C+72} {y} Z" fill="{BRASS}"/>'
@@ -182,7 +182,7 @@ def build():
              "".join(sparkle(C + dx, 110 + dy, 9, BRASS_SOFT) for dx, dy in [(-92, -10), (96, -22), (82, 40)]))
     eyepiece("docs-manual", 11,
              f'<path d="M86 140 Q140 120 198 146 L198 282 Q140 258 86 278Z" fill="{BRASS_SOFT}"/>'
-             f'<path d="M314 140 Q260 120 202 146 L202 282 Q260 258 314 278Z" fill="#efe6c8"/>'
+             f'<path d="M314 140 Q260 120 202 146 L202 282 Q260 258 314 278Z" fill="#f1e3da"/>'
              + constellation([(112, 200), (140, 172), (172, 210)], DEEP, 1.4) + orbit(258, 208, 34, 16, -10, color=DEEP, w=1.6) +
              f'<circle cx="258" cy="208" r="6" fill="{DEEP}"/>')
     eyepiece("operator-console", 12,
@@ -205,19 +205,18 @@ def build():
              f'<path d="M{C+60} {C-110} A124 124 0 0 1 {C+124} {C}" fill="none" stroke="{VIOLET}" stroke-width="5" stroke-linecap="round"/>')
     eyepiece("orry-leaderboard", 16,
              "".join(f'<rect x="{x}" y="{300-h}" width="56" height="{h}" rx="10" fill="{c}"/>' + sparkle(x + 28, 300 - h - 26, s, BRASS_SOFT)
-                     for x, h, c, s in [(92, 110, "#3a3f86", 11), (172, 170, VIOLET, 16), (252, 80, "#3a3f86", 9)]))
+                     for x, h, c, s in [(92, 110, "#2a3d63", 11), (172, 170, VIOLET, 16), (252, 80, "#2a3d63", 9)]))
     eyepiece("orry-stake", 17,
              planet(C, C, 40, VIOLET) + orbit(C, C, 86, 86, color=BRASS) + orbit(C, C, 126, 126, dash="4 7", color=FAINT) +
              planet(*on_ellipse(C, C, 86, 86, 0, -50), 11, BRASS_SOFT) + planet(*on_ellipse(C, C, 126, 126, 0, 120), 8, BRASS_SOFT) +
              f'<path d="M{C} {C+40} L{C} {C+132}" stroke="{BRASS}" stroke-width="5"/><path d="M{C-26} {C+112} Q{C} {C+140} {C+26} {C+112}" fill="none" stroke="{BRASS}" stroke-width="5" stroke-linecap="round"/>')
 
-    # Mark: a brass sun with two orbits and one planet, on a night tile
+    # Mark: a rose gold orbit with one body on it, around a centre, on a navy tile (the header mark, components/Brand.tsx)
     mark = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
 <rect width="96" height="96" rx="24" fill="{NIGHT}"/>
-<ellipse cx="48" cy="48" rx="34" ry="14" transform="rotate(-24 48 48)" fill="none" stroke="{BRASS}" stroke-width="4"/>
-<ellipse cx="48" cy="48" rx="20" ry="20" fill="none" stroke="{BRASS_SOFT}" stroke-width="2" opacity=".55"/>
-<circle cx="48" cy="48" r="9" fill="{BRASS}"/>
-<circle cx="76.5" cy="34.5" r="7" fill="{VIOLET}"/>
+<circle cx="46" cy="50" r="27" fill="none" stroke="{BRASS}" stroke-width="3.2"/>
+<circle cx="46" cy="50" r="4.6" fill="{BRASS}"/>
+<circle cx="67" cy="33.5" r="7" fill="{BRASS}"/>
 </svg>'''
     (OUT / "mark.svg").write_text(mark)
     print("wrote", len(list(OUT.glob("*.svg"))), "svgs to", OUT)
