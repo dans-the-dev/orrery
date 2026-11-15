@@ -22,7 +22,7 @@ export type OrryFeature = (typeof ORRY_FEATURES)[number];
  */
 export const RELEASE_FEATURES = [
   ...ORRY_FEATURES,
-  "core", // the public launch of Orrery itself (T0): opens the builder rooms in Discord
+  "core", // the public launch of Orrery itself (T0)
   "agent-stake",
   "payg-checks",
   "facilitator",

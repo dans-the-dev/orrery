@@ -171,7 +171,7 @@ export function buildAccruals(
 
 /** Referral tier by referred volume over the referral window (plan guess, `tiersUsd`). */
 export function tierOf(volumeUsd: bigint, tiersUsd: bigint[]): string | null {
-  const names = ["Bronze", "Silver", "Ambassador"]; // the top tier carries the Discord "Ambassador" role (plan 3)
+  const names = ["Bronze", "Silver", "Ambassador"];
   let t: string | null = null;
   tiersUsd.forEach((min, i) => {
     if (volumeUsd >= min) t = names[i] ?? `Tier ${i + 1}`;

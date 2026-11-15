@@ -348,7 +348,7 @@ footer.site-footer { display: flex; justify-content: space-between; align-items:
   .wallet { font-size: 0.75rem; }
 }
 
-/* Small phones: brand, X, Discord and the wallet button share the first row; the links and "Coming soon" take the second. */
+/* Small phones: brand, X and the wallet button share the first row; the links and "Coming soon" take the second. */
 @media (max-width: 420px) {
   .nav { column-gap: 10px; padding-right: 8px; }
   .brand { font-size: 1.15rem; gap: 8px; }

@@ -4,8 +4,7 @@
 #   cd /opt/orrery-dev && docker compose -p orrery-dev --env-file release.env -f compose.dev.yml up -d
 #
 # Secrets in /opt/orrery-dev/secrets (mode 600): the 46630 role keys from ~/.secrets/orrery/46630-*.json, a pg
-# password, and a copy of the bot token. The Discord process runs in test mode (ORRERY_DISCORD_TEST_CHANNEL): it posts
-# only to that private channel and never changes rooms or roles on the community server.
+# password.
 x-keys: &keys
   - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
   - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
@@ -32,13 +31,12 @@ services:
     container_name: orrery-dev-api
     restart: unless-stopped
     command: ["src/bin/api.ts"]
-    env_file: [common.env, api.env, discord.env]
+    env_file: [common.env, api.env]
     volumes:
       - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
       - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
       - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
       - /opt/orrery-dev/secrets/46630-quote-signer.json:/run/keys/quote-signer.json:ro
-      - /opt/orrery-dev/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
     depends_on: {postgres: {condition: service_healthy}}
     mem_limit: 320m
     cpus: 0.4
@@ -137,22 +135,6 @@ services:
       - /opt/orrery-dev/secrets/46630-keeper.json:/run/keys/keeper.json:ro
     mem_limit: 128m
     cpus: 0.1
-    networks: [data]
-
-  discord:
-    image: orrery-services:${TAG:?}
-    container_name: orrery-dev-discord
-    restart: unless-stopped
-    command: ["src/bin/discord.ts"]
-    env_file: [common.env, discord.env]
-    volumes:
-      - /opt/orrery-dev/secrets/46630-relayer.json:/run/keys/relayer.json:ro
-      - /opt/orrery-dev/secrets/46630-check-signer.json:/run/keys/check-signer.json:ro
-      - /opt/orrery-dev/secrets/46630-attester.json:/run/keys/attester.json:ro
-      - /opt/orrery-dev/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
-    depends_on: {postgres: {condition: service_healthy}}
-    mem_limit: 192m
-    cpus: 0.2
     networks: [data]
 
 volumes:

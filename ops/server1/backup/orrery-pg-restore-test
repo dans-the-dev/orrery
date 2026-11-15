@@ -7,7 +7,7 @@
 #   orrery-pg-restore-test <file.dump>          that dump
 #
 # Exits 1 when pg_restore fails or the restored database lacks a table the live one has. Row counts may differ where
-# the live database was written after the dump (the Discord process writes every minute); that is printed, not failed.
+# the live database was written after the dump; that is printed, not failed.
 set -eu
 umask 077
 

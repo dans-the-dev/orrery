@@ -28,14 +28,12 @@ services:
     container_name: orrery-api
     restart: unless-stopped
     command: ["src/bin/api.ts"]
-    env_file: [common.env, api.env, {path: discord.env, required: false}]
+    env_file: [common.env, api.env]
     volumes:
       - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
       - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
       - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
       - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-quote-signer.json:/run/keys/quote-signer.json:ro
-      - ${ORRERY_DIR:-/opt/orrery}/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
-      - ${ORRERY_DIR:-/opt/orrery}/cards:/run/cards:ro
     depends_on: {postgres: {condition: service_healthy}}
     mem_limit: 384m
     cpus: 0.5
@@ -131,45 +129,6 @@ services:
     cpus: 0.25
     networks: [data]
     profiles: [markets]
-
-  discord:
-    image: orrery-services:${TAG:?}
-    container_name: orrery-discord
-    restart: unless-stopped
-    command: ["src/bin/discord.ts"]
-    env_file: [common.env, discord.env]
-    volumes:
-      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-relayer.json:/run/keys/relayer.json:ro
-      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-check-signer.json:/run/keys/check-signer.json:ro
-      - ${ORRERY_DIR:-/opt/orrery}/secrets/${ORRERY_KEYS:-mainnet}-attester.json:/run/keys/attester.json:ro
-      - ${ORRERY_DIR:-/opt/orrery}/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
-      - ${ORRERY_DIR:-/opt/orrery}/cards:/run/cards:ro
-    depends_on: {postgres: {condition: service_healthy}}
-    mem_limit: 256m
-    cpus: 0.25
-    networks: [data]
-    profiles: [discord]
-
-  # Replies to Discord questions and the Orrery X account mentions (#reply-queue). Its own image tag, so shipping it never moves
-  # the other services off TAG; it starts only with the support profile. Keys sit in secrets/support/ (dir 700, uid 1000):
-  # anthropic.env (required) and x-api.json (optional: without it X stays off). No ports: it only connects out.
-  support:
-    image: orrery-services:${SUPPORT_TAG:-unset}
-    container_name: orrery-support
-    restart: unless-stopped
-    command: ["src/bin/support.ts"]
-    env_file: [common.env, discord.env, {path: support.env, required: false}]
-    environment:
-      ORRERY_ANTHROPIC_KEY_FILE: /run/keys/support/anthropic.env
-      ORRERY_SUPPORT_X_FILE: /run/keys/support/x-api.json
-    volumes:
-      - ${ORRERY_DIR:-/opt/orrery}/secrets/discord-bot.txt:/run/keys/discord-bot.txt:ro
-      - ${ORRERY_DIR:-/opt/orrery}/secrets/support:/run/keys/support:ro
-    depends_on: {postgres: {condition: service_healthy}}
-    mem_limit: 256m
-    cpus: 0.25
-    networks: [data]
-    profiles: [support]
 
 volumes:
   orrery-pg:

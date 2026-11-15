@@ -4,9 +4,13 @@
 
 - Orrery created from Runcore at faed73d: same functions, new name, token ORRY, contracts renamed, copy rewritten,
   Observatory theme. Runcore's launch history (`docs/launch/`), brand assets, deployments and addresses were left out.
-- Before a live run: register orrery.tech, create the X and Discord accounts (set `NEXT_PUBLIC_X_HANDLE` and the
-  Discord invite), make new keys in `~/.secrets/orrery/`, deploy with `services/scripts/deploy-4663.ts`, then copy
-  the addresses into `services/packages/sdk/src/quick.ts` and `services/packages/mcp/src/config.ts`.
+- Discord removed (owner, 2026-11-15: remove every mission or activity that needs Discord): the bot
+  (wallet /verify and roles, slash commands, announcements, booster tiers, welcomes), the /discord/verify page, the
+  Discord links, the support assistant whose review queue lived in Discord (X mentions are answered by hand), its ops
+  scripts, compose services and migrations 012 and 039. Referral tiers stay, without a Discord role. Plan documents
+  that still describe Discord features are history.
+- Before a live run: register orrery.tech, create the X account (set `NEXT_PUBLIC_X_HANDLE`), make new keys in
+  `~/.secrets/orrery/`, deploy with `services/scripts/deploy-4663.ts`, then copy the addresses into `services/packages/sdk/src/quick.ts` and `services/packages/mcp/src/config.ts`.
 - Fork tests under `contracts/test/**/fork` still read Runcore's live 4663 contracts as fixtures; they need Orrery's
   own addresses once it is deployed.
 

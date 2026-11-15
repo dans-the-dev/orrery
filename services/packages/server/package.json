@@ -12,12 +12,10 @@
     "indexer": "tsx src/bin/indexer.ts",
     "migrate": "tsx src/bin/migrate.ts",
     "keeper": "tsx src/bin/keeper.ts",
-    "discord": "tsx src/bin/discord.ts",
     "market-keeper": "tsx src/bin/market-keeper.ts",
     "market-relay": "tsx src/bin/market-relay.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.7.0",
     "@orrery/shared": "workspace:*",
     "fastify": "^5.2.0",
     "postgres": "^3.4.5",

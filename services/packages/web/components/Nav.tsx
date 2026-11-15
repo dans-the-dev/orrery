@@ -12,9 +12,8 @@ import { CREDIT_ROUTES } from "@/lib/credit/api";
 import { Brand } from "./Brand";
 import { WalletButton } from "./WalletButton";
 import { DASHBOARD_HREF } from "@/lib/dashboard";
-import { DiscordIcon } from "./DiscordIcon";
 import { XIcon } from "./XIcon";
-import { DISCORD_URL, X_URL } from "./social";
+import { X_URL } from "./social";
 
 type NavLink = { href: string; label: string; match?: string[] };
 /** A protocol section: its pages, and the first open one (none while the whole section is held). */
@@ -141,12 +140,7 @@ export function Nav() {
             <XIcon />
           </a>
         ) : null}
-        {DISCORD_URL ? (
-          <a aria-label="Join the Orrery Discord" className="x-link" href={DISCORD_URL} target="_blank" rel="noreferrer">
-            <DiscordIcon />
-          </a>
-        ) : null}
-        {X_URL || DISCORD_URL ? <span className="nav-divider" aria-hidden="true" /> : null}
+        {X_URL ? <span className="nav-divider" aria-hidden="true" /> : null}
         <WalletButton />
       </div>
     </nav>

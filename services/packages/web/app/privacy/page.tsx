@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { PageHead } from "@/components/PageHead";
-import { DISCORD_URL, X_HANDLE, X_URL } from "@/components/social";
+import { X_HANDLE, X_URL } from "@/components/social";
 
 export const metadata = {
   title: "Orrery · Privacy Policy",
-  description: "The records Orrery holds when you use orrery.tech, the Orrery API or the Discord bot, and the reason for each.",
+  description: "The records Orrery holds when you use orrery.tech or the Orrery API, and the reason for each.",
 };
 
 const UPDATED = "9 November 2026";
@@ -18,7 +18,6 @@ type Section = { id: string; title: string; body: ReactNode };
 function Contact() {
   const channels: ReactNode[] = [];
   if (X_URL) channels.push(<>on X at <a href={X_URL} target="_blank" rel="noreferrer">{X_HANDLE}</a></>);
-  if (DISCORD_URL) channels.push(<>in the <a href={DISCORD_URL} target="_blank" rel="noreferrer">Orrery Discord</a></>);
   return (
     <p>
       {channels.length ? <>Write to the team {channels[0]}{channels[1] ? <> or {channels[1]}</> : null}. </> : <>Write to the team through the contact channels published on orrery.tech. </>}
@@ -34,7 +33,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          This policy applies to orrery.tech, the Orrery API and the Orrery Discord bot. Orrery identifies people by wallet address. Each record the service holds is described below, with the reason it is held.
+          This policy applies to orrery.tech and the Orrery API. Orrery identifies people by wallet address. Each record the service holds is described below, with the reason it is held.
         </p>
         <p>Orrery never asks for your name, email, phone number or a password, and the website carries no advertising or analytics trackers.</p>
       </>
@@ -86,21 +85,6 @@ const SECTIONS: Section[] = [
     ),
   },
   {
-    id: "discord",
-    title: "Discord",
-    body: (
-      <>
-        <p>
-          If you use <code>/verify</code> in the Orrery Discord and sign with your wallet, the service stores your Discord user id, the wallet address you tied to it, the roles assigned, and the times the link was created and last reviewed. Each one-time verification link lapses after 15 minutes.
-        </p>
-        <p>
-          On a schedule, the bot reviews every linked wallet and adjusts roles to fit its ORRY balance and stake, the agents it owns and the credits it has bought. Tying a new wallet replaces the earlier link.
-        </p>
-        <p>The bot also stores the Discord user ids of the members it has greeted, so nobody is greeted twice.</p>
-      </>
-    ),
-  },
-  {
     id: "website",
     title: "The website",
     body: (
@@ -117,7 +101,7 @@ const SECTIONS: Section[] = [
     title: "Request limits and logs",
     body: (
       <p>
-        To enforce request rate limits, the Orrery API holds your IP address in memory only and never writes it to its database. The servers keep operational logs, for example indexer progress and what the Discord bot did.
+        To enforce request rate limits, the Orrery API holds your IP address in memory only and never writes it to its database. The servers keep operational logs, for example indexer progress.
       </p>
     ),
   },
@@ -126,7 +110,7 @@ const SECTIONS: Section[] = [
     title: "Why the data is held",
     body: (
       <p>
-        Every record above exists to operate the service: issuing keys, granting credits and plans, applying the included checks and price tiers, answering readings, showing balances and earnings, maintaining the leaderboard, assigning Discord roles and keeping the API reachable. Data is shared with the providers that run the service, such as hosting, Robinhood Chain access and Discord for roles, and wherever the law requires it.
+        Every record above exists to operate the service: issuing keys, granting credits and plans, applying the included checks and price tiers, answering readings, showing balances and earnings, maintaining the leaderboard and keeping the API reachable. Data is shared with the providers that run the service, such as hosting and Robinhood Chain access, and wherever the law requires it.
       </p>
     ),
   },
@@ -135,7 +119,7 @@ const SECTIONS: Section[] = [
     title: "Security",
     body: (
       <p>
-        API keys are held as hashes. Key sign in, key rotation and Discord verification each rely on a one-time message your wallet signs. Your private keys and seed phrase never leave your wallet, and the service never needs them.
+        API keys are held as hashes. Key sign in and key rotation each rely on a one-time message your wallet signs. Your private keys and seed phrase never leave your wallet, and the service never needs them.
       </p>
     ),
   },
@@ -145,7 +129,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>You decide which wallet to connect and which messages and transactions to sign, and you can disconnect the wallet from the website whenever you like.</p>
-        <p>Records written to Robinhood Chain are public and remain on chain. To ask about anything the service holds for your address or Discord account, your Discord link included, use the contact details in the last section.</p>
+        <p>Records written to Robinhood Chain are public and remain on chain. To ask about anything the service holds for your address, use the contact details in the last section.</p>
       </>
     ),
   },
@@ -169,7 +153,7 @@ export default function Privacy() {
         <PageHead
           kicker="Legal"
           title="Privacy Policy"
-          lead={<p>The records Orrery holds when you use orrery.tech, the Orrery API or the Discord bot, and the purpose of each one.</p>}
+          lead={<p>The records Orrery holds when you use orrery.tech or the Orrery API, and the purpose of each one.</p>}
           art="signer-lookup"
         />
         <div className="legal">

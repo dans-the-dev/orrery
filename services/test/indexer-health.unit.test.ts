@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { alertsFor, blockTimes, chainHead, indexerHealth, lagBehind, logLine, type Chain } from "@orrery/server";
+import { blockTimes, chainHead, indexerHealth, lagBehind, logLine, type Chain } from "@orrery/server";
 
 const base = { orry: null, orryOn: false, maxLag: 600n, confirmations: 10 };
 
@@ -40,11 +40,6 @@ describe("indexer health against the live head", () => {
     t = 3_000;
     expect(await chainHead(chain, 3_000, () => t)).toBe(101n);
     expect(calls).toBe(2);
-  });
-
-  it("alerts when the head cannot be read", () => {
-    const a = alertsFor({ lag: { lag: 0n }, orryLag: null, headUnreadable: true, orryOn: false, maxLag: 600n, confirmations: 10, balances: [] });
-    expect(a.map((x) => x.key)).toEqual(["chain-head"]);
   });
 
   it("log lines never carry an RPC URL", () => {

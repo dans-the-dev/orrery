@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Brand } from "./Brand";
-import { DISCORD_URL, X_HANDLE, X_URL } from "./social";
+import { X_HANDLE, X_URL } from "./social";
 
 export function Footer() {
   return (
@@ -14,7 +14,6 @@ export function Footer() {
         <Link href="/signer">Readings</Link>
         <Link href="/docs">Docs</Link>
         {X_URL ? <a href={X_URL} target="_blank" rel="noreferrer">{X_HANDLE}</a> : null}
-        {DISCORD_URL ? <a href={DISCORD_URL} target="_blank" rel="noreferrer">Discord</a> : null}
         <Link href="/terms">Terms</Link>
         <Link href="/privacy">Privacy</Link>
       </nav>

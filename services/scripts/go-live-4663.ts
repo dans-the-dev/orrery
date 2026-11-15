@@ -7,7 +7,6 @@
  *                                                              health); --fork rehearses the same compose.yml in local Docker
  *   tsx scripts/go-live-4663.ts dns     [--dry-run]            api.orrery.tech A record (Hostinger API) and the Caddy block
  *   tsx scripts/go-live-4663.ts vercel  [--dry-run]            production env on the Vercel project `orrery`, then deploy
- *   tsx scripts/go-live-4663.ts discord [--dry-run]            Discord interactions endpoint to https://api.orrery.tech
  *   tsx scripts/go-live-4663.ts check   [--fork]               health, indexer lag, releases, the X gate on orrery.tech
  *
  * Mainnet stages print what they will do and wait for a typed CONFIRM; --dry-run prints and sends nothing. Keys come
@@ -222,12 +221,10 @@ async function server() {
     const sec = join(REHEARSAL_DIR, "secrets");
     mkdirSync(sec, { recursive: true });
     chmodSync(sec, 0o700);
-    mkdirSync(join(REHEARSAL_DIR, "cards"), { recursive: true });
     for (const k of keys) {
       copyFileSync(join(SECRETS, `${KEYS}-${k}.json`), join(sec, `${KEYS}-${k}.json`));
       chmodSync(join(sec, `${KEYS}-${k}.json`), 0o600);
     }
-    if (!existsSync(join(sec, "discord-bot.txt"))) writeFileSync(join(sec, "discord-bot.txt"), "", { mode: 0o600 });
     const pgFile = join(sec, "pg-password");
     if (!existsSync(pgFile)) writeFileSync(pgFile, execFileSync("openssl", ["rand", "-hex", "24"], { encoding: "utf8" }).trim(), { mode: 0o600 });
     const pg = readFileSync(pgFile, "utf8").trim();
@@ -245,7 +242,7 @@ async function server() {
       `  keys copied: ${keys.map((k) => `${KEYS}-${k}.json`).join(", ")} (the deployer key stays on this laptop)`,
       `  every release stays held; nothing opens until releases.ts sets a time`,
     ]);
-    ssh("install -d -m 700 /opt/orrery/secrets && install -d -m 755 /opt/orrery/cards");
+    ssh("install -d -m 700 /opt/orrery/secrets");
     for (const k of keys) {
       run("scp", ["-q", join(SECRETS, `${KEYS}-${k}.json`), `${HOST}:/opt/orrery/secrets/${KEYS}-${k}.json`]);
     }
@@ -253,14 +250,12 @@ async function server() {
     // the services run as the image's `node` user (uid 1000): a key file left to root at mode 600 stops them at start
     // (first mainnet run, 2026-11-11: EACCES on /run/keys/relayer.json)
     ssh(`chown 1000:1000 ${keys.map((k) => `/opt/orrery/secrets/${KEYS}-${k}.json`).join(" ")}`);
-    ssh("test -e /opt/orrery/secrets/discord-bot.txt || (umask 077; : > /opt/orrery/secrets/discord-bot.txt)");
     run("scp", ["-q", join(OPS, "compose.yml"), join(OPS, "Caddyfile-block"), `${HOST}:/opt/orrery/`]);
     run("scp", ["-q", join(OUT, "common.env"), join(OUT, "api.env"), `${HOST}:/opt/orrery/`]);
     ssh(`cd /opt/orrery && chmod 600 common.env api.env && sed -i "s|<pg-password>|$(cat secrets/pg-password)|" common.env && printf 'TAG=${tag}\\n' > release.env`);
     buildImage(tag);
     run("bash", ["-c", `docker save orrery-services:${tag} | gzip -1 | ssh ${HOST} 'gunzip | docker load'`]);
-    const discord = ssh("test -s /opt/orrery/discord.env && echo yes || echo no", { allowFail: true }) === "yes" ? ["--profile", "discord"] : [];
-    ssh(`cd /opt/orrery && docker compose -p orrery-mainnet --env-file release.env -f compose.yml ${[...profiles, ...discord].join(" ")} up -d ${services.join(" ")}${discord.length ? " discord" : ""}`);
+    ssh(`cd /opt/orrery && docker compose -p orrery-mainnet --env-file release.env -f compose.yml ${profiles.join(" ")} up -d ${services.join(" ")}`);
   }
   await holdReleases();
   await check();
@@ -331,23 +326,6 @@ async function vercel() {
   log(run("vercel", ["deploy", "--prod", "--yes"], { cwd, env }).split("\n").filter((l) => /Production|Aliased/.test(l)).join("\n"));
 }
 
-// ------------------------------------------------------------------ discord
-
-async function discord() {
-  const tokenFile = join(SECRETS, "discord-bot.txt");
-  if (!existsSync(tokenFile)) fail("~/.secrets/orrery/discord-bot.txt is missing");
-  const url = `https://${API_HOST}/v1/discord/interactions`;
-  await confirm([`Discord application: interactions endpoint -> ${url} (Discord sends a signed PING; the API must be up)`]);
-  if (DRY) return;
-  const r = await fetch("https://discord.com/api/v10/applications/@me", {
-    method: "PATCH",
-    headers: { authorization: `Bot ${readFileSync(tokenFile, "utf8").trim()}`, "content-type": "application/json" },
-    body: JSON.stringify({ interactions_endpoint_url: url }),
-  });
-  if (!r.ok) fail(`Discord answered ${r.status}: ${(await r.text()).slice(0, 200)}`);
-  log(`Discord interactions endpoint: ${url}`);
-}
-
 // ------------------------------------------------------------------ check
 
 async function check() {
@@ -384,7 +362,7 @@ async function check() {
 
 // ------------------------------------------------------------------ main
 
-const stages: Record<string, () => unknown> = { env: writeEnv, server, dns, vercel, discord, check };
+const stages: Record<string, () => unknown> = { env: writeEnv, server, dns, vercel, check };
 if (!stages[stage]) fail(`unknown stage "${stage}"; use one of: ${Object.keys(stages).join(", ")}`);
-if (FORK && ["dns", "vercel", "discord"].includes(stage) && !DRY) fail(`${stage} touches the real domain, Vercel or Discord; with --fork only --dry-run`);
+if (FORK && ["dns", "vercel"].includes(stage) && !DRY) fail(`${stage} touches the real domain or Vercel; with --fork only --dry-run`);
 await stages[stage]!();

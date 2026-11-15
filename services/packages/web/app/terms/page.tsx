@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { PageHead } from "@/components/PageHead";
-import { DISCORD_URL, X_HANDLE, X_URL } from "@/components/social";
+import { X_HANDLE, X_URL } from "@/components/social";
 
 export const metadata = {
   title: "Orrery · Terms of Use",
-  description: "The rules for using orrery.tech, the Orrery API and SDK, the Discord bot and the Orrery contracts on Robinhood Chain.",
+  description: "The rules for using orrery.tech, the Orrery API and SDK and the Orrery contracts on Robinhood Chain.",
 };
 
 const UPDATED = "9 November 2026";
@@ -18,7 +18,6 @@ type Section = { id: string; title: string; body: ReactNode };
 function Contact() {
   const channels: ReactNode[] = [];
   if (X_URL) channels.push(<>on X at <a href={X_URL} target="_blank" rel="noreferrer">{X_HANDLE}</a></>);
-  if (DISCORD_URL) channels.push(<>in the <a href={DISCORD_URL} target="_blank" rel="noreferrer">Orrery Discord</a></>);
   return (
     <p>
       {channels.length ? <>Send questions about these terms to the team {channels[0]}{channels[1] ? <> or {channels[1]}</> : null}. </> : <>Send questions about these terms to the team through the contact channels published on orrery.tech. </>}
@@ -34,7 +33,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          In these terms, the service means orrery.tech, the Orrery API, the Orrery SDK, the Orrery Discord bot and the Orrery contracts on Robinhood Chain. Using the service means you accept these terms.
+          In these terms, the service means orrery.tech, the Orrery API, the Orrery SDK and the Orrery contracts on Robinhood Chain. Using the service means you accept these terms.
         </p>
         <p>When you act for a company or other organisation, you accept these terms in its name and confirm you have the authority to do so.</p>
         <p>Complying with the laws that apply to you, wherever you use the service, is your responsibility.</p>
@@ -120,7 +119,7 @@ const SECTIONS: Section[] = [
   {
     id: "others",
     title: "Third party services",
-    body: <p>Orrery connects with services operated by others, such as your wallet, Robinhood Chain and Discord. Those services apply their own terms to your use of them.</p>,
+    body: <p>Orrery connects with services operated by others, such as your wallet and Robinhood Chain. Those services apply their own terms to your use of them.</p>,
   },
   {
     id: "brand",
@@ -151,7 +150,7 @@ export default function Terms() {
         <PageHead
           kicker="Legal"
           title="Terms of Use"
-          lead={<p>The rules that apply when you use orrery.tech, the Orrery API and SDK, the Discord bot and the Orrery contracts on Robinhood Chain.</p>}
+          lead={<p>The rules that apply when you use orrery.tech, the Orrery API and SDK and the Orrery contracts on Robinhood Chain.</p>}
           art="docs-manual"
         />
         <div className="legal">

@@ -1,5 +1,5 @@
 {
-  "$comment": "Orrery on Robinhood Chain 4663, server 1 uptime monitor (2026-11-09). Stage prelaunch: the web, the Discord process and the daily database dump. Stage launch (after the v1 deploy brings up the API, indexer and prober and the relayer and attester hold gas): also the API health, the release switch, the indexer lag against the chain head, the prober, and relayer and attester gas. Stage orry (after the ORRY deploy starts the keeper): also the keeper, its last pass and its gas. Gas floors match ORRERY_DISCORD_WATCH. Switch with: sed -i 's/\"stage\": \"prelaunch\"/\"stage\": \"launch\"/' targets.json (later launch to orry).",
+  "$comment": "Orrery on Robinhood Chain 4663, server 1 uptime monitor (2026-11-09). Stage prelaunch: the web and the daily database dump. Stage launch (after the v1 deploy brings up the API, indexer and prober and the relayer and attester hold gas): also the API health, the release switch, the indexer lag against the chain head, the prober, and relayer and attester gas. Stage orry (after the ORRY deploy starts the keeper): also the keeper, its last pass and its gas. Switch with: sed -i 's/\"stage\": \"prelaunch\"/\"stage\": \"launch\"/' targets.json (later launch to orry).",
   "stage": "prelaunch",
   "stages": ["prelaunch", "launch", "orry"],
   "networks": {
@@ -18,8 +18,6 @@
   },
   "checks": [
     { "name": "web /", "base": "web", "path": "/", "contains": "orrery" },
-    { "name": "web /discord/verify", "base": "web", "path": "/discord/verify", "contains": "Verify your wallet." },
-    { "name": "discord container", "container": "orrery-discord", "minUpSeconds": 120 },
     { "name": "database backup", "backup": { "maxAgeHours": 26 } },
     { "name": "api /health", "from": "launch", "base": "api", "path": "/health", "json": { "ok": true, "chainId": 4663 } },
     {

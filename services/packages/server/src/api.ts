@@ -20,7 +20,6 @@ import { addressForKey, addressForReader, canCheck, checkAccount, closeSession, 
 import { buildCheck, readLens, toJson } from "./check.js";
 import { registerOrryRoutes } from "./orry-api.js";
 import { registerReleaseRoutes, releasesFor } from "./releases.js";
-import { discordRest, loadDiscordConfig, registerDiscordRoutes } from "./discord.js";
 import { logLine } from "./log.js";
 import { registerMarketRoutes } from "./markets-api.js";
 import { registerFacilitatorRoutes, stakeQuota } from "./facilitator-public.js";
@@ -330,9 +329,6 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
   // ---------------------------------------------------------------- ORRY (build spec §5), behind ORRERY_ORRY_FEATURES
   registerOrryRoutes(app, cfg, chain, sql, { allowPublic, makeLimiter: limiter });
   registerReleaseRoutes(app, releasesFor(sql, cfg.releaseSeed, cfg.releasesCacheMs), allowPublic);
-  // Discord (stage 2): interactions and wallet verification, only when the bot is configured.
-  const discord = loadDiscordConfig();
-  if (discord) registerDiscordRoutes(app, cfg, chain, sql, discord, discordRest(discord), allowPublic);
   registerMarketRoutes(app, cfg, chain, sql, { allowPublic, makeLimiter: limiter });
   registerFacilitatorRoutes(app, cfg, chain, sql, { allowPublic, makeLimiter: limiter });
   registerCommunityRoutes(app, cfg, chain, sql, { allowPublic });

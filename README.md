@@ -9,7 +9,7 @@ contracts, services, SDK, MCP server, web app and ops copied, every name, identi
 (Runcore to Orrery, RCORE to ORRY, Kya* contracts to Orrery*), user-facing copy rewritten, and a new visual direction
 (Observatory, `design/README.md`). Fresh git history. Nothing deployed: `deployments/` is empty, the SDK and MCP have no
 default contract addresses, and no keys exist yet (`~/.secrets/orrery/` when they are made). Domain orrery.tech
-(not registered), no X or Discord account yet. The planning documents below are carried over from Runcore and keep
+(not registered), no X account yet. The planning documents below are carried over from Runcore and keep
 their original decision history.
 
 ## Files

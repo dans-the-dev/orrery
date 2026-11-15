@@ -14,7 +14,6 @@ export * from "./orry-quotes.js";
 export * from "./orry-api.js";
 export * from "./keeper.js";
 export * from "./releases.js";
-export * from "./discord.js";
 export * from "./log.js";
 export * from "./markets-indexer.js";
 export * from "./markets-api.js";
