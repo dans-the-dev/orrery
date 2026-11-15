@@ -29,10 +29,10 @@
     },
     { "name": "indexer lag", "from": "launch", "indexer": { "maxLag": 600, "orryExtra": 10 } },
     { "name": "prober container", "from": "launch", "container": "orrery-prober", "minUpSeconds": 120 },
-    { "name": "relayer gas", "from": "launch", "balance": { "address": "0x21f7536E49Ffc5CbfFd7b976A0c73f3A0BC2C6C0", "minEth": "0.0001" } },
-    { "name": "attester gas", "from": "launch", "balance": { "address": "0xe0444a010EbAdb445aD75629E20c4C0149724eC0", "minEth": "0.0001" } },
+    { "name": "relayer gas", "from": "launch", "balance": { "address": "0xEF105b3689f64c09D70Df0cAE94b0a5CcD1DA41E", "minEth": "0.0001" } },
+    { "name": "attester gas", "from": "launch", "balance": { "address": "0x9887F31E21eC22aAa2a84A6fDaCC9184C22d01eb", "minEth": "0.0001" } },
     { "name": "keeper container", "from": "orry", "container": "orrery-keeper", "minUpSeconds": 120 },
     { "name": "keeper last pass", "from": "orry", "keeperPass": { "maxAgeMinutes": 75 } },
-    { "name": "keeper gas", "from": "orry", "balance": { "address": "0x1241C83501E865c86613c715bE40A60Be455075F", "minEth": "0.001" } }
+    { "name": "keeper gas", "from": "orry", "balance": { "address": "0x29b72029719D588959A46Dc626408BA117c83E84", "minEth": "0.001" } }
   ]
 }
