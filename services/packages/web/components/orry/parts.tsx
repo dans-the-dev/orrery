@@ -54,7 +54,7 @@ export function OrryHead({ kicker, title, lead, reading }: { kicker?: string; ti
           {lead ? <div className="page-head-lead">{lead}</div> : null}
         </div>
         {reading ? <div className="rc-reading">{reading}</div> : null}
-        {art ? <img className="rc-head-art" src={`/art/${art}.svg`} alt="" aria-hidden="true" width={600} height={600} /> : null}
+        {art ? <img className="rc-head-art" src={`/art/${art}.webp`} alt="" aria-hidden="true" width={600} height={600} /> : null}
       </header>
       {page?.flow ? <FlowStrip className="rc-flow" nodes={page.flow.nodes} accent={page.flow.accent} label={page.flow.label} /> : null}
     </>

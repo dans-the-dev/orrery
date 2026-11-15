@@ -137,7 +137,7 @@ export default function Home() {
           {STEPS.map((s, i) => (
             <li key={s.art}>
               <div className="lp-gate-art">
-                <img src={`/art/${s.art}.svg`} alt="" width={720} height={720} loading="lazy" />
+                <img src={`/art/${s.art}.webp`} alt="" width={800} height={800} loading="lazy" />
                 {i < STEPS.length - 1 ? <span className="lp-gate-link" aria-hidden="true"><i /></span> : null}
               </div>
               <h3>{s.title}</h3>
@@ -156,7 +156,7 @@ export default function Home() {
         <div className="lp-who-grid" data-reveal="group">
           {AUDIENCES.map((a) => (
             <article key={a.who}>
-              <img className="lp-who-art" src={`/art/${a.art}.svg`} alt="" aria-hidden="true" width={112} height={112} loading="lazy" />
+              <img className="lp-who-art" src={`/art/${a.art}.webp`} alt="" aria-hidden="true" width={112} height={112} loading="lazy" />
               <p className="lp-who-tag">{a.who}</p>
               <h3>{a.title}</h3>
               <p>{a.text}</p>
@@ -184,7 +184,7 @@ export default function Home() {
         <div className="lp-jobs" data-reveal="group">
           {JOBS.map((j) => (
             <article key={j.art} className="lp-job">
-              <div className="lp-job-art"><img src={`/art/${j.art}.svg`} alt="" width={900} height={675} loading="lazy" /></div>
+              <div className="lp-job-art"><img src={`/art/${j.art}.webp`} alt="" width={1024} height={768} loading="lazy" /></div>
               <h3>{j.title}</h3>
               <p>{j.text}</p>
             </article>
@@ -221,7 +221,7 @@ export default function Home() {
           <Link className="lp-link" href="/dashboard/agents">Go to the operator console</Link>
         </div>
         <div className="lp-operator-stage">
-          <Tilt className="lp-operator-art"><div className="float"><img src="/art/operator-console.svg" alt="" width={900} height={675} loading="lazy" /></div></Tilt>
+          <Tilt className="lp-operator-art"><div className="float"><img src="/art/operator-console.webp" alt="" width={800} height={800} loading="lazy" /></div></Tilt>
             <div className="lp-editor" aria-label="Preview of the policy editor" data-reveal="" style={{ ["--d" as string]: "0.15s" }}>
               <div className="lp-editor-head"><b>Agent policy</b><span>Preview</span></div>
               <div className="lp-editor-reading">
@@ -240,7 +240,7 @@ export default function Home() {
       </section>
 
       <section className="lp-section lp-paper lp-split lp-credits">
-        <Tilt className="lp-credits-art"><div className="float"><img src="/art/credits-pack.svg" alt="" width={820} height={820} loading="lazy" /></div></Tilt>
+        <Tilt className="lp-credits-art"><div className="float"><img src="/art/credits-pack.webp" alt="" width={800} height={800} loading="lazy" /></div></Tilt>
         <div>
           <p className="kicker">Pricing</p>
           <h2 data-reveal="lines"><span className="rl"><span>Pay per reading,</span></span><span className="rl"><span>less as volume grows.</span></span></h2>

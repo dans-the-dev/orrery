@@ -2,7 +2,7 @@
    Midnight navy with a guilloché engraving, silver ink, rose gold for the one primary action and headline line two.
    Display Instrument Serif (light, line two italic), text Hanken Grotesk, figures IBM Plex Mono. The hero object is a
    photographed plate (public/art/orrery-plate.webp, design/mainspring/README.md); the eyepiece illustrations
-   (public/art/*.svg, design/art/build_art.py) are complete views, so no layer may mask or crop them. */
+   (public/art/*.webp, design/art/hd_art.py) are complete views, so no layer may mask or crop them. */
 :root {
   --night: #0f1a2e;
   --night-deep: #0a1222;

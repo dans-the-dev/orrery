@@ -10,7 +10,7 @@ export function PageHead({ kicker, title, lead, art, titleClass }: { kicker: str
         <h1 className={titleClass}><span className="rl"><span>{title}</span></span></h1>
         {lead ? <div className="page-head-lead">{lead}</div> : null}
       </div>
-      <img className="page-head-art" src={`/art/${art}.svg`} alt="" aria-hidden="true" />
+      <img className="page-head-art" src={`/art/${art}.webp`} alt="" aria-hidden="true" />
     </header>
   );
 }

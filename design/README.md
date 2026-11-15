@@ -20,8 +20,17 @@ headings; **Hanken Grotesk** for text and controls; **IBM Plex Mono** for addres
 Material: a navy ground with a faint guilloché engraving (`--engrave` in `mainspring.css`), silver hairlines, 8 px
 radius buttons, a rose gold primary action with navy text. Header: a full-width bar flush with the top, one hairline
 under it, the ring mark and spaced wordmark on the left, links in the middle (the current page underlined in rose gold),
-then the social icons, a thin divider and an outlined "Connect wallet". Every illustration is an eyepiece view (a navy
-disc with a rose gold dial ring) or a plate (a navy panel), so pages never crop or mask them.
+then the social icons, a thin divider and an outlined "Connect wallet". The mark is "Orbit O" (owner's pick on 2026-11-15 from three
+concepts in `design/mainspring/logo/`): a cut serif O with its stress tilted, one orbit crossing in front of it through
+a gap masked out of the O, and a body riding the orbit. Every illustration is an HD photograph of a piece of a fine watch,
+made like the hero plate (ElevenLabs `flux-3-image` with the plate as style reference, two variations each, sources in
+`design/mainspring/hd/`, picks and processing in `design/art/hd_art.py`). Square views are cut out (ElevenLabs
+birefnet) and float on transparency on light and dark sections; the three 400x300 cards are full photographs. Plot sets
+a bound on the dial with a ruby stop, Pay turns the gear train and releases a coin, Read is a watchmaker's loupe, Sign
+the caseback seal; the caps are three chronograph registers, the delay a timing bezel, allowed calls a route of
+jewels; ORRY pages show the hourglass (burn), two trains winding one barrel (claim), the balance wheel with coins
+(earn), baton markers (leaderboard) and the wound mainspring (stake). Vector drafts of the same set stay in
+`design/art/vector/` (`build_art.py`). Pages never crop or mask any of them.
 
 Signature object: the hero plate `services/packages/web/public/art/orrery-plate.webp`, a photographed rose gold orrery
 (ElevenLabs `flux-3-image`, source in `design/mainspring/plates/`), with the live reading console in smoked glass over it.
@@ -29,7 +38,7 @@ Signature object: the hero plate `services/packages/web/public/art/orrery-plate.
 Files:
 
 - `services/packages/web/app/styles/mainspring.css` holds the theme, loaded last.
-- `services/packages/web/components/Brand.tsx` draws the header mark; `public/art/mark.svg`, `app/icon.png` and
+- `services/packages/web/components/Brand.tsx` draws the header mark (Orbit O); `public/art/mark.svg`, `app/icon.png` and
   `app/apple-icon.png` are the same mark on a navy tile.
 - `design/art/build_art.py` writes every illustration in `services/packages/web/public/art/*.svg`.
 - `public/og.png` is the share image (plate, headline, rose gold band).
