@@ -72,8 +72,8 @@ if (!shotsOnly) {
 await alice.page.goto(`${base}/predict`, { waitUntil: "networkidle" });
 await connect(alice.page);
 await alice.page.locator("#predict-strike").fill("360");
-await alice.page.getByRole("button", { name: "Open the market" }).click();
-say(await notice(alice.page, /Market created/));
+await alice.page.getByRole("button", { name: "Start the market" }).click();
+say(await notice(alice.page, /Market opened/));
 await alice.page.waitForTimeout(4000);
 await alice.page.reload({ waitUntil: "networkidle" });
 await connect(alice.page);
@@ -101,8 +101,8 @@ await alice.page.getByText(/Chainlink/).first().waitFor({ timeout: 30000 });
 await alice.page.getByRole("tab", { name: "Sell" }).click();
 await alice.page.locator("#limit-amt").fill("1");
 await alice.page.locator("#limit-price").fill("350");
-await alice.page.getByRole("button", { name: /^Sign sell order/ }).click();
-say(await notice(alice.page, /Order placed/));
+await alice.page.getByRole("button", { name: /^Sign the sell order/ }).click();
+say(await notice(alice.page, /Order on record/));
 // the keeper fills it on its next pass; the indexer records the fill
 let status = "";
 for (let i = 0; i < 30; i++) {

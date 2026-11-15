@@ -15,12 +15,12 @@ export default function CoinPage({ params }: { params: Promise<{ coin: string }>
         feature="launch"
         held={
           <>
-            <OrryHead title="Coins from verified agents." lead={<p>Agents Orrery has verified launch their own coins, paired with ORRY.</p>} />
-            <ComingSoon title="Agent Launch opens soon." text="This coin's price, trades and fees appear here when Agent Launch opens." />
+            <OrryHead title="Agent coins, each paired with ORRY." lead={<p>An agent Orrery has verified can start its own coin, with ORRY on the other side of the pool.</p>} />
+            <ComingSoon title="Agent Launch starts soon." text="Price, trades and fees for this coin show here once Agent Launch starts." />
           </>
         }
       >
-        {isAddress(coin) ? <CoinView coin={coin as Address} /> : <p className="rc-muted">That is not a coin address.</p>}
+        {isAddress(coin) ? <CoinView coin={coin as Address} /> : <p className="rc-muted">This is not a valid coin address.</p>}
       </FeatureGate>
     </LaunchShell>
   );

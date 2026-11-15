@@ -49,7 +49,7 @@ async function act(name, timeoutMs = 240_000) {
   const end = Date.now() + timeoutMs;
   while (Date.now() < end) {
     const n = await notice();
-    if (n !== before && /: done\.|did not go through|closed/.test(n)) return n;
+    if (n !== before && /: done\.|was not completed|closed/.test(n)) return n;
     await page.waitForTimeout(1000);
   }
   return `TIMEOUT, last notice: ${await notice()}`;
@@ -67,9 +67,9 @@ await page.getByRole("button", { name: "Connect wallet", disabled: false }).firs
 await page.waitForTimeout(2500);
 await page.screenshot({ path: join(out, "op-1-start.png"), fullPage: true });
 
-must("1 create account (2 confirmations)", await act(/^Create my account$/));
-const account = await page.getByPlaceholder("0x… your Safe").inputValue();
-must("2 register agent", await act(/^Register a new agent$/));
+must("1 create account (2 confirmations)", await act(/^Create a Safe$/));
+const account = await page.getByPlaceholder("0x… Safe address").inputValue();
+must("2 register agent", await act(/^Register an identity$/));
 const agentId = await page.getByPlaceholder("1", { exact: true }).inputValue();
 say(`   account ${account}, agent #${agentId}`);
 await page.locator(".editor").waitFor({ timeout: 60_000 });
@@ -78,16 +78,16 @@ say(`   steps: ${await steps()}`);
 must("3 bind identity", await act(/^Bind identity$/));
 await page.waitForTimeout(3000);
 
-await page.getByRole("button", { name: "Create the signer" }).click();
+await page.getByRole("button", { name: "Generate a signer" }).click();
 const dl = page.waitForEvent("download");
-await page.getByRole("button", { name: "Download the key file" }).click();
+await page.getByRole("button", { name: "Save the key file" }).click();
 const file = join(out, "agent.env");
 await (await dl).saveAs(file);
 const env = Object.fromEntries(readFileSync(file, "utf8").split("\n").filter((l) => l && !l.startsWith("#")).map((l) => l.split("=")));
 say(`4 key file saved: ${Object.keys(env).join(", ")}`);
 const openBtn = page.getByRole("button", { name: /^Open session$/ });
 say(`   open session before the box is ticked: ${(await openBtn.isDisabled()) ? "disabled" : "ENABLED"}`);
-await page.getByLabel(/The key file is saved/).check();
+await page.getByLabel(/I saved the key file/).check();
 say(`   limits: per payment ${await page.locator("label", { hasText: "Per payment" }).locator("input").inputValue()}, per day ${await page.locator("label", { hasText: "Per day" }).locator("input").inputValue()}, float ${await page.locator("label", { hasText: "Float ceiling" }).locator("input").inputValue()}, expiry ${await page.locator("label", { hasText: "Policy expiry" }).locator("input").inputValue()}`);
 await page.screenshot({ path: join(out, "op-2-before-session.png"), fullPage: true });
 must("5 open session", await act(/^Open session$/));
@@ -114,7 +114,7 @@ if (r.account.toLowerCase() !== account.toLowerCase() || r.float !== "1000000" |
 await page.reload({ waitUntil: "load" });
 await page.getByRole("button", { name: "Connect wallet", disabled: false }).first().click().catch(() => {});
 await page.locator(".editor").waitFor({ timeout: 60_000 });
-say(`10 after reload: account ${await page.getByPlaceholder("0x… your Safe").inputValue()}, agent ${await page.getByPlaceholder("1", { exact: true }).inputValue()}`);
+say(`10 after reload: account ${await page.getByPlaceholder("0x… Safe address").inputValue()}, agent ${await page.getByPlaceholder("1", { exact: true }).inputValue()}`);
 await page.goto(base + "/signer", { waitUntil: "load" });
 await page.getByLabel(/Paying address or transaction hash/).fill(hash);
 await page.getByRole("button", { name: "Look up" }).click();

@@ -50,25 +50,25 @@ const tokenAbi = parseAbi([
 export function parseDatasetQuery(cfg: Config, id: DatasetId, raw: Record<string, unknown>): DatasetQuery | { error: string } {
   const info = DATA_CATALOG[id];
   const view = raw.view === undefined || raw.view === "" ? info.views[0]! : String(raw.view);
-  if (!info.views.includes(view)) return { error: `Pass view= one of: ${info.views.join(", ")}.` };
+  if (!info.views.includes(view)) return { error: `view expects one of: ${info.views.join(", ")}.` };
   const limitRaw = raw.limit === undefined || raw.limit === "" ? 100 : Number(raw.limit);
-  if (!Number.isInteger(limitRaw) || limitRaw < 1 || limitRaw > cfg.data!.maxLimit) return { error: `Pass a limit from 1 to ${cfg.data!.maxLimit}.` };
+  if (!Number.isInteger(limitRaw) || limitRaw < 1 || limitRaw > cfg.data!.maxLimit) return { error: `limit must be between 1 and ${cfg.data!.maxLimit}.` };
   const before = raw.before === undefined || raw.before === "" ? null : String(raw.before);
-  if (before !== null && !/^\d{1,20}(:\d{1,9})?$/.test(before)) return { error: "Pass before= as the next value of the previous page." };
+  if (before !== null && !/^\d{1,20}(:\d{1,9})?$/.test(before)) return { error: "before expects the next value from the previous page." };
   const filters: Record<string, string> = {};
   for (const k of Object.keys(raw)) {
     if (k === "view" || k === "limit" || k === "before") continue;
-    if (!info.filters.includes(k)) return { error: `Unknown filter "${k}". This dataset takes: ${info.filters.join(", ") || "no filters"}.` };
+    if (!info.filters.includes(k)) return { error: `Filter "${k}" is not supported here. Supported filters: ${info.filters.join(", ") || "none"}.` };
     const v = String(raw[k] ?? "").trim();
     if (!v) continue;
     if (k === "agentId" || k === "source") {
-      if (!/^\d{1,78}$/.test(v)) return { error: `Pass ${k} as a whole number.` };
+      if (!/^\d{1,78}$/.test(v)) return { error: `${k} expects a whole number.` };
     } else if (k === "merchant" || k === "payer" || k === "asset" || k === "token") {
-      if (!/^0x[0-9a-fA-F]{40}$/.test(v)) return { error: `Pass ${k} as a 0x address.` };
+      if (!/^0x[0-9a-fA-F]{40}$/.test(v)) return { error: `${k} expects a 0x address.` };
     } else if (k === "symbol") {
-      if (!/^[A-Za-z0-9.]{1,12}$/.test(v)) return { error: "Pass a stock symbol such as TSLA." };
+      if (!/^[A-Za-z0-9.]{1,12}$/.test(v)) return { error: "symbol expects a stock ticker, e.g. TSLA." };
     } else if (k === "kind") {
-      if (!/^[a-z-]{1,24}$/.test(v)) return { error: "Pass a kind from the dataset's list." };
+      if (!/^[a-z-]{1,24}$/.test(v)) return { error: "kind must be one listed for this dataset." };
     }
     filters[k] = k === "symbol" ? v.toUpperCase() : /^0x/.test(v) ? v.toLowerCase() : v;
   }
@@ -432,7 +432,7 @@ async function ponsLaunches(ctx: DatasetCtx, q: DatasetQuery): Promise<DatasetRe
 
 async function orryEconomy(ctx: DatasetCtx, q: DatasetQuery): Promise<DatasetResult> {
   const { cfg, sql } = ctx;
-  if (!cfg.orry) throw new DatasetUnavailable("ORRY economy data starts when the ORRY contracts are live.");
+  if (!cfg.orry) throw new DatasetUnavailable("ORRY economy data begins once the ORRY contracts open.");
   const orryCursor = await cursorOf(sql, "orry");
   // burns come from three indexers; each record is at or before its own indexer's cursor, so the highest one bounds all
   const asOfBlock = q.view === "burns" ? [orryCursor, await cursorOf(sql, "facilitator"), await cursorOf(sql, "data")].reduce((a, b) => (a > b ? a : b)) : orryCursor;

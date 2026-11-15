@@ -25,7 +25,7 @@ function toFixed(v: bigint, len: number): Uint8Array {
     out[i] = Number(x & 0xffn);
     x >>= 8n;
   }
-  if (x !== 0n) throw new Error("value does not fit");
+  if (x !== 0n) throw new Error("The value is too large for one field.");
   return out;
 }
 

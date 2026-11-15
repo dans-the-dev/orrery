@@ -48,20 +48,20 @@ const log = (m) => console.log(m);
 // orange member roles in the member list.
 const ROLE = { name: "Orrery Booster", color: 0xb46bff, hoist: true, mentionable: false, permissions: P.EMBED | P.ATTACH | P.EXT_STICKERS };
 // Approved by the owner on 2026-11-09 ("Setuju, posting"); posted and pinned once when the lounge exists.
-const LOUNGE_INFO = `**Welcome to #boosters**
-Thank you for boosting Orrery. Every boost keeps the server upgraded for the whole community.
+const LOUNGE_INFO = `**#boosters · start here**
+Thanks for boosting Orrery. Your boosts keep the server's upgrades on for everyone.
 
-**What boosters get**
-• **Orrery Booster role:** a violet name and your own section in the member list.
-• **Images and files** in every room you can write in, with previews for official links.
-• **Release previews:** the next release card and the features coming up land here before #announcements.
-• **First tester invites:** when a new feature is ready to try on the development network, boosters hear first.
-• **Monthly thank-you:** once a month the team thanks its boosters in #announcements.
+**Booster perks**
+• **Orrery Booster role:** a violet name and a section of your own in the member list.
+• **Images and files** in each room where you can post, plus previews for official links.
+• **Release previews:** upcoming release cards and features show up here ahead of #announcements.
+• **First tester invites:** boosters are first to hear when a new feature is ready to try on the development network.
+• **Monthly thanks:** the team thanks its boosters in #announcements each month.
 
 **Coming soon**
-• **Booster achievement** on the Achievement Board, paid from the Reward Pool. Link your wallet with /verify to be ready.
-• **Agent Launch booster window:** boosters with a linked wallet get a short early window on new launches.`;
-const LOUNGE = { name: "boosters", topic: "The boosters' lounge: release previews before #announcements and first invites to test new features. Thank you for boosting Orrery.", slowmode: 5 };
+• **Booster achievement** on the Achievement Board, paid from the Reward Pool. Link a wallet with /verify ahead of time.
+• **Agent Launch booster window:** boosters with a linked wallet get a brief early window on new launches.`;
+const LOUNGE = { name: "boosters", topic: "Boosters and the team. Release previews land here ahead of #announcements, along with first invites to try new features. Thanks for boosting Orrery.", slowmode: 5 };
 const STAFF = ["Admin", "Core Team", "Moderator"];
 
 const isBoosterRole = (r) => r.tags && "premium_subscriber" in r.tags;
@@ -105,7 +105,7 @@ async function apply(st) {
   if (id) {
     const me = await call("GET", "/users/@me");
     const pins = await call("GET", `/channels/${id}/pins`);
-    if (!pins.some((m) => m.author?.id === me.id && m.content.startsWith("**Welcome to #boosters**"))) {
+    if (!pins.some((m) => m.author?.id === me.id && m.content.startsWith("**#boosters · start here**"))) {
       const m = await call("POST", `/channels/${id}/messages`, { content: LOUNGE_INFO, flags: 4, allowed_mentions: { parse: [] } });
       await call("PUT", `/channels/${id}/pins/${m.id}`);
       log("lounge info posted and pinned");

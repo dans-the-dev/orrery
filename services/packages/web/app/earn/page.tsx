@@ -4,7 +4,7 @@ import { ComingSoon, OrryHead } from "@/components/orry/parts";
 import { EarnView } from "@/components/orry/EarnView";
 import { OrryShell } from "@/components/orry/shell";
 
-export const metadata = { title: "Orrery · Earn", description: "Add ORRY with ETH or USDG. Each ORRY pool has its own Earn share, earning from every swap in that pool." };
+export const metadata = { title: "Orrery · Earn", description: "Pair ORRY with ETH or USDG. Every ORRY pool issues its own Earn share, paid from each swap that pool handles." };
 
 export default function EarnPage() {
   return (
@@ -13,8 +13,8 @@ export default function EarnPage() {
         feature="earn"
         held={
         <>
-          <OrryHead title="Add ORRY with ETH or USDG." lead={<p>Each ORRY pool has its own Earn share, earning from every swap in that pool.</p>} />
-          <ComingSoon title="Earn opens with the ORRY pools." text="Deposits and zaps appear on this page when Earn opens." />
+          <OrryHead title="Pair ORRY, collect swap fees." lead={<p>Every ORRY pool issues its own Earn share, paid from each swap that pool handles.</p>} />
+          <ComingSoon title="Earn starts with the ORRY pools." text="Deposits and zaps show here once Earn starts." />
           <EarnView exitOnly />
         </>
         }
@@ -22,11 +22,11 @@ export default function EarnPage() {
         <EarnView />
       </FeatureGate>
       <PageGuide
-        audience={"ORRY holders who want a share of swap fees."}
+        audience={"ORRY holders after a cut of swap fees."}
         steps={[
-          { title: "Pick a pool", text: "ORRY/ETH or ORRY/USDG. Each pool has its own Earn share." },
-          { title: "Deposit", text: "Add both sides at the pool price, or one side with Zap. What the pool cannot take comes back in the same transaction." },
-          { title: "Collect fees", text: "85% of every swap fee in the pool streams to Earn shares over 7 days. Claim any time; a deposit can be withdrawn 15 minutes after it lands." },
+          { title: "Choose a pool", text: "ORRY/ETH or ORRY/USDG, each with an Earn share of its own." },
+          { title: "Deposit", text: "Supply both sides at the pool price, or a single side through Zap. Anything the pool does not absorb returns to you in the same transaction." },
+          { title: "Collect fees", text: "Earn shares receive 85% of each swap fee in the pool, streamed over 7 days. Claim whenever you like, and withdraw a deposit from 15 minutes after it lands." },
         ]}
       />
     </OrryShell>

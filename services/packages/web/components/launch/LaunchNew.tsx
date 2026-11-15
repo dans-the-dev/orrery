@@ -65,42 +65,42 @@ export function LaunchNew() {
     const until = BigInt(e.needs.lockUntil + 3600);
     await tx.run("Lock stake", async ({ send }) => {
       await send({ address: ORRY.staking!, abi: iOrryStakingAbi as Abi, functionName: "extendAgentLock", args: [BigInt(e.agentId), until] });
-      return `Stake locked until ${utc(Number(until))}.`;
+      return `Lock runs until ${utc(Number(until))}.`;
     });
   }
 
   async function launch() {
     if (!address || !pub || !e) return;
     await tx.run("Launch", async ({ send, step, ensureAllowance }) => {
-      step("Finding the coin's address.");
+      step("Searching for an address for the coin.");
       let salt: `0x${string}` | undefined;
       for (let i = 0n; i < 256n && !salt; i++) {
         const s = pad(toHex(i), { size: 32 });
         const coin = (await pub.readContract({ address: AL, abi: launchAbi, functionName: "predictCoin", args: [address, s, name.trim(), symbol.trim()] })) as Address;
         if (ORRY.token && BigInt(coin) > BigInt(ORRY.token)) salt = s;
       }
-      if (!salt) throw new Error("No coin address found for this name. Try another symbol.");
+      if (!salt) throw new Error("This name gave no usable coin address. Pick a different symbol.");
       if (buyAmount > 0n) await ensureAllowance(address, AL, buyAmount, step);
-      step("Confirm the launch in your wallet.");
+      step("Approve the launch in your wallet.");
       await send({ address: AL, abi: launchAbi, functionName: "launch", args: [BigInt(e.agentId), name.trim(), symbol.trim(), salt, buyAmount, withLimit(quote, 200)] });
       const coin = (await pub.readContract({ address: AL, abi: launchAbi, functionName: "coinOfAgent", args: [BigInt(e.agentId)] })) as Address;
       router.push(`/launch/${coin}`);
-      return `${symbol.trim()} is live.`;
+      return `${symbol.trim()} is on chain.`;
     });
   }
 
   return (
     <>
       <OrryHead
-        title="Launch your agent's coin."
+        title="Give your agent a coin of its own."
         lead={
           <p>
-            One coin per verified agent. Its whole supply goes into its ORRY pool at the opening price and stays there. Stakers buy
-            first, then the pool opens to everyone.
+            Each verified agent gets one coin. The entire supply enters an ORRY pool at the opening price and remains in that pool. Stakers
+            get the first window, then trading opens to all.
           </p>
         }
       />
-      <FeeSplit label="Every trade of your coin pays 1%, and half of it goes to your agent's account" />
+      <FeeSplit label="Your coin takes 1% on each trade, and half of that is paid to your agent's account" />
       <section className="rc-panel" aria-label="Your agent">
         <div className="rc-panel-head">
           <h2>Your agent</h2>
@@ -113,29 +113,29 @@ export function LaunchNew() {
           <WalletButton />
         ) : e ? (
           <ul className="ln-checks">
-            <Check ok={controls} title="This wallet controls the agent" note="The agent's owner or its bound account launches its coin." />
-            <Check ok={e.verified} title="Verified by Orrery" action={e.verified ? null : <Link className="secondary" href="/dashboard/agents">Verify</Link>} />
-            <Check ok={e.walletBound} title="Bound account with Orrery's spending policy" note="The agent's half of every fee is paid here." />
+            <Check ok={controls} title="Connected wallet controls the agent" note="Only the owner or the bound account can launch the coin." />
+            <Check ok={e.verified} title="Orrery verification" action={e.verified ? null : <Link className="secondary" href="/dashboard/agents">Verify</Link>} />
+            <Check ok={e.walletBound} title="Bound account under Orrery's spending policy" note="The agent's half of each fee lands in this account." />
             <Check
               ok={usdOk}
-              title={`Stake worth ${(Number(e.needs.minStakeUsd) / 1e6).toLocaleString("en-US")} USD behind the agent`}
-              note={e.stake.usd !== null ? `Staked now: ${orry(BigInt(e.stake.active))} ORRY, ${orry(BigInt(e.stake.usd) * 10n ** 12n)} USD` : undefined}
+              title={`At least ${(Number(e.needs.minStakeUsd) / 1e6).toLocaleString("en-US")} USD staked behind the agent`}
+              note={e.stake.usd !== null ? `Currently ${orry(BigInt(e.stake.active))} ORRY · ${orry(BigInt(e.stake.usd) * 10n ** 12n)} USD` : undefined}
               action={usdOk ? null : <Link className="secondary" href="/stake">Stake</Link>}
             />
             <Check
               ok={lockOk}
-              title="Stake locked for 90 days"
-              note={e.stake.lockedUntil > 0 ? `Locked until ${utc(e.stake.lockedUntil)}` : undefined}
+              title="90 day stake lock"
+              note={e.stake.lockedUntil > 0 ? `Lock ends ${utc(e.stake.lockedUntil)}` : undefined}
               action={lockOk || !usdOk ? null : (
                 <button type="button" className="secondary" disabled={Boolean(tx.busy)} onClick={() => void lock()}>
-                  Lock for 90 days
+                  Lock 90 days
                 </button>
               )}
             />
-            <Check ok={e.coin === null} title="No coin launched yet" action={e.coin ? <Link className="secondary" href={`/launch/${e.coin}`}>Open its coin</Link> : null} />
+            <Check ok={e.coin === null} title="Agent has no coin yet" action={e.coin ? <Link className="secondary" href={`/launch/${e.coin}`}>View its coin</Link> : null} />
           </ul>
         ) : agentId ? (
-          <p className="rc-muted">Reading the agent…</p>
+          <p className="rc-muted">Looking up the agent…</p>
         ) : null}
       </section>
       <section className="rc-desk" aria-label="The coin">
@@ -151,11 +151,11 @@ export function LaunchNew() {
         </div>
         <AmountField
           id="launch-buy"
-          label="Your first buy, before anyone else (optional)"
+          label="Opening buy, ahead of everyone (optional)"
           unit="ORRY"
           value={buy}
           onChange={setBuy}
-          hint={`${buyAmount > 0n && quote > 0n ? `About ${orry(quote)} coins. ` : ""}${e ? `At most ${e.needs.maxFirstBuyBps / 100}% of the supply.` : ""}`}
+          hint={`${buyAmount > 0n && quote > 0n ? `Roughly ${orry(quote)} coins. ` : ""}${e ? `Up to ${e.needs.maxFirstBuyBps / 100}% of the supply.` : ""}`}
         />
         {ready ? (
           <button className="primary rc-go" type="button" disabled={!canLaunch || Boolean(tx.busy)} onClick={() => void launch()}>

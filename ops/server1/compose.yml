@@ -150,7 +150,7 @@ services:
     networks: [data]
     profiles: [discord]
 
-  # Replies to Discord questions and @OrreryHQ mentions (#reply-queue). Its own image tag, so shipping it never moves
+  # Replies to Discord questions and the Orrery X account mentions (#reply-queue). Its own image tag, so shipping it never moves
   # the other services off TAG; it starts only with the support profile. Keys sit in secrets/support/ (dir 700, uid 1000):
   # anthropic.env (required) and x-api.json (optional: without it X stays off). No ports: it only connects out.
   support:

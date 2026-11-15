@@ -32,21 +32,21 @@ export function MerchantsView() {
     <>
       <OrryHead
         kicker="Merchants"
-        title="Get paid by agents in USDG or ORRY."
+        title="Agents pay you in USDG or ORRY."
         lead={
           <p>
-            Your payment address receives x402 payments that Orrery settles. Orrery keeps {pct(20)} and forwards the rest to your wallet. Staking ORRY
-            lowers the fee.
+            Orrery settles each x402 payment into your payment address, takes {pct(20)}, and sends the remainder on to your wallet. A stake in ORRY
+            brings that fee down.
           </p>
         }
       />
       {!address ? (
-        <ExitConnect text={connected ? "Switch your wallet to this network to see your payment address." : "Connect the wallet that should receive payments."} />
+        <ExitConnect text={connected ? "Your payment address shows once the wallet is on this network." : "Connect the wallet that will receive the payments."} />
       ) : me.data ? (
         <PaymentAddress view={me.data} onChange={() => void me.refetch()} />
       ) : (
         <section className="mc-sec">
-          <h2>Your payment address</h2>
+          <h2>Payment address</h2>
           <dl className="rc-rows"><Row label="Payment address"><Fig /></Row></dl>
         </section>
       )}
@@ -70,24 +70,24 @@ export function PaymentAddress({ view, onChange }: { view: MerchantView; onChang
 
   async function create() {
     if (!ORRY.splitterFactory) return;
-    const ok = await tx.run("Create payment address", async ({ send }) => {
+    const ok = await tx.run("Payment address setup", async ({ send }) => {
       await send({ address: ORRY.splitterFactory!, abi: iMerchantSplitterFactoryAbi as Abi, functionName: "create", args: [view.merchant] });
-      return "Your payment address is ready.";
+      return "Payment address on record. It can take payments now.";
     });
     if (ok) onChange();
   }
   async function forward(token: Address, symbol: string) {
     const ok = await tx.run(`Forward ${symbol}`, async ({ send }) => {
       await send({ address: view.splitter, abi: iMerchantSplitterAbi as Abi, functionName: "forward", args: [token] });
-      return `${symbol} is on its way to your wallet.`;
+      return `${symbol} forwarded. It lands in your wallet with this block.`;
     });
     if (ok) onChange();
   }
 
   return (
     <section className="mc-sec">
-      <h2>Your payment address</h2>
-      <p className="mc-note">Use it as the <code>payTo</code> of every x402 price you publish. It belongs to your wallet and forwards to it.</p>
+      <h2>Payment address</h2>
+      <p className="mc-note">Set it as <code>payTo</code> on each x402 price you publish. Your wallet owns it, and it forwards only to your wallet.</p>
       <div className="mc-address">
         <code>{view.splitter}</code>
         <button
@@ -104,17 +104,17 @@ export function PaymentAddress({ view, onChange }: { view: MerchantView; onChang
         </button>
       </div>
       <dl className="rc-rows">
-        <Row label="Status">{view.created ? "Ready for payments" : "Not set up yet"}</Row>
-        <Row label="Orrery fee" hint={view.discountBps > 0 ? `${pct(view.discountBps)} off for your stake` : undefined}>
+        <Row label="Status">{view.created ? "Taking payments" : "Not created"}</Row>
+        <Row label="Orrery fee" hint={view.discountBps > 0 ? `${pct(view.discountBps)} lower thanks to your stake` : undefined}>
           {pct(fee)}
         </Row>
-        <Row label="Your ORRY stake">{usd(view.stakeUsd)}</Row>
+        <Row label="ORRY staked">{usd(view.stakeUsd)}</Row>
         {view.created
           ? list.map((t, i) => {
               const r = preview.data?.[i];
               const v = r?.status === "success" ? (r.result as readonly [bigint, bigint, number]) : undefined;
               return (
-                <Row key={t.address} label={`${t.symbol} waiting`} hint={v && v[0] + v[1] > 0n ? `${amount(v[1], { decimals: t.decimals, frac: 4 })} ${t.symbol} fee` : undefined}>
+                <Row key={t.address} label={`${t.symbol} to forward`} hint={v && v[0] + v[1] > 0n ? `${amount(v[1], { decimals: t.decimals, frac: 4 })} ${t.symbol} fee` : undefined}>
                   {v === undefined ? <Fig /> : `${amount(v[0] + v[1], { decimals: t.decimals, frac: t.decimals === 6 ? 2 : 4 })} ${t.symbol}`}
                 </Row>
               );
@@ -123,7 +123,7 @@ export function PaymentAddress({ view, onChange }: { view: MerchantView; onChang
         {view.settled30d.map((s) => {
           const t = list.find((x) => x.address.toLowerCase() === s.asset.toLowerCase());
           return (
-            <Row key={s.asset} label={`${t?.symbol ?? short(s.asset)} received, 30 days`} hint={`${s.payments} ${s.payments === 1 ? "payment" : "payments"}`}>
+            <Row key={s.asset} label={`${t?.symbol ?? short(s.asset)} received · 30 days`} hint={`${s.payments} ${s.payments === 1 ? "payment" : "payments"}`}>
               {amount(BigInt(s.amount), { decimals: t?.decimals ?? 18, frac: 2 })} {t?.symbol ?? ""}
             </Row>
           );
@@ -132,7 +132,7 @@ export function PaymentAddress({ view, onChange }: { view: MerchantView; onChang
       <div className="mc-actions">
         {!view.created ? (
           <button className="primary" type="button" disabled={Boolean(tx.busy) || !ORRY.splitterFactory} onClick={() => void create()}>
-            Create payment address
+            Set up payment address
           </button>
         ) : (
           list.map((t, i) => {
@@ -141,13 +141,13 @@ export function PaymentAddress({ view, onChange }: { view: MerchantView; onChang
             const has = v !== undefined && v[0] + v[1] > 0n;
             return (
               <button key={t.address} className="secondary" type="button" disabled={Boolean(tx.busy) || !has} onClick={() => void forward(t.address, t.symbol)}>
-                Forward {t.symbol} now
+                Send {t.symbol} to wallet
               </button>
             );
           })
         )}
       </div>
-      {view.created ? <p className="mc-note">Orrery&apos;s keeper also forwards on its own. Fees paid in ORRY are burned.</p> : null}
+      {view.created ? <p className="mc-note">The Orrery keeper forwards balances on a schedule as well. Every fee paid in ORRY is burned.</p> : null}
       <NoticeLine notice={tx.notice} />
     </section>
   );
@@ -163,16 +163,16 @@ export function Profile({ view, onSaved }: { view: MerchantView; onSaved: () => 
 
   async function save() {
     setBusy(true);
-    setNotice({ tone: "", text: "Sign the message in your wallet." });
+    setNotice({ tone: "", text: "Your wallet asks you to sign a message." });
     try {
       const n = await get<{ nonce: string; message: string }>(`/v1/merchants/profile/nonce?address=${view.merchant}`);
       const signature = await signMessageAsync({ message: n.message });
       await post("/v1/merchants/profile", { merchant: view.merchant, nonce: n.nonce, signature, name, url, description });
-      setNotice({ tone: "ok", text: "Profile saved." });
+      setNotice({ tone: "ok", text: "Profile on record." });
       onSaved();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "Request closed in the wallet." : msg || "The profile was not saved. Try again." });
+      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "The wallet request was dismissed." : msg || "The profile did not save. Try saving once more." });
     } finally {
       setBusy(false);
     }
@@ -182,8 +182,8 @@ export function Profile({ view, onSaved }: { view: MerchantView; onSaved: () => 
     <section className="mc-sec">
       <h2>Public profile</h2>
       <p className="mc-note">
-        Shown on your merchant record{view.badge ? " and in the directory" : `, and in the directory once your stake reaches ${usd(view.badgeMinStakeUsd)}`}. Saving signs a
-        message; it sends no transaction.
+        Appears on your merchant record{view.badge ? " and listed in the directory" : `, and joins the directory when your stake reaches ${usd(view.badgeMinStakeUsd)}`}. Saving
+        asks for a signed message only, with no transaction and no gas.
       </p>
       <div className="mc-form">
         <label className="field">
@@ -195,7 +195,7 @@ export function Profile({ view, onSaved }: { view: MerchantView; onSaved: () => 
           <input value={url} maxLength={200} placeholder="https://" onChange={(e) => setUrl(e.target.value)} />
         </label>
         <label className="field mc-wide">
-          What agents can buy
+          What you sell to agents
           <textarea value={description} maxLength={200} onChange={(e) => setDescription(e.target.value)} />
         </label>
       </div>
@@ -215,14 +215,14 @@ export function Integration({ payTo }: { payTo?: Address }) {
   const usdgKind = kinds.find((k) => k.extra.assetTransferMethod === "eip3009");
   const orryKind = kinds.find((k) => k.extra.assetTransferMethod === "permit2");
   const network = `eip155:${CHAIN_ID}`;
-  const to = payTo ?? "your payment address";
+  const to = payTo ?? "<payment address>";
   const lines = [
-    `// x402 price for one request, paid in USDG`,
+    `// one x402 price per request, settled in USDG`,
     `{`,
     `  scheme: "exact",`,
     `  network: "${usdgKind?.network ?? network}",`,
     `  asset: "${usdgKind?.asset ?? ADDRESSES.usdg ?? ""}",`,
-    `  amount: "10000", // 0.01 USDG, your price`,
+    `  amount: "10000", // 0.01 USDG, set your own`,
     `  payTo: "${to}",`,
     `  maxTimeoutSeconds: 120,`,
     `  extra: { name: "${usdgKind?.extra.name ?? ""}", version: "${usdgKind?.extra.version ?? ""}" },`,
@@ -230,16 +230,16 @@ export function Integration({ payTo }: { payTo?: Address }) {
   ];
   return (
     <section className="mc-sec">
-      <h2>Take payments in your API</h2>
+      <h2>Charge from your API</h2>
       <p className="mc-note">
-        Point your x402 middleware at Orrery&apos;s facilitator{API_URL ? <> at <code>{`${API_URL}/v1/x402`}</code></> : null} and publish prices with your payment
-        address as <code>payTo</code>. Verify and settle follow the x402 facilitator API.
+        Send your x402 middleware to the Orrery facilitator{API_URL ? <> at <code>{`${API_URL}/v1/x402`}</code></> : null}, and list prices whose <code>payTo</code> is
+        your payment address. The verify and settle calls match the standard x402 facilitator API.
       </p>
       <pre className="mc-code"><code>{lines.join("\n")}</code></pre>
       {orryKind ? (
         <p className="mc-note">
-          ORRY prices use <code>assetTransferMethod: &quot;permit2&quot;</code> with the proxy <code>{orryKind.extra.proxy}</code>. Payers sign one Permit2 message per
-          payment; <code>signPermit2Payment</code> in the Orrery SDK builds it.
+          For ORRY prices, set <code>assetTransferMethod: &quot;permit2&quot;</code> and the proxy <code>{orryKind.extra.proxy}</code>. Each payment carries its own
+          signed Permit2 message, which <code>signPermit2Payment</code> in the Orrery SDK prepares.
         </p>
       ) : null}
     </section>
@@ -252,11 +252,11 @@ function Directory() {
   return (
     <section className="mc-sec">
       <h2>Directory</h2>
-      <p className="mc-note">Merchants with a profile and a stake at the badge level, largest stake first.</p>
+      <p className="mc-note">Merchants holding a profile and a badge level stake, sorted by stake.</p>
       {isLoading ? (
         <dl className="rc-rows"><Row label="Merchants"><Fig /></Row></dl>
       ) : list.length === 0 ? (
-        <p className="mc-note">The first listed merchants appear here.</p>
+        <p className="mc-note">Merchants are listed here once they reach the badge level.</p>
       ) : (
         <ul className="mc-dir">
           {list.map((m) => (

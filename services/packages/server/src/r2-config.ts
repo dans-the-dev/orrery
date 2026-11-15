@@ -26,7 +26,7 @@ export interface R2Config {
 function optAddr(env: NodeJS.ProcessEnv, name: string): Address | null {
   const v = env[name];
   if (!v) return null;
-  if (!isAddress(v)) throw new Error(`${name} must be a 0x address`);
+  if (!isAddress(v)) throw new Error(`${name} expects a 0x address`);
   return getAddress(v);
 }
 

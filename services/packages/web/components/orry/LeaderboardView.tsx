@@ -19,8 +19,8 @@ export function LeaderboardView() {
   return (
     <>
       <OrryHead
-        title="Top stakers and top earners."
-        lead={<p>Ranked by ORRY staked and by everything earned from Earn and Stake, claimed or still pending, valued in ORRY at each pool&apos;s price. Addresses show their first and last characters.</p>}
+        title="Who stakes the most, who earns the most."
+        lead={<p>Two rankings, by ORRY staked and by total earnings from Earn and Stake (collected or pending), each priced in ORRY at its pool rate. Each address is shortened to its first and last characters.</p>}
       />
       <section className="rc-panel rc-board" aria-label="Leaderboard">
         <Segmented
@@ -35,7 +35,7 @@ export function LeaderboardView() {
         {isLoading ? (
           <p className="rc-muted">…</p>
         ) : rows.length === 0 ? (
-          <p className="rc-muted">{isError ? "The leaderboard appears here in a moment." : kind === "stakers" ? "The first stakers appear here as soon as they stake." : "The first earners appear here as soon as rewards stream."}</p>
+          <p className="rc-muted">{isError ? "Rankings load in a moment." : kind === "stakers" ? "Stakers are ranked here as each stake lands." : "Earners are ranked here as rewards begin to stream."}</p>
         ) : (
           <table className="rc-table">
             <thead>
@@ -44,7 +44,7 @@ export function LeaderboardView() {
                 <th scope="col">Address</th>
                 {hasStake ? <th scope="col" className="num">Staked</th> : null}
                 {hasEarned ? <th scope="col" className="num">Earned</th> : null}
-                {hasValue ? <th scope="col" className="num">Value in ORRY</th> : null}
+                {hasValue ? <th scope="col" className="num">ORRY value</th> : null}
               </tr>
             </thead>
             <tbody>

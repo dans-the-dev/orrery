@@ -35,7 +35,7 @@ export default function SignerSearch() {
       const paid = transfers.find((t) => ADDRESSES.usdg && t.address.toLowerCase() === ADDRESSES.usdg.toLowerCase()) ?? transfers[0];
       router.push(`/signer/${getAddress(paid ? paid.args.from : r.from)}`);
     } catch {
-      setNotice("That transaction was not found on this network. Check the hash, or paste the paying address.");
+      setNotice("No transaction with that hash on this network. Confirm the hash, or paste the paying address instead.");
     } finally {
       setBusy(false);
     }
@@ -45,39 +45,39 @@ export default function SignerSearch() {
       <Nav />
       <main className="signer-main">
         <PageHead
-          kicker="Signer lookup"
-          title="Who paid you, and within what limits."
-          lead={<p>Enter the address that sent the payment. The record is read from the chain.</p>}
+          kicker="Signer readings"
+          title="Read the orbit of any paying address."
+          lead={<p>Paste the address behind a payment. Every value below comes from chain state at the moment you ask.</p>}
           art="signer-lookup"
         />
         <PageGuide
-          audience="Merchants, and anyone who received USDG from an AI agent."
+          audience="Merchants, and anyone an AI agent has paid in USDG."
           steps={[
-            { title: "Copy the payment", text: "Paste the paying address, or the transaction hash of the payment. The payer is read from the USDG transfer inside it." },
-            { title: "Look it up here", text: "Open to anyone, no key needed. The record is read straight from the chain, nothing is cached by us." },
-            { title: "Check it in code", text: <>For a signed answer inside your own service, buy check credits and call <code>checkPayer</code>. <Link href="/dashboard/credits">Credits</Link></> },
+            { title: "Bring the payment", text: "Paste the paying address or the payment's transaction hash. With a hash, the payer is taken from the USDG transfer it contains." },
+            { title: "Read it here", text: "Free and open, no key required. Values come straight from chain state, and Orrery keeps no cached copy." },
+            { title: "Read it from your service", text: <>Need a signed reading inside your own backend? Buy check credits and call <code>checkPayer</code>. <Link href="/dashboard/credits">Credits</Link></> },
           ]}
         />
         <div className="with-preview">
           <form className="panel lookup-form" onSubmit={(e) => { e.preventDefault(); void lookUp(); }}>
-            <h2>Look up a payer</h2>
+            <h2>Take a reading</h2>
             <div className="row">
-              <label className="field">Paying address or transaction hash<input value={v} onChange={(e) => setV(e.target.value)} placeholder="0x…" spellCheck={false} /></label>
-              <button className="primary" type="submit" disabled={!valid || busy}>{busy ? "Reading" : "Look up"}</button>
+              <label className="field">Payer address or payment hash<input value={v} onChange={(e) => setV(e.target.value)} placeholder="0x…" spellCheck={false} /></label>
+              <button className="primary" type="submit" disabled={!valid || busy}>{busy ? "Reading" : "Read"}</button>
             </div>
             {notice ? <div className="notice error" role="status">{notice}</div> : null}
           </form>
           <ResultPreview
-            title="What the record shows"
+            title="What a reading contains"
             rows={[
-              ["Session", "Active, paused or revoked"],
-              ["Agent", "ERC-8004 ID and its owner"],
-              ["Per payment", "The largest single payment allowed"],
-              ["Per day", "Daily cap and what is spent today"],
-              ["Float ceiling", "Most the signer can hold at once"],
-              ["Endpoints", "Latest live probe of the agent"],
+              ["Session", "Active, paused or revoked state"],
+              ["Agent", "ERC-8004 identity with owner"],
+              ["Per payment", "Ceiling on any one payment"],
+              ["Per day", "Daily cap beside today's spend"],
+              ["Float ceiling", "Highest balance the signer may hold"],
+              ["Endpoints", "Most recent probe of the agent's endpoints"],
             ]}
-            foot="An address with no Orrery session shows that plainly, so an unknown payer is easy to spot."
+            foot="An address without an Orrery session says so in the first line, so a stranger stands out at once."
           />
         </div>
       </main>

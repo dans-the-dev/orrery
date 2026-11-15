@@ -242,12 +242,12 @@ export function useSeal() {
   }) {
     let id: string | undefined;
     const ok = await tx.run("Seal order", async ({ send, step }) => {
-      if (!pub) throw new Error("No connection to the network.");
+      if (!pub) throw new Error("The network did not answer. Retry in a few seconds.");
       for (const a of p.approvals) {
         if (a.amount <= 0n) continue;
         const current = await pub.readContract({ address: a.token, abi: erc20Abi, functionName: "allowance", args: [p.account, p.market] });
         if (current >= a.amount) continue;
-        step(`Approve ${a.symbol} in your wallet.`);
+        step(`Let this market use your ${a.symbol}. Approve in your wallet.`);
         await send({ address: a.token, abi: erc20Abi as Abi, functionName: "approve", args: [p.market, a.amount] });
       }
       // The batch is read after the approvals, from the chain's own clock: the commitment must name the batch it lands in.
@@ -255,7 +255,7 @@ export function useSeal() {
       const ph = phaseAt(head, p.timing.start, p.timing.commitSeconds, p.timing.revealSeconds);
       if (!ph || !ph.inCommit || ph.commitEnd - head < 3) {
         const wait = ph ? (ph.inCommit ? ph.left + p.timing.revealSeconds : ph.left) : 0;
-        throw new Error(`This batch is closing. The next one opens in ${span(Math.max(1, wait))}; seal the order then.`);
+        throw new Error(`Sealing for this batch is ending. Seal in the next one, which opens in ${span(Math.max(1, wait))}.`);
       }
       const batch = ph.batch;
       const salt = randomSalt();
@@ -279,22 +279,22 @@ export function useSeal() {
         state: "sealing",
         createdAt: Math.floor(Date.now() / 1000),
       });
-      step("Seal the order in your wallet.");
+      step("Sign the seal in your wallet.");
       try {
         const hash = await send({ address: p.market, abi: marketAbi, functionName: "commit", args: [commitment] });
         const r = await pub.getTransactionReceipt({ hash });
         updateOrder(id, { state: "sealed", commitTx: hash, commitBlock: r.blockNumber.toString() });
         if (p.relay) {
-          step("Handing the order to Orrery's relay.");
+          step("Passing the order to Orrery's relay.");
           try {
             const r = await relayReveal({ market: p.market, account: p.account, batch: batch.toString(), order: { ...p.order, amountIn: p.order.amountIn.toString(), limitPrice: p.order.limitPrice.toString(), mode: p.order.mode === 1 ? "swap" : "limit" }, salt });
             if (r.status === "failed") throw new Error(r.reason ?? "relay refused");
             updateOrder(id, { relay: true, relayStatus: r.status });
           } catch {
             // The order stays with this page, which reveals it as usual.
-            return `Sealed in batch ${batch}. The relay did not take it, so your wallet asks you to reveal it from this page.`;
+            return `Your order is sealed in batch ${batch}. The relay could not take it, so your wallet prompts the reveal here instead.`;
           }
-          return `Sealed in batch ${batch}. Orrery's relay reveals it during the reveal window; you can close this page.`;
+          return `Your order is sealed in batch ${batch}. Orrery's relay reveals it inside the reveal window, so this tab may close.`;
         }
       } catch (e) {
         removeOrder(id);
@@ -302,7 +302,7 @@ export function useSeal() {
       } finally {
         sealing.delete(id);
       }
-      return `Sealed in batch ${batch}. When its reveal window opens, your wallet asks you to reveal it from this page.`;
+      return `Your order is sealed in batch ${batch}. Once that reveal window opens, your wallet prompts the reveal here.`;
     });
     return ok ? id : undefined;
   }
@@ -336,7 +336,7 @@ export function useAutoReveal(account?: Address) {
       let hash: Hex | undefined;
       const ok = await tx.run(manual ? "Reveal" : `Reveal ${o.symbol} order`, async ({ send }) => {
         hash = await send({ address: o.market, abi: marketAbi, functionName: "reveal", args: [order, o.salt] });
-        return `${o.symbol} order revealed in batch ${o.batch}. It settles when the batch clears.`;
+        return `Your ${o.symbol} order is revealed in batch ${o.batch}. Settlement follows when the batch clears.`;
       });
       // A request closed in the wallet (or any failure) waits for the person's click instead of reopening the wallet.
       if (ok && hash) updateOrder(o.id, { state: "revealed", revealTx: hash });

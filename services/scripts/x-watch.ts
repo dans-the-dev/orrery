@@ -1,5 +1,5 @@
 /**
- * Fresh-post watcher for @OrreryHQ (docs/launch/x-playbook.md): waits until an account on the watch list, or a larger
+ * Fresh-post watcher for the Orrery X account (docs/launch/x-playbook.md): waits until an account on the watch list, or a larger
  * account on our keywords, publishes a post we could reply to while it is fresh, prints the candidates as JSON lines and
  * exits. It posts nothing. Replies go out by hand or through the logged-in browser.
  *   tsx scripts/x-watch.ts [--minutes 180] [--every 15]

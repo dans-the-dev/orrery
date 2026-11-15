@@ -9,15 +9,15 @@ if (!/^\d{15,}$/.test(appId ?? "") || !/^\d{15,}$/.test(guildId ?? "")) throw ne
 const token = readFileSync(join(homedir(), ".secrets/orrery/discord-bot.txt"), "utf8").trim();
 const STRING = 3;
 const commands = [
-  { name: "payer", description: "Check an address that paid you: session, caps and spend today.", options: [{ type: STRING, name: "address", description: "Paying address (0x...)", required: true }] },
-  { name: "agent", description: "Read an agent's limits on its account.", options: [
-    { type: STRING, name: "id", description: "ERC-8004 agent ID", required: true },
-    { type: STRING, name: "account", description: "The agent's account (0x...)", required: true },
+  { name: "payer", description: "Take a reading of an address that paid you: session, caps and today's spend.", options: [{ type: STRING, name: "address", description: "Address that paid you (0x...)", required: true }] },
+  { name: "agent", description: "Show the caps set on an agent's account.", options: [
+    { type: STRING, name: "id", description: "Numeric ERC-8004 agent ID", required: true },
+    { type: STRING, name: "account", description: "Account of the agent (0x...)", required: true },
   ] },
-  { name: "orry", description: "ORRY staked and burned so far." },
-  { name: "verify", description: "Link your wallet and get your Orrery roles." },
-  { name: "announce", description: "Post an approved release card to #announcements (Admin and Core Team).", default_member_permissions: "32", options: [
-    { type: STRING, name: "feature", description: "Release feature", required: true, choices: ["core", "earn", "stake", "claim", "leaderboard", "agent-stake", "burn", "checkout"].map((f) => ({ name: f, value: f })) },
+  { name: "orry", description: "ORRY staked now and burned to date." },
+  { name: "verify", description: "Connect your wallet to receive your Orrery roles." },
+  { name: "announce", description: "Publish an approved release card in #announcements (Admin and Core Team).", default_member_permissions: "32", options: [
+    { type: STRING, name: "feature", description: "Feature being released", required: true, choices: ["core", "earn", "stake", "claim", "leaderboard", "agent-stake", "burn", "checkout"].map((f) => ({ name: f, value: f })) },
   ] },
 ];
 const r = await fetch(`https://discord.com/api/v10/applications/${appId}/guilds/${guildId}/commands`, {

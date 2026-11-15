@@ -27,9 +27,9 @@ function int(env: NodeJS.ProcessEnv, name: string, dflt: number, min: number, ma
 export function loadLaunch(env: NodeJS.ProcessEnv): LaunchConfig | null {
   const raw = env.ORRERY_AGENT_LAUNCH;
   if (!raw) return null;
-  if (!isAddress(raw)) throw new Error("ORRERY_AGENT_LAUNCH must be a 0x address");
+  if (!isAddress(raw)) throw new Error("ORRERY_AGENT_LAUNCH expects a 0x address");
   const router = env.ORRERY_SPOKE_ROUTER;
-  if (router && !isAddress(router)) throw new Error("ORRERY_SPOKE_ROUTER must be a 0x address");
+  if (router && !isAddress(router)) throw new Error("ORRERY_SPOKE_ROUTER expects a 0x address");
   return {
     agentLaunch: getAddress(raw),
     spokeRouter: router ? getAddress(router) : null,

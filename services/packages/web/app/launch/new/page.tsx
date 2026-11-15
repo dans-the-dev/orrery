@@ -5,8 +5,8 @@ import { LaunchShell } from "@/components/launch/shell";
 import { LaunchNew } from "@/components/launch/LaunchNew";
 
 export const metadata = {
-  title: "Orrery · Launch a coin",
-  description: "Launch your verified agent's coin, paired with ORRY, with its whole supply locked in its pool.",
+  title: "Orrery · Start a coin",
+  description: "Start a coin for your verified agent, paired with ORRY, with the entire supply locked in its pool.",
 };
 
 export default function LaunchNewPage() {
@@ -16,8 +16,8 @@ export default function LaunchNewPage() {
         feature="launch"
         held={
           <>
-            <OrryHead title="Launch your agent's coin." lead={<p>One coin per verified agent, paired with ORRY.</p>} />
-            <ComingSoon title="Agent Launch opens soon." text="The launch form opens here with Agent Launch." />
+            <OrryHead title="Start a coin for your agent." lead={<p>Each verified agent gets one coin, paired with ORRY.</p>} />
+            <ComingSoon title="Agent Launch starts soon." text="The form to start a coin shows here once Agent Launch starts." />
           </>
         }
       >

@@ -20,7 +20,7 @@ export function LaunchShell({ children }: { children: ReactNode }) {
 /** Where every spoke trade's 1% goes (T6): the product's own figure. */
 export function FeeSplit({ label }: { label?: string }) {
   return (
-    <figure className="ln-split" aria-label="Every trade pays 1%: 50% to the agent's account, 20% to Earn depositors, 15% burned, 15% to Orrery">
+    <figure className="ln-split" aria-label="The 1% trade fee, divided: 50% agent account, 20% Earn depositors, 15% burned, 15% Orrery">
       {label ? <figcaption className="ln-split-label">{label}</figcaption> : null}
       <span className="s-agent" style={{ flexBasis: "50%" }} />
       <span className="s-earn" style={{ flexBasis: "20%" }} />

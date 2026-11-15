@@ -15,7 +15,7 @@ export function CreditTabs() {
   const path = usePathname();
   const releases = useReleases();
   return (
-    <nav className="rc-tabs" aria-label="Credit and attesters">
+    <nav className="rc-tabs" aria-label="Credit sections">
       {CREDIT_ROUTES.map((r) => {
         const live = !releases.ready || releases.isLive(r.feature);
         const current = path === r.href || path.startsWith(`${r.href}/`);

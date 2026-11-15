@@ -42,10 +42,10 @@ function Chat({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolean }) 
   return (
     <>
       <OrryHead
-        title="Talk with Orrery holders, on chain."
+        title="A room for Orrery holders, kept on chain."
         lead={
           <p>
-            Every message is a transaction on {activeChain.name}. A post costs {usd(cfg.postFeeUsd)} in ORRY, paid to the Reward Pool that funds the community&apos;s rewards.
+            Each message is recorded as a transaction on {activeChain.name}. Posting costs {usd(cfg.postFeeUsd)} in ORRY, which goes to the Reward Pool behind community rewards.
           </p>
         }
         reading={<NameCard cfg={cfg} />}
@@ -56,7 +56,7 @@ function Chat({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolean }) 
           {rooms.isLoading ? (
             <p className="rc-muted">…</p>
           ) : list.length === 0 ? (
-            <p className="rc-muted">Rooms appear here in a moment.</p>
+            <p className="rc-muted">Rooms load in a moment.</p>
           ) : (
             <ul>
               {list.map((r) => (
@@ -70,7 +70,7 @@ function Chat({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolean }) 
                     }}
                   >
                     <strong>{r.name}</strong>
-                    <span>{big(r.minStakeUsd) > 0n ? `Stakers with ${usd(big(r.minStakeUsd))} or more` : "Open to everyone"}</span>
+                    <span>{big(r.minStakeUsd) > 0n ? `For ${usd(big(r.minStakeUsd))} in Stake and above` : "Any wallet"}</span>
                   </button>
                 </li>
               ))}
@@ -107,10 +107,10 @@ function NameCard({ cfg }: { cfg: CommunityConfig }) {
     const name = input;
     await tx.run("Set name", async ({ send, step, approve }) => {
       await approve(cfg.addresses.orry as Address, names, max);
-      step("Confirm the name in your wallet.");
+      step("Sign the name in your wallet.");
       await send({ address: names, abi: namesAbi, functionName: "setName", args: [name, max] });
       setInput("");
-      return `Your name is now ${name}.`;
+      return `Name on record · ${name}.`;
     });
   }
 
@@ -124,7 +124,7 @@ function NameCard({ cfg }: { cfg: CommunityConfig }) {
         <p className="rc-card-wait">Usernames: {COMING_SOON}.</p>
       ) : !connected ? (
         <>
-          <p className="rc-card-wait">Pick a username others see beside your messages.</p>
+          <p className="rc-card-wait">Choose the username shown next to every message you post.</p>
           <WalletButton />
         </>
       ) : (
@@ -135,11 +135,11 @@ function NameCard({ cfg }: { cfg: CommunityConfig }) {
               <input id="cm-name-in" autoComplete="off" spellCheck={false} placeholder="your_name" maxLength={20} value={input} onChange={(e) => setInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} />
             </div>
             <div className="rc-amount-foot">
-              <span>{taken ? "That name belongs to another wallet." : own ? "That is already your name." : "3 to 20 characters: a to z, 0 to 9 and underscore."}</span>
+              <span>{taken ? "Another wallet holds that name." : own ? "This wallet already uses that name." : "3 to 20 characters, using a to z, 0 to 9 or underscore."}</span>
             </div>
           </div>
           <dl className="rc-rows rc-rows-tight">
-            <Row label="Fee" hint={`${usd(cfg.nameFeeUsd)}, paid to the Reward Pool`}>
+            <Row label="Fee" hint={`${usd(cfg.nameFeeUsd)}, sent to the Reward Pool`}>
               {fee.data !== undefined ? `${orry(fee.data)} ORRY` : "…"}
             </Row>
           </dl>
@@ -172,11 +172,11 @@ function Composer({ cfg, room, roomId, replyTo, onReplyDone }: { cfg: CommunityC
     const reply = replyTo ? BigInt(replyTo.id) : 0n;
     await tx.run("Post", async ({ send, step, approve }) => {
       await approve(cfg.addresses.orry as Address, chat, max);
-      step("Confirm the post in your wallet.");
+      step("Sign the post in your wallet.");
       await send({ address: chat, abi: chatAbi, functionName: "post", args: [BigInt(roomId), reply, text, max] });
       setText("");
       onReplyDone();
-      return "Posted. It appears in the room in a moment.";
+      return "Post on record. The room shows it shortly.";
     });
   }
 
@@ -196,7 +196,7 @@ function Composer({ cfg, room, roomId, replyTo, onReplyDone }: { cfg: CommunityC
       <label className="cm-label" htmlFor="cm-text">
         {room ? `Message ${room.name}` : "Message"}
       </label>
-      <textarea id="cm-text" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a message" disabled={below} />
+      <textarea id="cm-text" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Your message" disabled={below} />
       <div className="cm-compose-foot">
         <span className={over ? "cm-bytes is-over" : "cm-bytes"} aria-live="polite">
           {bytes.toLocaleString("en-US")} / {cfg.maxTextBytes.toLocaleString("en-US")} bytes
@@ -207,7 +207,7 @@ function Composer({ cfg, room, roomId, replyTo, onReplyDone }: { cfg: CommunityC
       </div>
       {below ? (
         <p className="rc-desk-note">
-          Posting here needs {usd(minStake)} or more earning in Stake. Yours is {usd(stake.data ?? 0n)}. <Link className="cm-link" href="/stake">Stake ORRY</Link>
+          This room takes posts from {usd(minStake)} earning in Stake and above. This wallet has {usd(stake.data ?? 0n)}. <Link className="cm-link" href="/stake">Stake ORRY</Link>
         </p>
       ) : null}
       {connected ? (
@@ -216,7 +216,7 @@ function Composer({ cfg, room, roomId, replyTo, onReplyDone }: { cfg: CommunityC
         </button>
       ) : (
         <div className="rc-connect">
-          <p>Connect a wallet to post.</p>
+          <p>Posting needs a connected wallet.</p>
           <WalletButton />
         </div>
       )}
@@ -248,7 +248,7 @@ function Feed({ cfg, roomId, boostOpen, onReply }: { cfg: CommunityConfig; roomI
     setActedOn(m.id);
     await tx.run("Report", async ({ send }) => {
       await send({ address: cfg.addresses.chat as Address, abi: chatAbi, functionName: "report", args: [BigInt(m.id)] });
-      return "Reported. The message hides once enough stakers report it.";
+      return "Report on record. A message is hidden after enough stakers report it.";
     });
   }
 
@@ -258,14 +258,14 @@ function Feed({ cfg, roomId, boostOpen, onReply }: { cfg: CommunityConfig; roomI
     setActedOn(m.id);
     await tx.run("Boost", async ({ send, step, approve }) => {
       await approve(cfg.addresses.orry as Address, boost, max);
-      step("Confirm the boost in your wallet.");
+      step("Sign the boost in your wallet.");
       await send({ address: boost, abi: boostAbi, functionName: "boost", args: [BOOST_KINDS.post, BigInt(m.id), 1n, max] });
-      return "Boosted for 24 hours. The ORRY paid is burned.";
+      return "This post sits at the top for 24 hours. The ORRY spent on the boost is burned.";
     });
   }
 
   if (q.isLoading) return <p className="rc-muted">…</p>;
-  if (messages.length === 0) return <p className="rc-muted cm-empty">{q.isError ? "Messages appear here in a moment." : "No messages in this room yet. The first post opens it."}</p>;
+  if (messages.length === 0) return <p className="rc-muted cm-empty">{q.isError ? "Messages load in a moment." : "This room is quiet so far. Yours can be the first post."}</p>;
 
   return (
     <div className="cm-msgs">
@@ -282,7 +282,7 @@ function Feed({ cfg, roomId, boostOpen, onReply }: { cfg: CommunityConfig; roomI
                 <strong>{m.authorName ?? mask(m.author)}</strong>
                 {own ? <span className="cm-you">you</span> : null}
                 <span className="cm-time">{ago(time(m.time), now)}</span>
-                {boostedUntil > now ? <span className="cm-boosted">Boosted, {span(boostedUntil - now)} left</span> : null}
+                {boostedUntil > now ? <span className="cm-boosted">Boost · {span(boostedUntil - now)} to go</span> : null}
                 <TxLink hash={m.txHash} />
               </div>
               {m.replyTo && m.replyTo !== "0" ? (
@@ -291,8 +291,8 @@ function Feed({ cfg, roomId, boostOpen, onReply }: { cfg: CommunityConfig; roomI
                   {parent?.text && !parent.hidden ? `: ${excerpt(parent.text, 70)}` : ""}
                 </p>
               ) : null}
-              {hidden ? <p className="cm-hidden">This message is hidden.</p> : <p className="cm-text">{m.text}</p>}
-              {tips > 0n ? <p className="cm-tips">{orry(tips)} ORRY in tips</p> : null}
+              {hidden ? <p className="cm-hidden">Hidden from the room.</p> : <p className="cm-text">{m.text}</p>}
+              {tips > 0n ? <p className="cm-tips">Tipped {orry(tips)} ORRY</p> : null}
               {!hidden && ready ? (
                 <div className="cm-actions">
                   <button type="button" className="cm-link" onClick={() => onReply(m)}>
@@ -304,7 +304,7 @@ function Feed({ cfg, roomId, boostOpen, onReply }: { cfg: CommunityConfig; roomI
                     </button>
                   )}
                   {boostOpen && boost ? (
-                    <button type="button" className="cm-link" disabled={Boolean(tx.busy) || boostQuote.data === undefined} onClick={() => void boostPost(m)} title={boostQuote.data !== undefined ? `${orry(boostQuote.data)} ORRY, burned` : undefined}>
+                    <button type="button" className="cm-link" disabled={Boolean(tx.busy) || boostQuote.data === undefined} onClick={() => void boostPost(m)} title={boostQuote.data !== undefined ? `${orry(boostQuote.data)} ORRY, all burned` : undefined}>
                       Boost 24 h{boostQuote.data !== undefined ? ` · ${orry(boostQuote.data)} ORRY` : ""}
                     </button>
                   ) : null}
@@ -345,9 +345,9 @@ function TipForm({ cfg, message, run, busy, onStart, onDone }: { cfg: CommunityC
     onStart();
     const ok = await run("Tip", async ({ send, step, approve }) => {
       await approve(cfg.addresses.orry as Address, chat, amount);
-      step("Confirm the tip in your wallet.");
+      step("Sign the tip in your wallet.");
       await send({ address: chat, abi: chatAbi, functionName: "tip", args: [BigInt(message.id), amount] });
-      return `Sent ${orry(amount)} ORRY to ${author}.`;
+      return `Tip on record · ${orry(amount)} ORRY to ${author}.`;
     });
     if (ok) onDone();
   }
@@ -364,8 +364,8 @@ function TipForm({ cfg, message, run, busy, onStart, onDone }: { cfg: CommunityC
         onMax={() => balance !== undefined && setInput(toInput(balance))}
         hint={
           amount && cut !== undefined
-            ? `${orry(amount - cut)} ORRY to ${author}, ${orry(cut)} ORRY (${percent(cfg.tipCutBps)}) to the Reward Pool.`
-            : `${percent(cfg.tipCutBps)} of each tip goes to the Reward Pool.`
+            ? `${author} receives ${orry(amount - cut)} ORRY, the Reward Pool ${orry(cut)} ORRY (${percent(cfg.tipCutBps)}).`
+            : `The Reward Pool keeps ${percent(cfg.tipCutBps)} of every tip.`
         }
       />
       <button className="primary" type="button" disabled={!ready || busy || !amount || (balance !== undefined && amount > balance)} onClick={() => void tip()}>

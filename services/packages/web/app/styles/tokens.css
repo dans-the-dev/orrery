@@ -1,11 +1,11 @@
-/* Current Limit design tokens */
+/* Orrery base tokens (the Observatory theme). app/styles/observatory.css, loaded last, holds the full palette. */
 :root {
-  --ground-light:#eef2ec; --ground-dark:#111c39; --ink:#18213b; --brand:#3152e9; --brand-on:#ffffff;
-  --success:#167b62; --warning:#a46013; --danger:#d33542; --hairline:#aab5ca;
-  --display:"Comfortaa",sans-serif; --text:"Figtree",sans-serif; --mono:"JetBrains Mono",monospace;
+  --ground-light:#e9e9f2; --ground-dark:#161b45; --ink:#171a33; --brand:#5b45c9; --brand-on:#ffffff;
+  --success:#23806a; --warning:#a66a12; --danger:#c23c4b; --hairline:#cfd0e0;
+  --display:"Jost",sans-serif; --text:"Albert Sans",sans-serif; --mono:"IBM Plex Mono",monospace;
   --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px; --space-9:96px;
-  --radius-sm:4px; --radius-md:12px; --radius-lg:28px; --radius-nav:30px;
-  --shadow-nav:0 12px 35px rgba(0,0,0,.14); --shadow-object:0 36px 80px rgba(0,0,0,.28); --shadow-paper:14px 20px 0 rgba(0,0,0,.09);
+  --radius-sm:4px; --radius-md:12px; --radius-lg:24px; --radius-nav:999px;
+  --shadow-nav:0 12px 35px rgba(13,16,48,.18); --shadow-object:0 36px 80px rgba(13,16,48,.32); --shadow-paper:0 18px 40px -20px rgba(13,16,48,.25);
   --motion-fast:160ms; --motion-base:360ms; --motion-slow:900ms; --ease-out:cubic-bezier(.2,.8,.2,1); --ease-in-out:cubic-bezier(.65,0,.35,1);
   --font-hero:clamp(3.1rem,6.2vw,6.5rem); --font-h2:clamp(2.3rem,4vw,4.5rem); --font-h3:clamp(1.4rem,2vw,2rem); --font-body:1.06rem; --font-small:.84rem;
 }

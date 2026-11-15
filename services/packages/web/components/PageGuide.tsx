@@ -5,7 +5,7 @@ export type GuideStep = { title: string; text: ReactNode };
 /** "Who this page is for" and the steps it takes, in order. Sits under the page head on every product page. */
 export function PageGuide({ audience, steps, note }: { audience: ReactNode; steps: GuideStep[]; note?: ReactNode }) {
   return (
-    <section className="guide" aria-label="How this page works">
+    <section className="guide" aria-label="Using this page">
       <p className="guide-for">
         <span>For</span>
         {audience}

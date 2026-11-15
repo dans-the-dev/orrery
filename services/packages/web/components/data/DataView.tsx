@@ -40,25 +40,25 @@ export function DataView() {
     <>
       <OrryHead
         kicker="Orrery Data"
-        title="Data your agents can prove."
+        title="Chain data with a signature on every answer."
         lead={
           <p>
-            Seven datasets read from Robinhood Chain and from Orrery itself. Every answer is signed by Orrery&apos;s data key, so an agent can show where each number
-            came from.
+            Seven datasets, read from Robinhood Chain and from Orrery&apos;s own records. Orrery&apos;s data key signs each answer, so an agent can trace every
+            figure to the block it was read at.
           </p>
         }
         reading={
           <dl className="rc-rows rc-rows-tight">
-            <Row label="A call">{pricing ? <Fig v={dollars(pricing.callUsd)} /> : <Fig />}</Row>
-            <Row label="A pack" hint={pricing ? `${n(pricing.packCalls)} calls` : undefined}>{pricing ? <Fig v={dollars(pricing.packUsd)} /> : <Fig />}</Row>
-            <Row label="Signed by">{signer.data ? <code>{short(signer.data.signer as Address)}</code> : <Fig />}</Row>
+            <Row label="Per call">{pricing ? <Fig v={dollars(pricing.callUsd)} /> : <Fig />}</Row>
+            <Row label="Per pack" hint={pricing ? `${n(pricing.packCalls)} calls` : undefined}>{pricing ? <Fig v={dollars(pricing.packUsd)} /> : <Fig />}</Row>
+            <Row label="Data signer">{signer.data ? <code>{short(signer.data.signer as Address)}</code> : <Fig />}</Row>
           </dl>
         }
       />
 
       <section className="mc-sec">
         <h2>Datasets</h2>
-        <p className="mc-note">Each record names the block it comes from; records of an event name its transaction and log too.</p>
+        <p className="mc-note">Every record carries its block number. Event records also name the transaction and the log they come from.</p>
         <ul className="mc-dir">
           {(catalog.data?.datasets ?? []).map((d) => (
             <li key={d.id}>
@@ -67,7 +67,7 @@ export function DataView() {
                 <p>{d.summary}</p>
               </div>
               <div className="mc-dir-meta">
-                <span>{d.records === null ? "Read from the chain on each call" : `${n(d.records)} ${d.records === 1 ? "record" : "records"}`}</span>
+                <span>{d.records === null ? "Read live, per call" : `${n(d.records)} ${d.records === 1 ? "record" : "records"}`}</span>
                 <code>{d.id}</code>
               </div>
             </li>
@@ -80,10 +80,10 @@ export function DataView() {
       <Query apiKey={key} onKey={setKey} signer={signer.data?.signer as Address | undefined} />
 
       <section className="mc-sec">
-        <h2>Check an answer yourself</h2>
+        <h2>Verify an answer</h2>
         <p className="mc-note">
-          Answers are EIP-712 typed data in the domain <code>Orrery Data</code>. The Orrery SDK recomputes the hashes from the records you received and checks the
-          signature against the data signer{signer.data ? <> <code>{signer.data.signer}</code></> : null}.
+          Each answer is EIP-712 typed data under the domain <code>Orrery Data</code>. The Orrery SDK hashes the records you got once more and compares the
+          signature with the data signer{signer.data ? <> <code>{signer.data.signer}</code></> : null}.
         </p>
         <pre className="mc-code">
           <code>
@@ -103,9 +103,9 @@ export function DataView() {
 
       {releases.isLive("data-providers") ? (
         <section className="mc-sec">
-          <h2>More data from independent providers</h2>
+          <h2>Datasets from outside providers</h2>
           <p className="mc-note">
-            Providers with an ORRY stake list their own x402 endpoints. <Link href="/data/providers">See the providers</Link>
+            Providers who stake ORRY publish their own x402 endpoints. <Link href="/data/providers">Browse the providers</Link>
           </p>
         </section>
       ) : null}
@@ -132,11 +132,11 @@ function BuyCalls({ pricing, onKey }: { pricing: NonNullable<ReturnType<typeof u
     try {
       const first = await fetch(url, { method: "POST" });
       const header = first.headers.get(HEADER_REQUIRED);
-      if (first.status !== 402 || !header) throw new Error("The payment terms did not load. Try again.");
+      if (first.status !== 402 || !header) throw new Error("Could not read the payment terms. Retry in a few seconds.");
       const required = decodeHeader<PaymentRequired>(header);
       const accepts = required.accepts as unknown as DataPaymentRequirements[];
       const req = accepts.find((a) => (asset === "orry" ? a.extra.assetTransferMethod === "permit2" : a.extra.assetTransferMethod === "eip3009"));
-      if (!req) throw new Error(asset === "orry" ? "Paying in ORRY is not available right now. Pay in USDG." : "No USDG option for this network.");
+      if (!req) throw new Error(asset === "orry" ? "ORRY is not among the payment options here. Use USDG instead." : "USDG is not offered on this network.");
       const now = BigInt(Math.floor(Date.now() / 1000));
       let payload: unknown;
       if (asset === "usdg") {
@@ -157,8 +157,8 @@ function BuyCalls({ pricing, onKey }: { pricing: NonNullable<ReturnType<typeof u
         const permit2 = getAddress(req.extra.permit2!);
         const allowance = await pub.readContract({ address: getAddress(req.asset), abi: erc20, functionName: "allowance", args: [address, permit2] });
         if (allowance < BigInt(req.amount)) {
-          setNotice({ tone: "", text: "Allow Permit2 to move ORRY for your payments, once." });
-          const ok = await tx.run("Allow ORRY payments", async ({ send }) => {
+          setNotice({ tone: "", text: "One approval lets Permit2 move ORRY for your payments." });
+          const ok = await tx.run("Approve ORRY for Permit2", async ({ send }) => {
             await send({ address: getAddress(req.asset), abi: erc20 as Abi, functionName: "approve", args: [permit2, 2n ** 256n - 1n] });
           });
           if (!ok) return;
@@ -183,23 +183,23 @@ function BuyCalls({ pricing, onKey }: { pricing: NonNullable<ReturnType<typeof u
       for (let i = 0; i < 15; i++) {
         const r = await fetch(url, { method: "POST", headers: { [HEADER_SIGNATURE]: encodeHeader(payload) } });
         if (r.status === 202) {
-          setNotice({ tone: "", text: "Payment is confirming." });
+          setNotice({ tone: "", text: "Payment seen, waiting for confirmation." });
           await new Promise((res) => setTimeout(res, 2_000));
           continue;
         }
         const body = (await r.json()) as { account?: { calls: string; apiKey?: string }; granted?: string; error?: string };
-        if (!r.ok) throw new Error(body.error ?? "The payment was not accepted.");
+        if (!r.ok) throw new Error(body.error ?? "The server did not accept the payment.");
         if (body.account?.apiKey) {
           setIssued(body.account.apiKey);
           onKey(body.account.apiKey);
         }
-        setNotice({ tone: "ok", text: `${n(body.granted ?? "0")} calls added. Balance ${n(body.account?.calls ?? "0")} calls.` });
+        setNotice({ tone: "ok", text: `Added ${n(body.granted ?? "0")} calls. This key now holds ${n(body.account?.calls ?? "0")}.` });
         return;
       }
-      throw new Error("Payment is still confirming. Check your balance in a moment.");
+      throw new Error("The payment has not confirmed yet. The call balance updates once it does.");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "Signature request closed." : msg || "The purchase did not finish." });
+      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "The wallet closed the request." : msg || "The purchase was not completed." });
     } finally {
       setBusy(false);
     }
@@ -207,24 +207,24 @@ function BuyCalls({ pricing, onKey }: { pricing: NonNullable<ReturnType<typeof u
 
   return (
     <section className="mc-sec">
-      <h2>Buy calls</h2>
+      <h2>Call packs</h2>
       <dl className="rc-rows">
-        <Row label="Pack in USDG" hint={`${n(pricing.packCalls)} calls, paid to the Orrery treasury`}>{dollars(pricing.packUsd)}</Row>
+        <Row label="USDG pack" hint={`${n(pricing.packCalls)} calls · paid to the Orrery treasury`}>{dollars(pricing.packUsd)}</Row>
         {pricing.orryPayTo ? (
-          <Row label="Pack in ORRY" hint={`${pricing.orryDiscountBps / 100}% less; 70% of it is burned, 30% goes to the Reward Pool`}>{dollars(orryUsd)}</Row>
+          <Row label="ORRY pack" hint={`${pricing.orryDiscountBps / 100}% off · 70% burned, 30% to the Reward Pool`}>{dollars(orryUsd)}</Row>
         ) : null}
       </dl>
-      {pricing.maxStakeDiscountBps > 0 ? <p className="mc-note">ORRY stakers get more calls in every pack, by their fee tier.</p> : null}
+      {pricing.maxStakeDiscountBps > 0 ? <p className="mc-note">Staking ORRY adds calls to each pack, scaled by your fee tier.</p> : null}
       {!ready ? (
-        <ExitConnect text={isConnected ? "Switch your wallet to this network to buy calls." : "Connect the wallet that pays for the calls. Its address holds them."} />
+        <ExitConnect text={isConnected ? "Change your wallet to this network to buy a pack." : "Connect the paying wallet. The calls are kept under its address."} />
       ) : (
         <div className="mc-actions">
           <button className="primary" type="button" disabled={busy || Boolean(tx.busy)} onClick={() => void buy("usdg")}>
-            Buy with USDG
+            Pay with USDG
           </button>
           {pricing.orryPayTo ? (
             <button className="secondary" type="button" disabled={busy || Boolean(tx.busy)} onClick={() => void buy("orry")}>
-              Buy with ORRY
+              Pay with ORRY
             </button>
           ) : null}
         </div>
@@ -237,7 +237,7 @@ function BuyCalls({ pricing, onKey }: { pricing: NonNullable<ReturnType<typeof u
           </button>
         </div>
       ) : null}
-      {issued ? <p className="mc-note">Your API key for checks and data. It is shown once; keep it with your agent&apos;s settings.</p> : null}
+      {issued ? <p className="mc-note">This API key covers checks and data. It appears only this once, so store it with your agent&apos;s settings.</p> : null}
       <NoticeLine notice={tx.busy ? tx.notice : notice} />
     </section>
   );
@@ -256,13 +256,13 @@ function Query({ apiKey, onKey, signer }: { apiKey: string; onKey: (k: string) =
     try {
       const r = await fetch(`${API_URL}/v1/data/datasets/${dataset}?limit=5`, { headers: { authorization: `Bearer ${apiKey}` } });
       const body = (await r.json()) as DataResponse & { error?: string };
-      if (r.status === 402) throw new Error("No calls left on this key. Buy a pack above.");
-      if (!r.ok) throw new Error(body.error ?? "The query did not finish.");
+      if (r.status === 402) throw new Error("This key has used all its calls. A pack above adds more.");
+      if (!r.ok) throw new Error(body.error ?? "The query was not completed.");
       const v = await verifyDataResponse(body, { signer, chainId: activeChain.id });
       setAnswer({ res: body, ok: v.ok });
-      setNotice({ tone: v.ok ? "ok" : "error", text: v.ok ? `Signature checked. ${n(body.account?.calls ?? "0")} calls left.` : "This answer did not verify." });
+      setNotice({ tone: v.ok ? "ok" : "error", text: v.ok ? `Signature verified · ${n(body.account?.calls ?? "0")} calls remain.` : "This answer failed verification." });
     } catch (e) {
-      setNotice({ tone: "error", text: e instanceof Error ? e.message : "The query did not finish." });
+      setNotice({ tone: "error", text: e instanceof Error ? e.message : "The query was not completed." });
     } finally {
       setBusy(false);
     }
@@ -270,8 +270,8 @@ function Query({ apiKey, onKey, signer }: { apiKey: string; onKey: (k: string) =
 
   return (
     <section className="mc-sec">
-      <h2>Query a dataset</h2>
-      <p className="mc-note">One call per answer. Paste your Orrery API key, or buy a pack above to get one.</p>
+      <h2>Read a dataset</h2>
+      <p className="mc-note">Each answer uses one call. Paste an Orrery API key, or buy a pack above and a key is issued.</p>
       <div className="mc-form">
         <label className="field">
           API key
@@ -290,7 +290,7 @@ function Query({ apiKey, onKey, signer }: { apiKey: string; onKey: (k: string) =
       </div>
       <div className="mc-actions">
         <button className="primary" type="button" disabled={busy || !apiKey} onClick={() => void run()}>
-          Run the query
+          Send query
         </button>
       </div>
       <NoticeLine notice={notice} />
@@ -306,10 +306,10 @@ function Query({ apiKey, onKey, signer }: { apiKey: string; onKey: (k: string) =
 function McpSection() {
   return (
     <section className="mc-sec">
-      <h2>Use it from an MCP client</h2>
+      <h2>From an MCP client</h2>
       <p className="mc-note">
-        <code>@orrery/mcp</code> gives an MCP client the checks, the agent records and Orrery Data as tools. Each tool says what it costs; a payment above the amount you
-        set runs only when the call confirms it. Your agent&apos;s session key stays in a file on its own machine.
+        <code>@orrery/mcp</code> exposes checks, agent records and Orrery Data as MCP tools. Every tool states its price, and a payment above the amount you set
+        goes through only once the call confirms it. The session key stays in a file on the agent&apos;s own machine.
       </p>
       <pre className="mc-code">
         <code>

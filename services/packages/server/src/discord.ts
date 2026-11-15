@@ -140,31 +140,31 @@ export function discordRest(cfg: Pick<DiscordConfig, "token" | "guildId">, fetch
 // ---------------------------------------------------------------- stage 1: messages (pure)
 
 const FEATURE_TEXT: Record<string, string> = {
-  earn: "Earn is open: add ORRY with ETH or USDG and earn 85% of every swap fee in the pool.",
-  stake: "Staking is open: stake ORRY for a share of Orrery's revenue, paid in ETH and ORRY.",
-  claim: "Claim is open: every Earn fee and stake reward in one transaction.",
-  burn: "The burn page is live: every ORRY burn with its transaction.",
-  leaderboard: "The leaderboard is live: top stakers and top earners.",
-  "agent-stake": "Stake behind an agent is open: back your agent with ORRY, shown in every signed check.",
-  checkout: "Pay with ORRY is open: check packs and agent verifications, and every ORRY spent is burned.",
+  earn: "Earn is now in view. Pair ORRY with ETH or USDG and collect 85% of the pool's swap fees.",
+  stake: "Staking is now in view. Stake ORRY to receive a share of Orrery revenue, paid out in ETH and ORRY.",
+  claim: "Claim is now in view. Collect Earn fees and stake rewards together in a single transaction.",
+  burn: "The burn chart is up. Each ORRY burn is plotted with its transaction.",
+  leaderboard: "The leaderboard is up, ranking the top stakers and earners.",
+  "agent-stake": "Agent stake is now in view. Back your agent with ORRY, and the stake appears in each signed reading.",
+  checkout: "ORRY checkout is now in view. Buy check packs and agent verifications in ORRY, and all ORRY spent is burned.",
 };
 const FEATURE_PATH: Record<string, string> = {
   earn: "/earn", stake: "/stake", claim: "/claim", burn: "/burn", leaderboard: "/leaderboard", "agent-stake": "/stake", checkout: "/credits",
 };
 
 export function releaseMessage(feature: string, webUrl: string): string {
-  const text = FEATURE_TEXT[feature] ?? `${feature} is now open on Orrery.`;
+  const text = FEATURE_TEXT[feature] ?? `${feature} is now in view on Orrery.`;
   return `**${text}**\n${webUrl}${FEATURE_PATH[feature] ?? ""}`;
 }
 
 const BURN_SOURCE: Record<string, string> = {
-  "1": "protocol fees, ORRY share",
-  "2": "check packs paid in ORRY",
-  "3": "agent verification paid in ORRY",
-  "4": "protocol fees, ETH share bought and burned",
-  "5": "market orders, sealing fee",
-  "6": "market trading fees paid in ORRY",
-  "7": "merchant payments in ORRY, Orrery's fee",
+  "1": "ORRY portion of protocol fees",
+  "2": "ORRY check pack purchase",
+  "3": "ORRY agent verification",
+  "4": "ETH portion of protocol fees, bought back",
+  "5": "market order sealing fee",
+  "6": "market trading fee in ORRY",
+  "7": "Orrery fee on ORRY merchant payments",
 };
 
 export function formatOrry(amount: string): string {
@@ -188,16 +188,16 @@ export function alertsFor(input: {
   balances: { name: string; address: string; eth: number; minEth: number }[];
 }): { key: string; text: string }[] {
   const out: { key: string; text: string }[] = [];
-  if (input.headUnreadable) out.push({ key: "chain-head", text: "The chain head could not be read, so indexer lag is unknown. Check the RPC." });
-  if (!input.lag) out.push({ key: "indexer-missing", text: "Indexer has no state yet." });
-  else if (input.lag.lag > input.maxLag) out.push({ key: "indexer-lag", text: `Indexer is ${input.lag.lag} blocks behind the head.` });
+  if (input.headUnreadable) out.push({ key: "chain-head", text: "Chain head unreadable, so indexer lag cannot be measured. Look at the RPC." });
+  if (!input.lag) out.push({ key: "indexer-missing", text: "Indexer state is empty." });
+  else if (input.lag.lag > input.maxLag) out.push({ key: "indexer-lag", text: `Indexer trails the chain head by ${input.lag.lag} blocks.` });
   if (input.orryOn) {
     const limit = input.maxLag + BigInt(input.confirmations);
-    if (!input.orryLag) out.push({ key: "orry-indexer-missing", text: "ORRY indexer has no state yet." });
-    else if (input.orryLag.lag > limit) out.push({ key: "orry-indexer-lag", text: `ORRY indexer is ${input.orryLag.lag} blocks behind the head.` });
+    if (!input.orryLag) out.push({ key: "orry-indexer-missing", text: "ORRY indexer state is empty." });
+    else if (input.orryLag.lag > limit) out.push({ key: "orry-indexer-lag", text: `ORRY indexer trails the chain head by ${input.orryLag.lag} blocks.` });
   }
   for (const b of input.balances) {
-    if (b.eth < b.minEth) out.push({ key: `low-gas-${b.name}`, text: `${b.name} wallet ${b.address} holds ${b.eth.toFixed(6)} ETH, below ${b.minEth} ETH. Top it up.` });
+    if (b.eth < b.minEth) out.push({ key: `low-gas-${b.name}`, text: `${b.name} wallet ${b.address} is at ${b.eth.toFixed(6)} ETH, under its ${b.minEth} ETH floor. Refill it.` });
   }
   return out;
 }
@@ -305,7 +305,7 @@ export async function notifyOnce(cfg: Config, chain: Chain, sql: Sql, d: Discord
   for (const r of due) {
     if (at("release-drafts") && (await postedOnce(sql, "draft", `${r.feature}@${r.opens_at.toISOString()}`))) {
       const card = releaseCard(r.feature, d);
-      const head = `**Draft for review** · ${r.feature} opens ${r.opens_at.toISOString().replace("T", " ").slice(0, 16)} UTC. Approve with \`/announce ${r.feature}\`; nothing is posted before that.\n\n`;
+      const head = `**Pending review** · ${r.feature} opens ${r.opens_at.toISOString().replace("T", " ").slice(0, 16)} UTC. Run \`/announce ${r.feature}\` to publish it; it stays unposted until then.\n\n`;
       try {
         if (card.png) await api.postImage(at("release-drafts")!, head + card.caption, card.png, `${r.feature}.png`);
         else await api.post(at("release-drafts")!, head + card.caption);
@@ -318,7 +318,7 @@ export async function notifyOnce(cfg: Config, chain: Chain, sql: Sql, d: Discord
     if (r.opens_at <= now && (await postedOnce(sql, "rooms", `${r.feature}@${r.opens_at.toISOString()}`))) {
       if (d.testChannel) {
         const rooms = roomsFor(r.feature).filter((room) => ch[room]);
-        if (rooms.length && at("rooms")) await api.post(at("rooms")!, `Rooms that open with ${r.feature} on mainnet: ${rooms.map((x) => `#${x}`).join(", ")}. Nothing changed here.`);
+        if (rooms.length && at("rooms")) await api.post(at("rooms")!, `Opening with ${r.feature} on mainnet: ${rooms.map((x) => `#${x}`).join(", ")}. No change in this room.`);
       } else {
         const opened = await openRooms(api, ch, await roleIdsByName(api), r.feature);
         if (opened.length) posted.push(`rooms:${opened.join(",")}`);
@@ -440,9 +440,9 @@ export async function completeVerification(
 ): Promise<{ ok: true; roles: AutoRole[]; test?: true } | { ok: false; error: string }> {
   const [n] = await sql<{ discord_user_id: string }[]>`update discord_nonces set used = true
     where nonce = ${nonce} and not used and expires_at > now() returning discord_user_id`;
-  if (!n) return { ok: false, error: "This link has expired or was used. Run /verify in Discord for a new one." };
+  if (!n) return { ok: false, error: "This link is spent or past its 15 minutes. Run /verify in Discord to get a fresh one." };
   const valid = await verifyMessage({ address, message: verificationMessage(n.discord_user_id, nonce), signature }).catch(() => false);
-  if (!valid) return { ok: false, error: "The signature does not match this wallet. Run /verify again and sign with the same wallet." };
+  if (!valid) return { ok: false, error: "Signature and wallet differ. Run /verify again and sign from the wallet you connect." };
   const [prev] = await sql<{ roles: string[] }[]>`select roles from discord_links where discord_user_id = ${n.discord_user_id}`;
   const want = rolesFor(await factsFor(cfg, chain, sql, address));
   if (testMode) return { ok: true, roles: want, test: true }; // the development network never changes community roles
@@ -471,14 +471,14 @@ const usd = (v: bigint) => Number(formatUnits(v, 6)).toLocaleString("en-US", { m
 
 type LensView = Awaited<ReturnType<typeof readLens>>;
 export function lensReply(v: LensView, label: string): string {
-  if (v.account === "0x0000000000000000000000000000000000000000") return `${label}: no Orrery session for this address.`;
+  if (v.account === "0x0000000000000000000000000000000000000000") return `${label}: no Orrery session is on record for this address.`;
   const c = v.caps[0];
   const lines = [
     `**${label}** · ${STATUS[v.status] ?? "Unknown"}${v.verified ? " · verified" : ""}`,
-    `Agent #${v.agentId} on account ${v.account}`,
+    `Agent #${v.agentId} · account ${v.account}`,
   ];
-  if (c) lines.push(`Per payment ${usd(c.perTx)} · per day ${usd(c.perDay)} (spent today ${usd(c.spentToday)}) · float ${usd(c.floatMax)} USDG`);
-  lines.push(`Endpoints: ${v.attestation.endpointsLive ? "live at the last probe" : "no live probe"}`);
+  if (c) lines.push(`Per payment cap ${usd(c.perTx)} · daily cap ${usd(c.perDay)} (${usd(c.spentToday)} used today) · float ${usd(c.floatMax)} USDG`);
+  lines.push(`Endpoints: ${v.attestation.endpointsLive ? "answered the last probe" : "no answer on record"}`);
   return lines.join("\n");
 }
 
@@ -493,52 +493,52 @@ const reply = (content: string, ephemeral = false) => ({ type: 4, data: { conten
 
 export async function handleInteraction(cfg: Config, chain: Chain, sql: Sql, d: DiscordConfig, i: Interaction, api?: DiscordApi): Promise<unknown> {
   if (i.type === 1) return { type: 1 }; // PING
-  if (i.type !== 2 || !i.data) return reply("Unknown command.", true);
+  if (i.type !== 2 || !i.data) return reply("That command is not recognised.", true);
   const opt = (n: string) => i.data?.options?.find((o) => o.name === n)?.value;
   const userId = i.member?.user?.id ?? i.user?.id;
   if (d.testChannel && api) {
     const testId = (await channelIds(api))[d.testChannel];
-    if (!testId || i.channel_id !== testId) return reply(`These commands answer in #${d.testChannel} for now.`, true);
+    if (!testId || i.channel_id !== testId) return reply(`Run these commands in #${d.testChannel}.`, true);
   }
   try {
     switch (i.data.name) {
       case "payer": {
         const a = String(opt("address") ?? "");
-        if (!isAddress(a)) return reply("Pass a 0x address.", true);
+        if (!isAddress(a)) return reply("Expected a 0x address.", true);
         return reply(lensReply(await readLens(cfg, chain, { signer: getAddress(a) }), `Payer ${getAddress(a)}`));
       }
       case "agent": {
         const id = String(opt("id") ?? "");
         const acc = String(opt("account") ?? "");
-        if (!/^\d+$/.test(id) || !isAddress(acc)) return reply("Pass an agent ID and its account address.", true);
+        if (!/^\d+$/.test(id) || !isAddress(acc)) return reply("Give the numeric agent ID followed by its account address.", true);
         return reply(lensReply(await readLens(cfg, chain, { agentId: BigInt(id), account: getAddress(acc) }), `Agent #${id}`));
       }
       case "orry": {
-        if (!cfg.orry) return reply("ORRY stats appear here once ORRY is live.", true);
+        if (!cfg.orry) return reply("ORRY figures show here once ORRY opens.", true);
         const [s] = await sql<{ staked: string | null; burned: string | null }[]>`select
           (select sum(plain_active + agent_active)::text from orry_stakers) as staked,
           (select sum((args->>'amount')::numeric)::text from orry_events where event = 'Burned') as burned`;
-        return reply(`**ORRY**\nStaked: ${formatOrry(s?.staked ?? "0")} ORRY\nBurned so far: ${formatOrry(s?.burned ?? "0")} ORRY\n${d.webUrl}/stake`);
+        return reply(`**ORRY**\nStaked now: ${formatOrry(s?.staked ?? "0")} ORRY\nBurned to date: ${formatOrry(s?.burned ?? "0")} ORRY\n${d.webUrl}/stake`);
       }
       case "announce": {
-        if (!api) return reply("Announcements are not set up here.", true);
+        if (!api) return reply("This server has no announcement setup.", true);
         const feature = String(opt("feature") ?? "");
         const roles = await roleIdsByName(api);
         const allowed = [roles["Admin"], roles["Core Team"]].filter(Boolean);
-        if (!i.member?.roles?.some((r) => allowed.includes(r))) return reply("Only Admin and Core Team can approve announcements.", true);
+        if (!i.member?.roles?.some((r) => allowed.includes(r))) return reply("Announcements need approval from an Admin or Core Team member.", true);
         const out = await announceRelease(sql, api, await channelIds(api), d, feature);
-        return reply(out === "posted" ? `Posted the ${feature} announcement.` : out === "already" ? `The ${feature} announcement was already posted.` : "There is no #announcements channel.", true);
+        return reply(out === "posted" ? `${feature} announcement published.` : out === "already" ? `${feature} announcement is already up.` : "No #announcements channel found.", true);
       }
       case "verify": {
-        if (!userId) return reply("Run /verify inside the Orrery server.", true);
+        if (!userId) return reply("Use /verify from within the Orrery server.", true);
         const nonce = await newNonce(sql, userId);
-        return reply(`Open this link, connect your wallet and sign one message. It works once, for 15 minutes:\n${d.webUrl}/discord/verify?n=${nonce}&u=${userId}`, true);
+        return reply(`Link your wallet: open the page below, connect, and sign a single message. The link is good for one use within 15 minutes.\n${d.webUrl}/discord/verify?n=${nonce}&u=${userId}`, true);
       }
     }
   } catch {
-    return reply("The chain read did not finish. Try again in a moment.", true);
+    return reply("Chain read failed. Retry in a few seconds.", true);
   }
-  return reply("Unknown command.", true);
+  return reply("That command is not recognised.", true);
 }
 
 /** POST /v1/discord/interactions (signed by Discord) and POST /v1/discord/verify (from the web page). */
@@ -559,10 +559,10 @@ export function registerDiscordRoutes(app: FastifyInstance, cfg: Config, chain: 
       return handleInteraction(cfg, chain, sql, d, b.json, api);
     });
     scope.post("/v1/discord/verify", async (req, res) => {
-      if (!allowPublic(req.ip)) return res.code(429).send({ error: "Too many requests. Try again in a minute." });
+      if (!allowPublic(req.ip)) return res.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
       const j = (req.body as { json: { nonce?: string; address?: string; signature?: string } | null }).json;
       if (!j?.nonce || !j.address || !isAddress(j.address) || !/^0x[0-9a-fA-F]+$/.test(j.signature ?? "")) {
-        return res.code(400).send({ error: "Send nonce, address and signature." });
+        return res.code(400).send({ error: "Required fields: nonce, address, signature." });
       }
       const out = await completeVerification(cfg, chain, sql, api, j.nonce, getAddress(j.address), j.signature as Hex, !!d.testChannel);
       return out.ok ? { roles: out.roles, test: out.test } : res.code(400).send({ error: out.error });
@@ -583,22 +583,22 @@ const UP = { VIEW: B(10), SEND: B(11), MANAGE_MESSAGES: B(13), EMBED: B(14), ATT
 export const BOOSTER_ROLE = { name: "Orrery Booster", color: 0xb46bff, hoist: true, mentionable: false, permissions: UP.EMBED | UP.ATTACH | UP.EXT_STICKERS };
 export const BOOSTER_LOUNGE = {
   name: "boosters",
-  topic: "The boosters' lounge: release previews before #announcements and first invites to test new features. Thank you for boosting Orrery.",
+  topic: "Boosters and the team. Release previews land here ahead of #announcements, along with first invites to try new features. Thanks for boosting Orrery.",
 };
 /** Approved by the owner on 2026-11-09; posted and pinned once in #boosters. */
-export const BOOSTER_INFO = `**Welcome to #boosters**
-Thank you for boosting Orrery. Every boost keeps the server upgraded for the whole community.
+export const BOOSTER_INFO = `**#boosters · start here**
+Thanks for boosting Orrery. Your boosts keep the server's upgrades on for everyone.
 
-**What boosters get**
-• **Orrery Booster role:** a violet name and your own section in the member list.
-• **Images and files** in every room you can write in, with previews for official links.
-• **Release previews:** the next release card and the features coming up land here before #announcements.
-• **First tester invites:** when a new feature is ready to try on the development network, boosters hear first.
-• **Monthly thank-you:** once a month the team thanks its boosters in #announcements.
+**Booster perks**
+• **Orrery Booster role:** a violet name and a section of your own in the member list.
+• **Images and files** in each room where you can post, plus previews for official links.
+• **Release previews:** upcoming release cards and features show up here ahead of #announcements.
+• **First tester invites:** boosters are first to hear when a new feature is ready to try on the development network.
+• **Monthly thanks:** the team thanks its boosters in #announcements each month.
 
 **Coming soon**
-• **Booster achievement** on the Achievement Board, paid from the Reward Pool. Link your wallet with /verify to be ready.
-• **Agent Launch booster window:** boosters with a linked wallet get a short early window on new launches.`;
+• **Booster achievement** on the Achievement Board, paid from the Reward Pool. Link a wallet with /verify ahead of time.
+• **Agent Launch booster window:** boosters with a linked wallet get a brief early window on new launches.`;
 const STAFF_ROLES = ["Admin", "Core Team", "Moderator"];
 
 /**
@@ -636,7 +636,7 @@ export async function ensureBoosters(api: DiscordApi, guildId: string): Promise<
     done.push("#boosters access restored");
   }
   const pins = (await api.raw("GET", `/channels/${lounge.id}/pins`)) as { author?: { id: string }; content: string }[];
-  if (!pins.some((m) => m.author?.id === me.id && m.content.startsWith("**Welcome to #boosters**"))) {
+  if (!pins.some((m) => m.author?.id === me.id && m.content.startsWith("**#boosters · start here**"))) {
     const m = (await api.raw("POST", `/channels/${lounge.id}/messages`, { content: BOOSTER_INFO, flags: 4, allowed_mentions: { parse: [] } })) as { id: string };
     await api.raw("PUT", `/channels/${lounge.id}/pins/${m.id}`);
     done.push("#boosters welcome pinned");
@@ -694,7 +694,7 @@ export const BOOSTER_TIERS = [
 /** Rooms only long-term boosters (and staff) see. */
 export const TIER_ROOMS = [
   { name: "Booster Stage", type: 2, from: "Booster 3M", topic: "" },
-  { name: "inner-circle", type: 0, from: "Booster 6M", topic: "Six-month boosters and the team: the earliest feature tests and direct talks with the builders." },
+  { name: "inner-circle", type: 0, from: "Booster 6M", topic: "Boosters of six months or more, with the team. Earliest feature trials and direct conversations with the people building Orrery." },
 ] as const;
 /** Server boost levels and the boosts each needs. */
 export const BOOST_LEVELS = [
@@ -777,11 +777,11 @@ export async function ensureBoosterTiers(api: DiscordApi, guildId: string, now =
 /** The progress line for #boosters: boosts now, the level, and what the next level needs. */
 export function boostProgressMessage(boosts: number, level: number): string {
   const next = BOOST_LEVELS.find((l) => l.boosts > boosts);
-  const head = `**Server boosts: ${boosts}** · Level ${level}`;
-  if (!next) return `${head}\nLevel 3 is unlocked: the custom server link is available. Thank you, boosters.`;
+  const head = `**Boosts: ${boosts}** · Server level ${level}`;
+  if (!next) return `${head}\nLevel 3 reached, which unlocks the custom server link. Thanks, boosters.`;
   const more = next.boosts - boosts;
-  const perk = next.level === 3 ? "a custom server link for Orrery" : next.level === 2 ? "a server banner and larger uploads" : "more emoji, better audio and an animated icon";
-  return `${head}\n${more} more ${more === 1 ? "boost" : "boosts"} reach Level ${next.level}, which unlocks ${perk}.`;
+  const perk = next.level === 3 ? "a custom invite link for Orrery" : next.level === 2 ? "a banner and bigger uploads" : "extra emoji slots, higher audio quality and an animated icon";
+  return `${head}\nLevel ${next.level} is ${more} ${more === 1 ? "boost" : "boosts"} away and brings ${perk}.`;
 }
 
 /**
@@ -803,9 +803,9 @@ export async function boostProgress(sql: Sql, api: DiscordApi, guildId: string):
   if (ch.boosters && boosts > 0) { await api.post(ch.boosters, boostProgressMessage(boosts, level)); done.push(`progress ${key}`); }
   if (ch.alerts && prev !== null && boosts < prev) {
     const l3 = BOOST_LEVELS[2].boosts;
-    const lost = prevLevel !== null && level < prevLevel ? ` The server dropped from Level ${prevLevel} to Level ${level}.` : "";
-    const near = boosts < l3 && prev >= l3 ? " The custom server link needs 14 boosts." : "";
-    await api.post(ch.alerts, `⚠️ Server boosts fell from ${prev} to ${boosts}.${lost}${near}`);
+    const lost = prevLevel !== null && level < prevLevel ? ` Server level went from ${prevLevel} to ${level}.` : "";
+    const near = boosts < l3 && prev >= l3 ? " Keeping the custom server link takes 14 boosts." : "";
+    await api.post(ch.alerts, `⚠️ Boost count went from ${prev} to ${boosts}.${lost}${near}`);
     done.push("boost drop alert");
   }
   return done;
@@ -844,12 +844,12 @@ export async function ensureRoleOrder(api: DiscordApi, guildId: string): Promise
   return [`role order set: ${below.map((r) => r.name).join(" > ")}`];
 }
 
-export const WELCOME_ROOM = { name: "new-members", topic: "The Orrery bot welcomes everyone who joins. Say hello in #introductions." };
+export const WELCOME_ROOM = { name: "new-members", topic: "New arrivals are greeted here by the Orrery bot. Introduce yourself in #introductions." };
 
 export function welcomeMessage(userIds: string[], ch: Record<string, string>): string {
   const link = (n: string) => (ch[n] ? `<#${ch[n]}>` : `#${n}`);
   const who = userIds.map((u) => `<@${u}>`).join(", ");
-  return `Welcome to Orrery, ${who}! Start with ${link("rules")}, say hello in ${link("introductions")}, and link your wallet with \`/verify\`. The team never DMs you first.`;
+  return `${who}, welcome aboard Orrery. Read ${link("rules")} first, introduce yourself in ${link("introductions")}, and connect your wallet with \`/verify\`. Nobody from the team will message you first.`;
 }
 
 /**

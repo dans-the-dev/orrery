@@ -26,7 +26,7 @@ const staffAllow = (VIEW | SEND | HISTORY | EMBED | ATTACH | APP_COMMANDS).toStr
 const ow = [{ id: G, type: 0, allow: "0", deny: VIEW.toString() }, ...["Admin", "Core Team"].map(role).filter(Boolean).map((r) => ({ id: r.id, type: 0, allow: staffAllow, deny: "0" }))];
 if (bot) ow.push({ id: bot.id, type: 0, allow: (VIEW | SEND | HISTORY | EMBED | ATTACH).toString(), deny: "0" });
 const existing = chans.find((c) => c.name === "dev-lab" && c.type === 0);
-const topic = "Orrery on the development network: bot posts, alerts and commands for testing. Nothing here touches the community rooms or roles.";
+const topic = "Development network room for the Orrery bot: its posts, alerts and test commands. Community rooms and roles stay untouched by anything here.";
 if (existing) {
   await call("PATCH", `/channels/${existing.id}`, { parent_id: team?.id, topic, permission_overwrites: ow });
   console.log(`kept #dev-lab ${existing.id} private`);

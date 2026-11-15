@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { DISCORD_URL, X_URL } from "@/lib/config";
 import { ORRY_ROUTES } from "@/lib/orry/config";
 import { useReleases } from "@/lib/orry/releases";
 import { MARKET_ROUTES } from "@/lib/markets/config";
@@ -15,6 +14,7 @@ import { WalletButton } from "./WalletButton";
 import { DASHBOARD_HREF } from "@/lib/dashboard";
 import { DiscordIcon } from "./DiscordIcon";
 import { XIcon } from "./XIcon";
+import { DISCORD_URL, X_URL } from "./social";
 
 type NavLink = { href: string; label: string; match?: string[] };
 /** A protocol section: its pages, and the first open one (none while the whole section is held). */
@@ -24,7 +24,7 @@ const HOME: NavLink = { href: "/", label: "Home" };
 // Agent limits and credits are sections of the dashboard, so the site nav carries one link to it.
 const CORE: NavLink[] = [
   { href: DASHBOARD_HREF, label: "Dashboard" },
-  { href: "/signer", label: "Signer lookup" },
+  { href: "/signer", label: "Signer readings" },
 ];
 const DOCS: NavLink = { href: "/docs", label: "Docs" };
 
@@ -57,7 +57,7 @@ export function Nav() {
       pages: [{ href: "/credit", label: "Credit pools" }, { href: "/attesters", label: "Attesters" }],
       liveHref: CREDIT_ROUTES.find((r) => live(r.feature))?.href,
     },
-    { label: "Agent Launch", pages: [{ href: "/launch", label: "Launch a coin" }], liveHref: live("launch") ? "/launch" : undefined },
+    { label: "Agent Launch", pages: [{ href: "/launch", label: "Start a coin" }], liveHref: live("launch") ? "/launch" : undefined },
   ];
   const openSections = sections.filter((s) => s.liveHref);
   const heldSections = sections.filter((s) => !s.liveHref);
@@ -136,12 +136,16 @@ export function Nav() {
         ) : null}
       </div>
       <div className="nav-actions">
-        <a aria-label="Orrery on X" className="x-link" href={X_URL} target="_blank" rel="noreferrer">
-          <XIcon />
-        </a>
-        <a aria-label="Orrery on Discord" className="x-link" href={DISCORD_URL} target="_blank" rel="noreferrer">
-          <DiscordIcon />
-        </a>
+        {X_URL ? (
+          <a aria-label="Follow Orrery on X" className="x-link" href={X_URL} target="_blank" rel="noreferrer">
+            <XIcon />
+          </a>
+        ) : null}
+        {DISCORD_URL ? (
+          <a aria-label="Join the Orrery Discord" className="x-link" href={DISCORD_URL} target="_blank" rel="noreferrer">
+            <DiscordIcon />
+          </a>
+        ) : null}
         <WalletButton />
       </div>
     </nav>

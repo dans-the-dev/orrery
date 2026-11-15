@@ -21,7 +21,7 @@ async function act(name) {
   await btn.click();
   for (let i = 0; i < 60; i++) {
     const n = await notice();
-    if (/: done\.|did not go through|closed/.test(n)) return n;
+    if (/: done\.|was not completed|closed/.test(n)) return n;
     await page.waitForTimeout(1500);
   }
   return await notice();
@@ -29,7 +29,7 @@ async function act(name) {
 const field = (label) => page.locator("label", { hasText: label }).locator("input").first();
 await page.goto(base + "/operator", { waitUntil: "load", timeout: 60000 });
 await page.waitForTimeout(2500);
-await page.getByPlaceholder("0x… your Safe").fill(account);
+await page.getByPlaceholder("0x… Safe address").fill(account);
 await page.getByPlaceholder("1", { exact: true }).fill(agent);
 await page.locator(".editor").waitFor({ timeout: 30000 });
 await page.waitForTimeout(3000);
@@ -37,7 +37,7 @@ say(`opened: ${(await page.locator(".editor-head").innerText()).replace(/\s+/g, 
 say(`caps now: per payment ${await field("Per payment").inputValue()}, per day ${await field("Per day").inputValue()}, float ${await field("Float ceiling").inputValue()}`);
 if (!process.env.ONLY_CANCEL) {
 await field("Per payment").fill("8");
-say(`1 lower: ${await act(/^Lower limits now$/)}`);
+say(`1 lower: ${await act(/^Lower the caps now$/)}`);
 await page.waitForTimeout(4000);
 say(`2 pause: ${await act(/^Pause agent$/)}`);
 await page.waitForTimeout(4000);
@@ -45,7 +45,7 @@ say(`   status: ${(await page.locator(".editor-head").innerText()).replace(/\s+/
 say(`3 resume: ${await act(/^Resume agent$/)}`);
 await page.waitForTimeout(4000);
 await field("Per payment").fill("10");
-say(`4 propose increase: ${await act(/^Propose increase/)}`);
+say(`4 propose increase: ${await act(/^Propose higher caps/)}`);
 await page.waitForTimeout(4000);
 }
 say(`   pending: ${(await page.locator(".editor").innerText()).match(/Increase pending[^\n]*\n?[^\n]*/)?.[0]?.replace(/\s+/g, " ") ?? "none shown"}`);

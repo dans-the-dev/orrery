@@ -22,9 +22,9 @@ function Reading() {
   const per = pm?.rate ? (BigInt(pm.rate) * SAMPLE_WEI * BigInt(10_000 + pm.premiumBps)) / (10n ** 18n * 10_000n) : undefined;
   return (
     <div className="rc-card">
-      <p className="rc-card-title">Gas price in ORRY</p>
+      <p className="rc-card-title">Current gas reading</p>
       <p className="rc-big">
-        <Fig v={per !== undefined ? orry(per) : undefined} unit="ORRY per 0.00001 ETH" />
+        <Fig v={per !== undefined ? orry(per) : undefined} unit="ORRY for each 0.00001 ETH of gas" />
       </p>
       <dl className="rc-rows">
         <Row label="EntryPoint">{q.data ? q.data.paymasters.map((p) => `v${p.version}`).join(", ") : "…"}</Row>
@@ -42,9 +42,9 @@ export function GasExits() {
   const mine = useReadContract({ address: PAYMASTER, abi: pmAbi, functionName: "balanceOf", args: address ? [address] : undefined, query: { enabled: Boolean(address && PAYMASTER) } }).data as bigint | undefined;
   if (!PAYMASTER || !connected || !mine) return null;
   return (
-    <section className="rc-desk r2-desk" aria-label="Withdraw prepaid gas">
+    <section className="rc-desk r2-desk" aria-label="Take back prepaid gas">
       <div className="rc-desk-body">
-        <AmountField id="gas-exit" label="ORRY to withdraw" unit="ORRY" value={amt} onChange={setAmt} max={orry(mine)} onMax={() => setAmt(toInput(mine))} />
+        <AmountField id="gas-exit" label="Amount to take back, ORRY" unit="ORRY" value={amt} onChange={setAmt} max={orry(mine)} onMax={() => setAmt(toInput(mine))} />
         <button
           className="primary rc-go"
           type="button"
@@ -52,7 +52,7 @@ export function GasExits() {
           onClick={() => void tx.run("Withdraw", async ({ send }) => {
             await send({ address: PAYMASTER, abi: pmAbi, functionName: "withdraw", args: [address, parseAmount(amt)] });
             setAmt("");
-            return "Back in your wallet.";
+            return "Returned to your wallet.";
           })}
         >
           Withdraw
@@ -78,10 +78,10 @@ export function GasView() {
     if (!address || !a || !target) return;
     await tx.run("Fund gas", async ({ send, step, ensureAllowance }) => {
       await ensureAllowance(address, PAYMASTER, a, step);
-      step("Confirm the deposit in your wallet.");
+      step("Approve the gas deposit in your wallet.");
       await send({ address: PAYMASTER, abi: pmAbi, functionName: "deposit", args: [target, a] });
       setAmt("");
-      return `${orry(a)} ORRY ready for ${target === address ? "your account" : "that account"}'s gas.`;
+      return `${orry(a)} ORRY is now ready for ${target === address ? "your account" : "that account"} to spend on gas.`;
     });
   }
   async function withdraw() {
@@ -90,27 +90,27 @@ export function GasView() {
     await tx.run("Withdraw", async ({ send }) => {
       await send({ address: PAYMASTER, abi: pmAbi, functionName: "withdraw", args: [address, a] });
       setAmt("");
-      return `${orry(a)} ORRY back in your wallet.`;
+      return `${orry(a)} ORRY returned to your wallet.`;
     });
   }
 
   return (
     <>
       <OrryHead
-        title="Pay your agents' gas in ORRY."
-        lead={<p>Prepay a little ORRY for a smart account. Its ERC-4337 operations then run through Orrery&apos;s paymaster and are charged from that balance at the USD price of the gas they use.</p>}
+        title="Your agents spend ORRY on gas, not ETH."
+        lead={<p>Set aside ORRY for a smart account. Orrery&apos;s paymaster then covers each of its ERC-4337 operations and charges that balance the USD value of the gas used.</p>}
         reading={<Reading />}
       />
       <div className="rc-grid">
         <section className="rc-desk r2-desk" aria-label="Gas balance">
-          <Segmented label="Gas actions" value={mode} onChange={setMode} options={[{ id: "fund", label: "Fund an account" }, { id: "withdraw", label: "Withdraw" }]} />
+          <Segmented label="Gas actions" value={mode} onChange={setMode} options={[{ id: "fund", label: "Add to an account" }, { id: "withdraw", label: "Withdraw" }]} />
           {mode === "fund" ? (
             <div className="rc-desk-body">
               <label className="r2-field">
                 <span>Smart account</span>
                 <input value={account} placeholder={address ?? "0x…"} onChange={(e) => setAccount(e.target.value.trim())} spellCheck={false} />
               </label>
-              <AmountField id="gas-amt" label="ORRY to set aside" unit="ORRY" value={amt} onChange={setAmt} hint={bal !== undefined ? `Balance now ${orry(bal)} ORRY` : undefined} />
+              <AmountField id="gas-amt" label="Amount to add, ORRY" unit="ORRY" value={amt} onChange={setAmt} hint={bal !== undefined ? `Gas balance: ${orry(bal)} ORRY` : undefined} />
               {ready ? (
                 <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !parseAmount(amt) || !target} onClick={() => void fund()}>
                   {tx.busy ? "Funding…" : "Fund gas"}
@@ -121,8 +121,8 @@ export function GasView() {
             </div>
           ) : (
             <div className="rc-desk-body">
-              <p className="rc-muted">Each account withdraws its own balance, to any address it names.</p>
-              <AmountField id="gas-out" label="ORRY to withdraw" unit="ORRY" value={amt} onChange={setAmt} max={mine !== undefined ? orry(mine) : undefined} onMax={() => mine !== undefined && setAmt(toInput(mine))} />
+              <p className="rc-muted">Only the account itself takes its balance back, and it can send it to any address.</p>
+              <AmountField id="gas-out" label="Amount to take back, ORRY" unit="ORRY" value={amt} onChange={setAmt} max={mine !== undefined ? orry(mine) : undefined} onMax={() => mine !== undefined && setAmt(toInput(mine))} />
               {ready ? (
                 <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !parseAmount(amt)} onClick={() => void withdraw()}>
                   {tx.busy ? "Withdrawing…" : "Withdraw"}
@@ -136,14 +136,14 @@ export function GasView() {
         </section>
         <section className="rc-panel r2-dev" aria-label="For developers">
           <div className="rc-panel-head">
-            <h2>Use it from an agent</h2>
+            <h2>For agent builders</h2>
           </div>
           <dl className="rc-rows">
             <Row label="Paymaster">
               <span className="mono">{PAYMASTER}</span>
             </Row>
-            <Row label="paymasterAndData">paymaster, verification gas (16 bytes), postOp gas of at least 120,000 (16 bytes)</Row>
-            <Row label="Funding">Any wallet can fund an account; only the account withdraws its balance</Row>
+            <Row label="paymasterAndData">Paymaster address, then verification gas (16 bytes), then postOp gas of 120,000 or more (16 bytes)</Row>
+            <Row label="Funding">Anyone may add to an account. Only that account can take its balance back</Row>
           </dl>
         </section>
       </div>

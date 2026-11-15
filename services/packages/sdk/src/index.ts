@@ -122,7 +122,7 @@ export async function signSessionConsent(
   signer: Account,
   args: { chainId: number; module: Address; account: Address; agentId: bigint; policy: Policy },
 ): Promise<Hex> {
-  if (!signer.signTypedData) throw new Error("The signer account cannot sign typed data.");
+  if (!signer.signTypedData) throw new Error("Signing needs an account that supports signTypedData.");
   return signer.signTypedData({
     domain: consentDomain(args.chainId, args.module),
     types: consentTypes,
@@ -175,7 +175,7 @@ export class AgentClient {
 
   async session(): Promise<{ account: Address; agentId: bigint }> {
     const [account, agentId] = await this.publicClient.readContract({ address: this.module, abi: orreryPolicyModuleAbi, functionName: "signerOf", args: [this.signer] });
-    if (account === "0x0000000000000000000000000000000000000000") throw new Error("This address has no Orrery session.");
+    if (account === "0x0000000000000000000000000000000000000000") throw new Error("No Orrery session is registered for this signer address.");
     return { account, agentId };
   }
 
@@ -199,12 +199,12 @@ export class AgentClient {
     const bal = await this.publicClient.readContract({ address: token, abi: devUSDGAbi, functionName: "balanceOf", args: [this.signer] });
     if (bal >= needed) return null;
     const allowance = (await this.getAllowance()).find((a) => a.token.toLowerCase() === token.toLowerCase());
-    if (!allowance) throw new Error("This token is not in the session's caps.");
+    if (!allowance) throw new Error("The session policy sets no cap for this token.");
     let amount = needed - bal;
     if (amount > allowance.perTx) amount = allowance.perTx;
     if (amount > allowance.floatHeadroom) amount = allowance.floatHeadroom;
     if (amount > allowance.remainingToday) amount = allowance.remainingToday;
-    if (amount + bal < needed) throw new Error("The session's caps do not allow this payment today.");
+    if (amount + bal < needed) throw new Error("This payment would exceed today's session caps.");
     const hash = await this.wallet.writeContract({ address: this.module, abi: orreryPolicyModuleAbi, functionName: "topUp", args: [token, amount], chain: null, account: this.wallet.account });
     await this.publicClient.waitForTransactionReceipt({ hash });
     return hash;
@@ -214,9 +214,9 @@ export class AgentClient {
   async ensureGas(min: bigint): Promise<Hex | null> {
     const bal = await this.publicClient.getBalance({ address: this.signer });
     if (bal >= min) return null;
-    if (bal === 0n) throw new Error("The signer has no ETH for gas yet. The operator funds the first gas.");
+    if (bal === 0n) throw new Error("The signer holds 0 ETH. Send its first gas from the operator wallet.");
     const allowance = (await this.getAllowance()).find((a) => a.token === "0x0000000000000000000000000000000000000000");
-    if (!allowance) throw new Error("Native gas is not in the session's caps.");
+    if (!allowance) throw new Error("The session policy sets no cap for native gas.");
     let amount = min - bal;
     for (const lim of [allowance.perTx, allowance.floatHeadroom, allowance.remainingToday]) if (amount > lim) amount = lim;
     const hash = await this.wallet.writeContract({ address: this.module, abi: orreryPolicyModuleAbi, functionName: "topUp", args: ["0x0000000000000000000000000000000000000000", amount], chain: null, account: this.wallet.account });
@@ -318,23 +318,23 @@ export async function verifyCheck(
 ): Promise<{ ok: boolean; reason?: string; version?: CheckVersion; result: CheckResult & Partial<CheckResultV2> }> {
   const result = parseCheck(res.result);
   const version = res.domain?.version as CheckVersion;
-  if (!CHECK_VERSIONS.includes(version)) return { ok: false, reason: "unknown check version", result };
+  if (!CHECK_VERSIONS.includes(version)) return { ok: false, reason: "unsupported check version", result };
   const v2Fields = ["stakeActive", "stakeLeaving", "stakeLeavingAt", "stakeLockedUntil", "stakedBy"] as const;
   const hasV2 = v2Fields.map((f) => f in res.result);
-  if (version === "2" ? !hasV2.every(Boolean) : hasV2.some(Boolean)) return { ok: false, reason: "fields do not match the check version", result };
+  if (version === "2" ? !hasV2.every(Boolean) : hasV2.some(Boolean)) return { ok: false, reason: "result fields disagree with the check version", result };
   const chainId = await publicClient.getChainId();
   const domain = checkDomain(chainId, attestor, version);
   let recovered: Address;
   try {
     recovered = await recoverTypedDataAddress({ domain, types: checkTypesFor(version), primaryType: "CheckResult", message: result as never, signature: res.signature });
   } catch {
-    return { ok: false, reason: "signature does not verify", version, result };
+    return { ok: false, reason: "invalid signature", version, result };
   }
   const active = await publicClient.readContract({ address: attestor, abi: orreryAttestorAbi, functionName: "isCheckSigner", args: [recovered] });
-  if (!active) return { ok: false, reason: "not signed by an active check signer", version, result };
+  if (!active) return { ok: false, reason: "signer is not an active check signer", version, result };
   const now = opts.now ?? BigInt(Math.floor(Date.now() / 1000));
   if (result.validUntil < now) return { ok: false, reason: "expired check", version, result };
-  if (opts.payer && result.signer.toLowerCase() !== opts.payer.toLowerCase()) return { ok: false, reason: "check is about another address", version, result };
+  if (opts.payer && result.signer.toLowerCase() !== opts.payer.toLowerCase()) return { ok: false, reason: "check names a different address", version, result };
   return { ok: true, version, result };
 }
 
@@ -381,7 +381,7 @@ export class OrreryApi {
       if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
       return { apiKey: body.apiKey, credits: body.credits ?? "0", planUntil: body.planUntil };
     }
-    throw new Error("Payment is still confirming. Try again shortly.");
+    throw new Error("Payment awaiting confirmation. Retry in a few seconds.");
   }
 }
 
@@ -472,19 +472,19 @@ export async function verifyQuote(
             signature: q.signature,
           });
   } catch {
-    return { ok: false, reason: "signature does not verify" };
+    return { ok: false, reason: "invalid signature" };
   }
-  if (recovered.toLowerCase() !== q.signer.toLowerCase()) return { ok: false, reason: "signed by another key" };
+  if (recovered.toLowerCase() !== q.signer.toLowerCase()) return { ok: false, reason: "signer key mismatch" };
   const [listed, used] = await Promise.all([
     publicClient.readContract({ address: treasury, abi: iOrreryTreasuryAbi, functionName: "isQuoteSigner", args: [recovered] }),
     publicClient.readContract({ address: treasury, abi: iOrreryTreasuryAbi, functionName: "quoteUsed", args: [q.quote.quoteId] }),
   ]);
-  if (!listed) return { ok: false, reason: "not signed by an active quote signer" };
-  if (used) return { ok: false, reason: "quote already used" };
+  if (!listed) return { ok: false, reason: "signer is not a listed quote signer" };
+  if (used) return { ok: false, reason: "quote already redeemed" };
   const now = opts.now ?? BigInt(Math.floor(Date.now() / 1000));
   if (BigInt(q.quote.expiry) < now) return { ok: false, reason: "expired quote" };
   const forWhom = q.kind === "verification" ? q.quote.payer : q.quote.buyer;
-  if (opts.sender && forWhom.toLowerCase() !== opts.sender.toLowerCase()) return { ok: false, reason: "quote is for another address" };
+  if (opts.sender && forWhom.toLowerCase() !== opts.sender.toLowerCase()) return { ok: false, reason: "quote names a different sender" };
   return { ok: true };
 }
 
@@ -494,7 +494,7 @@ export class OrryApi {
 
   private async get<T>(path: string): Promise<T> {
     const r = await fetch(`${this.baseUrl}${path}`);
-    if (r.status === 404) throw new Error("This ORRY feature is not open yet.");
+    if (r.status === 404) throw new Error("This ORRY feature is coming soon.");
     const body = (await r.json()) as T & { error?: string };
     if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
     return body;
@@ -502,7 +502,7 @@ export class OrryApi {
 
   private async post<T>(path: string, data: unknown): Promise<T> {
     const r = await fetch(`${this.baseUrl}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data) });
-    if (r.status === 404) throw new Error("This ORRY feature is not open yet.");
+    if (r.status === 404) throw new Error("This ORRY feature is coming soon.");
     const body = (await r.json()) as T & { error?: string };
     if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
     return body;
@@ -562,7 +562,7 @@ export class MarketsApi {
   private async get<T>(path: string): Promise<T> {
     const r = await fetch(`${this.baseUrl}${path}`);
     const body = (await r.json().catch(() => ({}))) as T & { error?: string };
-    if (r.status === 404 && !body.error) throw new Error("Markets are not open yet.");
+    if (r.status === 404 && !body.error) throw new Error("Markets are coming soon.");
     if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
     return body;
   }
@@ -593,7 +593,7 @@ export class MarketsApi {
     };
     const r = await fetch(`${this.baseUrl}/v1/markets/relay/reveals`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const out = (await r.json().catch(() => ({}))) as RelayRevealResponse & { error?: string };
-    if (!r.ok) throw new Error(out.error ?? (r.status === 404 ? "The relay is not open yet." : `HTTP ${r.status}`));
+    if (!r.ok) throw new Error(out.error ?? (r.status === 404 ? "The relay is coming soon." : `HTTP ${r.status}`));
     return out;
   }
 
@@ -640,7 +640,7 @@ export class FacilitatorApi {
   private async call<T>(path: string, init?: RequestInit): Promise<T> {
     const r = await fetch(`${this.baseUrl}${path}`, init);
     const body = (await r.json().catch(() => ({}))) as T & { error?: string };
-    if (r.status === 404 && !body.error) throw new Error("The facilitator is not open yet.");
+    if (r.status === 404 && !body.error) throw new Error("The facilitator is coming soon.");
     if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
     return body;
   }
@@ -671,7 +671,7 @@ export async function signPermit2Payment(
   args: { chainId: number; requirements: PublicPaymentRequirements; permit2: Address; proxy: Address; nonce?: bigint; deadline?: bigint },
 ): Promise<PublicPaymentPayload> {
   const from = wallet.account?.address;
-  if (!from) throw new Error("The wallet client needs an account.");
+  if (!from) throw new Error("Attach an account to the wallet client first.");
   const nonce = args.nonce ?? BigInt(toHex(crypto.getRandomValues(new Uint8Array(31))));
   const deadline = args.deadline ?? BigInt(Math.floor(Date.now() / 1000) + args.requirements.maxTimeoutSeconds);
   const message = {

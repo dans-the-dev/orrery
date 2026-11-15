@@ -34,12 +34,12 @@ const chainFor = (chainId: number, rpcUrl: string) =>
  */
 export function agentFromEnv(env: Env = processEnv()): AgentClient {
   const key = env.ORRERY_SIGNER_KEY;
-  if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key)) throw new Error("Set ORRERY_SIGNER_KEY to the signer key from your Orrery key file.");
+  if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key)) throw new Error("ORRERY_SIGNER_KEY should hold the signer key from your Orrery key file (0x plus 64 hex characters).");
   const chainId = Number(env.ORRERY_CHAIN_ID ?? ORRERY_MAINNET.chainId);
-  if (!Number.isInteger(chainId) || chainId <= 0) throw new Error("ORRERY_CHAIN_ID must be a chain ID such as 4663.");
+  if (!Number.isInteger(chainId) || chainId <= 0) throw new Error("ORRERY_CHAIN_ID expects a positive chain ID, for example 4663.");
   const rpcUrl = env.ORRERY_RPC_URL || ORRERY_MAINNET.rpcUrl;
   const module = env.ORRERY_MODULE || (chainId === ORRERY_MAINNET.chainId ? ORRERY_MAINNET.module : undefined);
-  if (!module || !isAddress(module)) throw new Error("Set ORRERY_MODULE to the Orrery policy module on this chain.");
+  if (!module || !isAddress(module)) throw new Error("ORRERY_MODULE should be the address of the Orrery policy module on this chain.");
   const chain = chainFor(chainId, rpcUrl);
   const wallet = createWalletClient({ chain, transport: http(rpcUrl), account: privateKeyToAccount(key as Hex) }) as WalletClient & { account: Account };
   return new AgentClient(wallet, createPublicClient({ chain, transport: http(rpcUrl) }) as PublicClient, getAddress(module));
@@ -59,6 +59,6 @@ export async function checkPayment(
   const publicClient = opts.publicClient ?? (createPublicClient({ chain: chainFor(ORRERY_MAINNET.chainId, rpcUrl), transport: http(rpcUrl) }) as PublicClient);
   const res = await new OrreryApi(opts.apiUrl ?? ORRERY_MAINNET.apiUrl, apiKey).checkPayer(payer);
   const attestor = opts.attestor ?? ORRERY_MAINNET.attestor;
-  if (!attestor) throw new Error("Pass the Orrery attestor address for this network.");
+  if (!attestor) throw new Error("Provide the Orrery attestor address for this network.");
   return verifyCheck(publicClient, attestor, res, { payer });
 }

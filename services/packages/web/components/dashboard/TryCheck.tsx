@@ -31,17 +31,17 @@ export function TryCheck({ apiKey, onChecked }: { apiKey: string | null; onCheck
     try {
       const r = await fetch(`${API_URL}/v1/check/by-signer/${payer}`, { headers: { authorization: `Bearer ${k}` } });
       const body = (await r.json()) as { result?: Record<string, unknown>; signature?: Hex; domain?: { version?: string }; error?: string };
-      if (!r.ok || !body.result || !body.signature) throw new Error(body.error ?? "The check did not finish.");
+      if (!r.ok || !body.result || !body.signature) throw new Error(body.error ?? "No result came back from the check.");
       const result = parseCheck(body.result);
       // only the version comes from the response; the name, chain and attestor are this page's own
       const version = (CHECK_VERSIONS as readonly string[]).includes(body.domain?.version ?? "1") ? ((body.domain?.version ?? "1") as CheckVersion) : null;
-      if (!version) throw new Error("The check came back in a version this page does not know.");
+      if (!version) throw new Error("This page cannot read the check's version.");
       const signer = await recoverTypedDataAddress({ domain: checkDomain(activeChain.id, ADDRESSES.attestor, version), types: checkTypesFor(version), primaryType: "CheckResult", message: result as never, signature: body.signature });
       const verified = await pub.readContract({ address: ADDRESSES.attestor, abi: orreryAttestorAbi, functionName: "isCheckSigner", args: [signer] });
       setCheck({ result, verified, signer });
       onChecked?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The check did not finish.");
+      setError(e instanceof Error ? e.message : "No result came back from the check.");
     } finally {
       setBusy(false);
     }
@@ -60,7 +60,7 @@ export function TryCheck({ apiKey, onChecked }: { apiKey: string | null; onCheck
           <input value={payer} onChange={(e) => setPayer(e.target.value.trim())} placeholder="0x…" spellCheck={false} />
         </label>
         <button className="cp-btn cp-btn-primary" type="button" disabled={!k || !isAddress(payer) || busy} onClick={() => void run()}>
-          {busy ? "Checking" : "Run a signed check"}
+          {busy ? "Checking" : "Send a signed check"}
         </button>
       </div>
       {error ? <p className="cp-note is-error" role="alert">{error}</p> : null}
@@ -68,10 +68,10 @@ export function TryCheck({ apiKey, onChecked }: { apiKey: string | null; onCheck
         <Rows
           rows={[
             ["Session", STATUS[Number(check.result.status)] ?? "Unknown"],
-            ["Signature", check.verified ? `Valid, signed by ${short(check.signer)}` : "Not from an active check signer"],
+            ["Signature", check.verified ? `Valid · check signer ${short(check.signer)}` : "Signed by a key that is not an active check signer"],
             ["Account", <span key="a" className="mono">{short(check.result.account)}</span>],
-            ["USDG today", cap ? `${usdg(cap.spentToday)} of ${usdg(cap.perDay)}, per payment ${usdg(cap.perTx)}` : "No caps"],
-            ["Endpoints", check.result.endpointsLive ? "Live" : "Not probed live"],
+            ["USDG today", cap ? `${usdg(cap.spentToday)} spent of ${usdg(cap.perDay)} · ${usdg(cap.perTx)} per payment` : "No caps"],
+            ["Endpoints", check.result.endpointsLive ? "Live" : "Not seen live"],
             ["Valid until", `${new Date(Number(check.result.validUntil) * 1000).toISOString().replace("T", " ").slice(0, 19)} UTC`],
           ]}
         />

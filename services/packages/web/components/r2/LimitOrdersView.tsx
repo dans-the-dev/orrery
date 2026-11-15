@@ -116,13 +116,13 @@ function OrderDesk({ stocks }: { stocks: Stock[] }) {
     const tokenIn = sell ? stock!.asset : usdgAddr;
     const need = sell ? amountIn : amountIn + (inOrry ? 0n : fee) + tipAmt;
     await tx.run("Place order", async ({ send, step, ensureAllowance }) => {
-      step(`Approve ${sell ? stock!.symbol : "USDG"} for the order book in your wallet.`);
+      step(`Approve the ${sell ? stock!.symbol : "USDG"} spend for the order book in your wallet.`);
       await send({ address: tokenIn, abi: tokenAbi as Abi, functionName: "approve", args: [BOOK, need] });
       if (inOrry) await ensureAllowance(address, BOOK, 10n ** 24n, step);
       const nonce = BigInt(`0x${Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(16).padStart(2, "0")).join("")}`);
       const expiry = Math.floor(Date.now() / 1000) + days * 86_400;
       const message = { owner: address, asset: stock!.asset, sellAsset: sell, amountIn, limitPrice, tipBps: tip, payFeeInOrry: inOrry, nonce, expiry: BigInt(expiry) };
-      step("Sign the order in your wallet. Nothing moves until it fills.");
+      step("Sign the order message in your wallet. Your tokens stay put until a fill.");
       const signature = await sign.mutateAsync({
         domain: { ...LIMIT_ORDER_DOMAIN, chainId: CHAIN_ID, verifyingContract: BOOK },
         types: LIMIT_ORDER_TYPES,
@@ -142,12 +142,12 @@ function OrderDesk({ stocks }: { stocks: Stock[] }) {
         signature,
       });
       setAmt("");
-      return `Order placed: ${sell ? "sell" : "buy"} ${stock!.symbol} at ${limit} USD. It fills once the pool reaches your price.`;
+      return `Order on record: ${sell ? "sell" : "buy"} ${stock!.symbol}, limit ${limit} USD. A keeper fills it when the pool meets your price.`;
     });
   }
 
   return (
-    <section className="rc-desk r2-desk" aria-label="New limit order">
+    <section className="rc-desk r2-desk" aria-label="Limit order desk">
       <div className="mk-pick">
         <label htmlFor="limit-stock">Stock</label>
         <select id="limit-stock" value={stock.asset} onChange={(e) => setPick(e.target.value as Address)}>
@@ -164,13 +164,13 @@ function OrderDesk({ stocks }: { stocks: Stock[] }) {
             Chainlink <b className="mono">{usdg(perShare(stock.price, stock.decimals))}</b> USD per share. Fills happen within {bpsLabel(devBps)} of it.
           </>
         ) : (
-          "Orders fill from the next US session."
+          "Fills resume when the next US session opens."
         )}
       </p>
       <div className="rc-desk-body">
         <Segmented label="Side" value={side} onChange={setSide} options={[{ id: "buy", label: "Buy" }, { id: "sell", label: "Sell" }]} />
-        <AmountField id="limit-amt" label={sell ? `${stock.symbol} to sell` : "USDG to spend"} unit={sell ? stock.symbol : "USDG"} value={amt} onChange={setAmt} />
-        <AmountField id="limit-price" label={sell ? "Lowest price per share" : "Highest price per share"} unit="USD" value={limit} onChange={setLimit} />
+        <AmountField id="limit-amt" label={sell ? `Sell amount, ${stock.symbol}` : "Spend amount, USDG"} unit={sell ? stock.symbol : "USDG"} value={amt} onChange={setAmt} />
+        <AmountField id="limit-price" label={sell ? "Minimum price per share" : "Maximum price per share"} unit="USD" value={limit} onChange={setLimit} />
         <div className="r2-choices">
           <span>Keeper tip</span>
           {LIMIT_TIPS_BPS.map((b) => (
@@ -188,22 +188,22 @@ function OrderDesk({ stocks }: { stocks: Stock[] }) {
           ))}
         </div>
         <label className="r2-check">
-          <input type="checkbox" checked={inOrry} onChange={(e) => setInOrry(e.target.checked)} /> Pay the fee in ORRY, 25% off
+          <input type="checkbox" checked={inOrry} onChange={(e) => setInOrry(e.target.checked)} /> Settle the fee in ORRY for 25% less
         </label>
         <dl className="rc-rows rc-rows-tight">
-          <Row label={`Fee, ${bpsLabel(feeBps)}`}>{fee !== undefined ? (inOrry ? "In ORRY at fill" : `${usdg(fee)} USDG`) : "…"}</Row>
+          <Row label={`Fee, ${bpsLabel(feeBps)}`}>{fee !== undefined ? (inOrry ? "Charged in ORRY on fill" : `${usdg(fee)} USDG`) : "…"}</Row>
           <Row label="Keeper tip">{tipAmt !== undefined ? `${usdg(tipAmt)} USDG` : "…"}</Row>
-          <Row label={sell ? "You receive at your price" : "Set aside in your wallet"}>
+          <Row label={sell ? "Proceeds at your price" : "Needed in your wallet"}>
             {notional !== undefined && fee !== undefined && tipAmt !== undefined
               ? sell
-                ? `${usdg(notional - (inOrry ? 0n : fee) - tipAmt)} USDG or more`
-                : `${usdg(notional + (inOrry ? 0n : fee) + tipAmt)} USDG`
+                ? `At least ${usdg(notional - (inOrry ? 0n : fee) - tipAmt)} USDG`
+                : `${usdg(notional + (inOrry ? 0n : fee) + tipAmt)} USDG in total`
               : "…"}
           </Row>
         </dl>
         {ready ? (
           <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !amountIn || !limitPrice} onClick={() => void place()}>
-            {tx.busy ? "Placing…" : `Sign ${sell ? "sell" : "buy"} order`}
+            {tx.busy ? "Placing…" : sell ? "Sign the sell order" : "Sign the buy order"}
           </button>
         ) : (
           <WalletButton />
@@ -214,7 +214,7 @@ function OrderDesk({ stocks }: { stocks: Stock[] }) {
   );
 }
 
-const STATUS: Record<LimitOrderView["status"], string> = { open: "Waiting for its price", filled: "Filled", cancelled: "Cancelled", expired: "Expired" };
+const STATUS: Record<LimitOrderView["status"], string> = { open: "Watching for your price", filled: "Filled", cancelled: "Cancelled", expired: "Expired" };
 
 function MyOrders({ stocks }: { stocks: Stock[] }) {
   const { address } = useWallet();
@@ -224,7 +224,7 @@ function MyOrders({ stocks }: { stocks: Stock[] }) {
   if (!address || orders.length === 0) return null;
   const dec = (asset: string) => stocks.find((s) => s.asset.toLowerCase() === asset)?.decimals ?? 18;
   return (
-    <section className="rc-panel" aria-label="Your limit orders">
+    <section className="rc-panel" aria-label="Limit orders on record">
       <div className="rc-panel-head">
         <h2>Your orders</h2>
       </div>
@@ -244,7 +244,7 @@ function MyOrders({ stocks }: { stocks: Stock[] }) {
             return (
               <tr key={o.hash}>
                 <td data-label="Order">
-                  {o.sellAsset ? `Sell ${amount(BigInt(o.amountIn), { decimals: d })} ${o.symbol}` : `Buy ${o.symbol} with ${usdg(BigInt(o.amountIn))} USDG`}
+                  {o.sellAsset ? `Sell ${amount(BigInt(o.amountIn), { decimals: d })} ${o.symbol}` : `Buy ${o.symbol} for ${usdg(BigInt(o.amountIn))} USDG`}
                 </td>
                 <td data-label="Price" className="num mono">{usdg(perShare(BigInt(o.limitPrice), d))}</td>
                 <td data-label="Valid until">{utc(o.expiry)}</td>
@@ -260,7 +260,7 @@ function MyOrders({ stocks }: { stocks: Stock[] }) {
                       disabled={Boolean(tx.busy)}
                       onClick={() => void tx.run("Cancel", async ({ send }) => {
                         await send({ address: BOOK, abi: bookAbi, functionName: "cancel", args: [BigInt(o.nonce)] });
-                        return "Cancelled on chain. It can no longer fill.";
+                        return "Cancelled on chain, so this order is now off the book.";
                       })}
                     >
                       Cancel
@@ -287,11 +287,11 @@ export function LimitOrdersView() {
   return (
     <>
       <OrryHead
-        title="Name your price. Keep your tokens until it fills."
-        lead={<p>Sign a buy or sell order for a stock token. A keeper fills it through the token&apos;s pool once the price reaches yours, close to the Chainlink price, and your tokens move only in that transaction.</p>}
+        title="Set your price. Your tokens stay with you until the fill."
+        lead={<p>Pick a stock token and sign a buy or sell order. When the pool meets your price, near the Chainlink reading, a keeper fills it through that token&apos;s pool. Your tokens leave your wallet only in that one transaction.</p>}
         reading={
           <div className="rc-card">
-            <p className="rc-card-title">Stocks with limit orders</p>
+            <p className="rc-card-title">Stocks open to limit orders</p>
             <p className="rc-big">
               <Fig v={loading ? undefined : stocks.length.toLocaleString("en-US")} unit={stocks.length === 1 ? "stock token" : "stock tokens"} />
             </p>
@@ -305,7 +305,7 @@ export function LimitOrdersView() {
         }
       />
       <div className="rc-grid">
-        {stocks.length ? <OrderDesk stocks={stocks} /> : <p className="rc-muted">{loading ? "Reading the stock list…" : "Stock tokens appear here once their pools are listed."}</p>}
+        {stocks.length ? <OrderDesk stocks={stocks} /> : <p className="rc-muted">{loading ? "Loading stocks…" : "Each stock token shows here as soon as its pool is listed."}</p>}
       </div>
       <MyOrders stocks={stocks} />
     </>

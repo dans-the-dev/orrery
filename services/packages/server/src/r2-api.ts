@@ -36,21 +36,21 @@ import { releasesFor } from "./releases.js";
  * an unknown route. `GET /v1/r2/accounts/:address` (positions, stored orders, prepaid gas) is never held.
  */
 
-const READ_FAILED = "Could not read the chain right now. Try again shortly.";
+const READ_FAILED = "Chain read failed. Retry in a few seconds.";
 const ENTRY_POINT_V07 = "0x0000000071727de22e5e9d8baf0edac6f37da032";
 const MAX_EXPIRY_SECONDS = 30 * 86_400;
 
 const OrderBody = z.object({
-  owner: z.string().refine(isAddress, "owner must be a 0x address"),
-  asset: z.string().refine(isAddress, "asset must be a 0x address"),
+  owner: z.string().refine(isAddress, "owner expects a 0x address"),
+  asset: z.string().refine(isAddress, "asset expects a 0x address"),
   sellAsset: z.boolean(),
-  amountIn: z.string().regex(/^[1-9]\d{0,37}$/, "amountIn must be a positive integer in base units"),
-  limitPrice: z.string().regex(/^[1-9]\d{0,40}$/, "limitPrice must be a positive integer"),
+  amountIn: z.string().regex(/^[1-9]\d{0,37}$/, "amountIn expects a positive whole number of base units"),
+  limitPrice: z.string().regex(/^[1-9]\d{0,40}$/, "limitPrice expects a positive whole number"),
   tipBps: z.number().int().min(0).max(100),
   payFeeInOrry: z.boolean(),
-  nonce: z.string().regex(/^\d{1,78}$/, "nonce must be an integer"),
+  nonce: z.string().regex(/^\d{1,78}$/, "nonce expects a whole number"),
   expiry: z.number().int().positive(),
-  signature: z.string().refine((s) => isHex(s) && s.length >= 132 && s.length <= 4098, "signature must be hex"),
+  signature: z.string().refine((s) => isHex(s) && s.length >= 132 && s.length <= 4098, "signature expects a hex string"),
 });
 
 interface PredictRow {
@@ -111,7 +111,7 @@ export function registerR2Routes(app: FastifyInstance, cfg: Config, chain: Chain
       return reply.code(503).send({ error: READ_FAILED });
     }
     if (!open) return reply.callNotFound();
-    if (!limit(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!limit(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   async function guarded<T>(reply: FastifyReply, fn: () => Promise<T>) {
     try {
@@ -180,12 +180,12 @@ export function registerR2Routes(app: FastifyInstance, cfg: Config, chain: Chain
   );
 
   app.get<{ Params: { market: string } }>("/v1/r2/predict/:market", { preHandler: gate("predict") }, async (req, reply) => {
-    if (!isAddress(req.params.market)) return reply.code(400).send({ error: "Pass the market as a 0x address." });
+    if (!isAddress(req.params.market)) return reply.code(400).send({ error: "market expects a 0x address." });
     const key = req.params.market.toLowerCase();
     return guarded(reply, async () => {
       const [rows, now] = await Promise.all([predictRows(key), chainTime()]);
       const r = rows[0];
-      if (!r) return reply.code(404).send({ error: "No market at that address." });
+      if (!r) return reply.code(404).send({ error: "No market exists at this address." });
       const body: PredictMarketResponse = { ...(await view(r, now)), chainTime: now, updatedAt: new Date().toISOString() };
       return body;
     });
@@ -234,7 +234,7 @@ export function registerR2Routes(app: FastifyInstance, cfg: Config, chain: Chain
 
   app.get<{ Querystring: { owner?: string } }>("/v1/r2/limit-orders", { preHandler: gate("limit-orders") }, async (req, reply) => {
     const owner = req.query.owner;
-    if (owner !== undefined && !isAddress(owner)) return reply.code(400).send({ error: "Pass owner as a 0x address." });
+    if (owner !== undefined && !isAddress(owner)) return reply.code(400).send({ error: "owner expects a 0x address." });
     return guarded(reply, async () => {
       const [p, now, rows] = await Promise.all([bookParams(), chainTime(), owner ? ordersOf(owner.toLowerCase()) : Promise.resolve([] as OrderRow[])]);
       const body: LimitOrdersResponse = {
@@ -250,7 +250,7 @@ export function registerR2Routes(app: FastifyInstance, cfg: Config, chain: Chain
 
   app.post("/v1/r2/limit-orders", { preHandler: gate("limit-orders", allowOrder), bodyLimit: 16_384 }, async (req, reply) => {
     const parsed = OrderBody.safeParse(req.body);
-    if (!parsed.success) return reply.code(400).send({ error: parsed.error.issues[0]?.message ?? "Invalid order." });
+    if (!parsed.success) return reply.code(400).send({ error: parsed.error.issues[0]?.message ?? "The order fields are malformed." });
     const o = parsed.data;
     const book = r2!.limitBook!;
     const order = {
@@ -264,33 +264,33 @@ export function registerR2Routes(app: FastifyInstance, cfg: Config, chain: Chain
       nonce: BigInt(o.nonce),
       expiry: BigInt(o.expiry),
     };
-    if (order.amountIn > (1n << 128n) - 1n) return reply.code(400).send({ error: "amountIn is too large." });
+    if (order.amountIn > (1n << 128n) - 1n) return reply.code(400).send({ error: "amountIn exceeds the 128 bit maximum." });
     try {
       const now = await chainTime();
-      if (o.expiry <= now) return reply.code(400).send({ error: "The order has already expired." });
-      if (o.expiry > now + MAX_EXPIRY_SECONDS) return reply.code(400).send({ error: "Choose an expiry within 30 days." });
+      if (o.expiry <= now) return reply.code(400).send({ error: "This order's expiry is already in the past." });
+      if (o.expiry > now + MAX_EXPIRY_SECONDS) return reply.code(400).send({ error: "Set an expiry no more than 30 days ahead." });
       const p = await bookParams();
       const market = await chain.public.readContract({ address: p.factory, abi: iMarketFactoryAbi, functionName: "marketOf", args: [order.asset] });
-      if (/^0x0{40}$/i.test(market)) return reply.code(400).send({ error: "That asset has no limit orders." });
+      if (/^0x0{40}$/i.test(market)) return reply.code(400).send({ error: "Limit orders are not offered for this asset." });
       const [, listed] = await chain.public.readContract({ address: market, abi: iSealedBatchMarketAbi, functionName: "remainderPool" });
-      if (!listed) return reply.code(400).send({ error: "That asset has no limit orders." });
+      if (!listed) return reply.code(400).send({ error: "Limit orders are not offered for this asset." });
       const [hash, used] = await Promise.all([
         chain.public.readContract({ address: book, abi: iLimitOrderBookAbi, functionName: "hashOrder", args: [order] }),
         chain.public.readContract({ address: book, abi: iLimitOrderBookAbi, functionName: "nonceUsed", args: [order.owner, order.nonce] }),
       ]);
-      if (used) return reply.code(409).send({ error: "That nonce is already used. Sign the order again." });
+      if (used) return reply.code(409).send({ error: "This nonce has been spent. Sign the order with a fresh one." });
       // EOAs by recovery, smart accounts through ERC-1271 (viem's verifyHash)
       const valid = await chain.public.verifyHash({ address: order.owner, hash: hash as Hex, signature: o.signature as Hex }).catch(() => false);
-      if (!valid) return reply.code(400).send({ error: "The signature does not match the order." });
+      if (!valid) return reply.code(400).send({ error: "Signature and order fields disagree." });
       const owner = order.owner.toLowerCase();
       const [open] = await sql<{ n: number }[]>`select count(*)::int as n from limit_orders where owner = ${owner} and status = 'open' and expiry > ${now}`;
-      if ((open?.n ?? 0) >= r2!.maxOpenOrdersPerOwner) return reply.code(429).send({ error: "Too many open orders for this wallet. Cancel some first." });
+      if ((open?.n ?? 0) >= r2!.maxOpenOrdersPerOwner) return reply.code(429).send({ error: "This wallet holds the most open orders allowed. Cancel one to place another." });
       const ins = await sql`insert into limit_orders (order_hash, book, owner, asset, sell_asset, amount_in, limit_price, tip_bps, pay_fee_in_orry,
           nonce, expiry, signature)
         values (${(hash as string).toLowerCase()}, ${book.toLowerCase()}, ${owner}, ${order.asset.toLowerCase()}, ${order.sellAsset},
           ${o.amountIn}, ${o.limitPrice}, ${o.tipBps}, ${o.payFeeInOrry}, ${o.nonce}, ${o.expiry}, ${o.signature.toLowerCase()})
         on conflict do nothing returning 1`;
-      if (ins.length !== 1) return reply.code(409).send({ error: "That order is already stored." });
+      if (ins.length !== 1) return reply.code(409).send({ error: "This order is already on record." });
       const body: LimitOrderSubmitResponse = { hash: (hash as string).toLowerCase(), status: "open" };
       return reply.code(201).send(body);
     } catch {
@@ -354,10 +354,10 @@ export function registerR2Routes(app: FastifyInstance, cfg: Config, chain: Chain
   const SHIELD_PAGE = 500;
   app.get<{ Querystring: { after?: string } }>("/v1/r2/shield/events", async (req, reply) => {
     if (!r2?.shield) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
     const after = req.query.after ?? "0:-1";
     const m = /^(\d{1,20}):(-?\d{1,9})$/.exec(after);
-    if (!m) return reply.code(400).send({ error: "Pass after as <block>:<log index> from a previous page." });
+    if (!m) return reply.code(400).send({ error: "after expects <block>:<log index>, taken from the previous page." });
     const [block, index] = [m[1]!, Number(m[2])];
     return guarded(reply, async () => {
       const rows = await sql<{ block_number: string; log_index: number; event: string; args: Record<string, unknown> }[]>`
@@ -387,8 +387,8 @@ export function registerR2Routes(app: FastifyInstance, cfg: Config, chain: Chain
   // ---------------------------------------------------------------- account (never held)
   app.get<{ Params: { address: string } }>("/v1/r2/accounts/:address", async (req, reply) => {
     if (!r2) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
-    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
+    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
     const address = req.params.address.toLowerCase();
     return guarded(reply, async () => {
       const [positions, orders, ops, now] = await Promise.all([

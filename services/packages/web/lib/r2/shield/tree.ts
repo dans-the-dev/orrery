@@ -42,7 +42,7 @@ export class MerkleTree {
   }
 
   path(index: number): bigint[] {
-    if (index >= this.size) throw new Error(`leaf ${index} not in tree`);
+    if (index >= this.size) throw new Error(`Leaf ${index} is past the end of the note tree.`);
     const siblings: bigint[] = [];
     let at = index;
     for (let level = 0; level < DEPTH; level++) {

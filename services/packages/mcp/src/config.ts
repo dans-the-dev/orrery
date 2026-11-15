@@ -27,26 +27,26 @@ const MODULE_4663: Address | null = null;
 
 function addr(env: NodeJS.ProcessEnv, name: string, dflt: Address | null): Address {
   const v = env[name] || dflt;
-  if (!v) throw new Error(`Set ${name}: Orrery has no default deployment on this chain yet`);
-  if (!isAddress(v)) throw new Error(`${name} must be a 0x address`);
+  if (!v) throw new Error(`Set ${name} to the Orrery contract address for this chain`);
+  if (!isAddress(v)) throw new Error(`${name} expects a 0x address`);
   return v as Address;
 }
 
 /** Reads the session signer's key. The file must not be readable by group or others (mode 600 or stricter). */
 export function readKeyFile(path: string): Hex {
   const mode = statSync(path).mode & 0o777;
-  if (mode & 0o077) throw new Error(`${path} must be readable only by you (chmod 600); it is ${mode.toString(8)}`);
+  if (mode & 0o077) throw new Error(`${path} has mode ${mode.toString(8)}; run chmod 600 so only you can read it`);
   const raw = readFileSync(path, "utf8").trim();
   const key = (raw.startsWith("{") ? (JSON.parse(raw) as { privateKey?: string }).privateKey : raw) ?? "";
-  if (!isHex(key) || key.length !== 66) throw new Error(`${path} must hold a 32 byte private key (0x...)`);
+  if (!isHex(key) || key.length !== 66) throw new Error(`${path} should contain one 32 byte private key, 0x prefixed`);
   return key as Hex;
 }
 
 export function loadMcpConfig(env: NodeJS.ProcessEnv = process.env): McpConfig {
   const max = env.ORRERY_MCP_MAX_PAYMENT_USD === undefined || env.ORRERY_MCP_MAX_PAYMENT_USD === "" ? 1 : Number(env.ORRERY_MCP_MAX_PAYMENT_USD);
-  if (!Number.isFinite(max) || max < 0) throw new Error("ORRERY_MCP_MAX_PAYMENT_USD must be a number of USD, 0 or more");
+  if (!Number.isFinite(max) || max < 0) throw new Error("ORRERY_MCP_MAX_PAYMENT_USD expects a USD amount of 0 or more");
   const chainId = Number(env.ORRERY_CHAIN_ID ?? 4663);
-  if (!Number.isInteger(chainId) || chainId <= 0) throw new Error("ORRERY_CHAIN_ID must be a chain id");
+  if (!Number.isInteger(chainId) || chainId <= 0) throw new Error("ORRERY_CHAIN_ID expects a positive integer chain id");
   return {
     apiUrl: (env.ORRERY_API_URL || "https://api.orrery.tech").replace(/\/+$/, ""),
     apiKey: env.ORRERY_API_KEY || null,

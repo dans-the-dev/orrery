@@ -48,15 +48,15 @@ export function MarketFacts({ m }: { m: Market }) {
   return (
     <div className="mk-facts">
       <dl className="rc-rows">
-        <Row label="Batch" hint={cs && rs ? `${period(cs)} to seal, ${period(rs)} to reveal` : undefined}>
+        <Row label="Batch" hint={cs && rs ? `Sealing ${period(cs)}, then reveal ${period(rs)}` : undefined}>
           <Fig v={cs && rs ? period(cs + rs) : undefined} />
         </Row>
-        <Row label="Trading fee" hint="Of each side's filled amount">
+        <Row label="Trading fee" hint="Charged on the filled amount, both sides">
           <Fig v={feeBps !== undefined ? bpsLabel(feeBps) : undefined} />
         </Row>
         {(cfg.poolListed ?? m.poolListed) !== undefined ? (
-          <Row label="Unmatched swap orders" hint={(cfg.poolListed ?? m.poolListed) ? `Within ${bpsLabel(cfg.maxDeviationBps ?? m.params.maxDeviationBps ?? 0)} of the clearing price` : undefined}>
-            <span className="rc-muted-inline">{(cfg.poolListed ?? m.poolListed) ? "Fill against the Uniswap pool" : "Stay in your wallet"}</span>
+          <Row label="Swap orders left unmatched" hint={(cfg.poolListed ?? m.poolListed) ? `No further than ${bpsLabel(cfg.maxDeviationBps ?? m.params.maxDeviationBps ?? 0)} from the clearing price` : undefined}>
+            <span className="rc-muted-inline">{(cfg.poolListed ?? m.poolListed) ? "Trade in the Uniswap pool" : "Remain with you"}</span>
           </Row>
         ) : null}
         <Row label="Smallest order">
@@ -74,17 +74,17 @@ export function MarketFacts({ m }: { m: Market }) {
       </dl>
       {fees.tiers.length > 0 && active ? (
         <div className="mk-tiers">
-          <h3>Fee discount for ORRY stakers</h3>
+          <h3>Lower fees for staked ORRY</h3>
           <ul>
             {fees.tiers.map((t) => (
               <li key={t.minStakeUsd.toString()} className={current === t ? "is-yours" : undefined}>
-                <span>{usdg(t.minStakeUsd)} USD of ORRY staked</span>
+                <span>From {usdg(t.minStakeUsd)} USD staked</span>
                 <strong>{bpsLabel(t.discountBps)} off</strong>
               </li>
             ))}
           </ul>
           <p className="rc-muted">
-            {address && fees.stakeUsd !== undefined ? `Your staked ORRY is worth ${usdg(fees.stakeUsd)} USD${current ? `, so your fee is ${bpsLabel(current.discountBps)} lower.` : "."} ` : ""}
+            {address && fees.stakeUsd !== undefined ? `Your ORRY stake reads ${usdg(fees.stakeUsd)} USD${current ? `, which takes ${bpsLabel(current.discountBps)} off your fee.` : "."} ` : ""}
             <Link href="/stake">Stake ORRY</Link>
           </p>
         </div>

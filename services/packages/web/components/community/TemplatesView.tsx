@@ -55,31 +55,31 @@ function Templates({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolea
     setActedOn(t.id);
     await tx.run("Buy template", async ({ send, step, approve }) => {
       await approve(cfg.addresses.orry as Address, market, max);
-      step("Confirm the purchase in your wallet.");
+      step("Sign the purchase in your wallet.");
       await send({ address: market, abi: marketAbi, functionName: "buy", args: [BigInt(t.id), max] });
-      return `Template ${t.id} is licensed to your wallet.`;
+      return `Licence on record. Template ${t.id} now belongs to this wallet.`;
     });
   }
 
   return (
     <>
       <OrryHead
-        title="Spending policies, written by operators."
+        title="Orbits other operators have already charted."
         lead={
           <p>
-            Policy templates for agent spending limits, priced in USD and paid in ORRY. {percent(cfg.templateBurnBps)} of each sale is burned and the rest goes to the template&apos;s creator.
+            Ready-made policies that set an agent&apos;s caps and allowed targets. Prices are in USD, payment is in ORRY, {percent(cfg.templateBurnBps)} of every sale is burned and the creator keeps the remainder.
           </p>
         }
       />
       <section className="rc-panel rc-board" aria-label="Templates">
         <div className="rc-panel-head">
           <h2>Templates</h2>
-          <p>Each licence is held by the buying wallet for good. The content hash lets you check the file at its address before you buy.</p>
+          <p>A licence stays with the wallet that bought it. Compare the content hash with the hosted file before buying.</p>
         </div>
         {q.isLoading ? (
           <p className="rc-muted">…</p>
         ) : listed.length === 0 ? (
-          <p className="rc-muted">{q.isError ? "Templates appear here in a moment." : "The first templates appear here as creators list them."}</p>
+          <p className="rc-muted">{q.isError ? "Listings load in a moment." : "Listings are added here as creators publish them."}</p>
         ) : (
           <table className="rc-table cm-templates">
             <thead>
@@ -103,7 +103,7 @@ function Templates({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolea
                   <tr key={t.id}>
                     <td>
                       <strong className="cm-tpl-name">Template {t.id}</strong>
-                      {until > now ? <span className="cm-boosted">Boosted, {span(until - now)} left</span> : null}
+                      {until > now ? <span className="cm-boosted">Boost · {span(until - now)} to go</span> : null}
                       <TemplateLinks t={t} />
                     </td>
                     <td className="mono" data-label="Creator">
@@ -111,7 +111,7 @@ function Templates({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolea
                     </td>
                     <td className="num" data-label="Price">
                       <span className="mono">{usd(big(t.priceUsd))}</span>
-                      <small className="cm-sub mono">{quote !== undefined ? `${orry(quote)} ORRY now` : "…"}</small>
+                      <small className="cm-sub mono">{quote !== undefined ? `${orry(quote)} ORRY today` : "…"}</small>
                     </td>
                     <td className="num mono" data-label="Sales">
                       {t.sales.toLocaleString("en-US")}
@@ -136,7 +136,7 @@ function Templates({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolea
         )}
         {!connected && listed.length > 0 ? (
           <div className="rc-connect">
-            <p>Connect a wallet to buy a template.</p>
+            <p>Buying a template needs a connected wallet.</p>
             <WalletButton />
           </div>
         ) : null}
@@ -146,9 +146,9 @@ function Templates({ cfg, boostOpen }: { cfg: CommunityConfig; boostOpen: boolea
         <section className="rc-side" aria-label="Your templates">
           <h2>Your templates</h2>
           {!address ? (
-            <p className="rc-muted">Templates you list show here once a wallet is connected.</p>
+            <p className="rc-muted">Connect a wallet to see the templates it has listed.</p>
           ) : mine.length === 0 ? (
-            <p className="rc-muted">{q.isLoading ? "…" : "No templates listed from this wallet yet."}</p>
+            <p className="rc-muted">{q.isLoading ? "…" : "This wallet has not listed a template."}</p>
           ) : (
             <ul className="cm-mine">
               {mine.map((t) => (
@@ -218,22 +218,22 @@ function ListForm({ cfg }: { cfg: CommunityConfig }) {
       setPriceIn("");
       setJson("");
       setUri("");
-      return "Listed. It appears in the market in a moment.";
+      return "Listing on record. The market shows it shortly.";
     });
   }
 
   return (
-    <section className="rc-desk" aria-label="List a template">
+    <section className="rc-desk" aria-label="New listing">
       <div className="rc-desk-body">
-        <h2 className="cm-desk-title">List a template</h2>
+        <h2 className="cm-desk-title">New listing</h2>
         <div className="rc-amount">
-          <label htmlFor="cm-tpl-price">Price per licence</label>
+          <label htmlFor="cm-tpl-price">Licence price</label>
           <div className="rc-amount-box">
             <input id="cm-tpl-price" inputMode="decimal" autoComplete="off" placeholder="0.00" value={priceIn} onChange={(e) => setPriceIn(e.target.value.replace(/[^\d.]/g, ""))} />
             <span className="rc-unit">USD</span>
           </div>
           <div className="rc-amount-foot">
-            <span>{min !== undefined && max !== undefined ? `From ${usd(min)} to ${usd(max)}. Buyers pay it in ORRY at the live price.` : "Buyers pay it in ORRY at the live price."}</span>
+            <span>{min !== undefined && max !== undefined ? `Between ${usd(min)} and ${usd(max)}. Paid in ORRY at the current rate.` : "Paid in ORRY at the current rate."}</span>
           </div>
         </div>
         <div>
@@ -241,7 +241,7 @@ function ListForm({ cfg }: { cfg: CommunityConfig }) {
             Policy JSON
           </label>
           <textarea id="cm-tpl-json" className="cm-code" rows={6} spellCheck={false} placeholder='{ "caps": [] }' value={json} onChange={(e) => setJson(e.target.value)} />
-          <p className="cm-field-foot">{parsed === null ? "This is not valid JSON." : parsed ? <span className="mono">Content hash {shortHash(parsed)}</span> : "Paste the exact file you host. Its keccak256 hash is recorded with the listing."}</p>
+          <p className="cm-field-foot">{parsed === null ? "The JSON does not parse." : parsed ? <span className="mono">Content hash {shortHash(parsed)}</span> : "Paste the file exactly as hosted. The listing stores its keccak256 hash."}</p>
         </div>
         <div>
           <label className="cm-label" htmlFor="cm-tpl-uri">
@@ -255,7 +255,7 @@ function ListForm({ cfg }: { cfg: CommunityConfig }) {
           </button>
         ) : (
           <div className="rc-connect">
-            <p>Connect a wallet to list a template.</p>
+            <p>Listing a template needs a connected wallet.</p>
             <WalletButton />
           </div>
         )}
@@ -280,14 +280,14 @@ function MyTemplate({ cfg, t, boostOpen, run, busy, onAct, notice }: { cfg: Comm
     await run("Reprice", async ({ send }) => {
       await send({ address: market, abi: marketAbi, functionName: "setPrice", args: [BigInt(t.id), price] });
       setPriceIn("");
-      return `Template ${t.id} now costs ${usd(price)}.`;
+      return `New price on record · template ${t.id} at ${usd(price)}.`;
     });
   }
   async function setListed(listed: boolean) {
     onAct();
     await run(listed ? "Relist" : "Delist", async ({ send }) => {
       await send({ address: market, abi: marketAbi, functionName: "setListed", args: [BigInt(t.id), listed] });
-      return listed ? `Template ${t.id} is for sale again.` : `Template ${t.id} is off the market. Licences already sold stay with their buyers.`;
+      return listed ? `Template ${t.id} is back on the shelf.` : `Template ${t.id} is off the shelf. Every licence sold so far stays with its holder.`;
     });
   }
   async function boostIt() {
@@ -296,9 +296,9 @@ function MyTemplate({ cfg, t, boostOpen, run, busy, onAct, notice }: { cfg: Comm
     onAct();
     await run("Boost", async ({ send, step, approve }) => {
       await approve(cfg.addresses.orry as Address, boost, max);
-      step("Confirm the boost in your wallet.");
+      step("Sign the boost in your wallet.");
       await send({ address: boost, abi: boostAbi, functionName: "boost", args: [BOOST_KINDS.template, BigInt(t.id), 1n, max] });
-      return `Template ${t.id} is boosted for 24 hours. The ORRY paid is burned.`;
+      return `Template ${t.id} sits at the top for 24 hours. The ORRY spent on the boost is burned.`;
     });
   }
 
@@ -306,7 +306,7 @@ function MyTemplate({ cfg, t, boostOpen, run, busy, onAct, notice }: { cfg: Comm
     <li className="rc-agent">
       <div className="rc-agent-head">
         <strong>Template {t.id}</strong>
-        <span>{t.listed ? `For sale at ${usd(big(t.priceUsd))} · ${t.sales.toLocaleString("en-US")} sold` : `Off the market · ${t.sales.toLocaleString("en-US")} sold`}</span>
+        <span>{t.listed ? `Listed at ${usd(big(t.priceUsd))} · ${t.sales.toLocaleString("en-US")} sold` : `Off the shelf · ${t.sales.toLocaleString("en-US")} sold`}</span>
       </div>
       <dl className="rc-rows rc-rows-tight">
         <Row label="Content hash">
@@ -315,7 +315,7 @@ function MyTemplate({ cfg, t, boostOpen, run, busy, onAct, notice }: { cfg: Comm
       </dl>
       <div className="rc-agent-actions">
         <div className="rc-inline">
-          <input aria-label={`New price for template ${t.id}, USD`} inputMode="decimal" autoComplete="off" placeholder="New price, USD" value={priceIn} onChange={(e) => setPriceIn(e.target.value.replace(/[^\d.]/g, ""))} />
+          <input aria-label={`Template ${t.id} price in USD`} inputMode="decimal" autoComplete="off" placeholder="Price in USD" value={priceIn} onChange={(e) => setPriceIn(e.target.value.replace(/[^\d.]/g, ""))} />
           <button className="secondary" type="button" disabled={!ready || busy || !price} onClick={() => void reprice()}>
             Reprice
           </button>

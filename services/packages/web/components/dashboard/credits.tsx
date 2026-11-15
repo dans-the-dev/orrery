@@ -34,11 +34,11 @@ function SignIn({ busy, error, onSignIn, compact = false }: { busy: boolean; err
     <div className="cp-empty">
       <p>
         {compact
-          ? "Sign one message to see your credits here."
-          : "Sign one message with this wallet to see your credits, purchases and usage. It costs no gas, reads only, and lasts 24 hours on this device."}
+          ? "One signed message shows your credits here."
+          : "One signed message from this wallet opens your credits, purchases and usage. No gas, read only, valid on this device for 24 hours."}
       </p>
       <button className="cp-btn cp-btn-primary" type="button" onClick={onSignIn} disabled={busy}>
-        {busy ? "Waiting for the signature" : "Sign in to view credits"}
+        {busy ? "Awaiting your signature" : "Show my credits"}
       </button>
       {error ? <p className="cp-note" role="alert">{error}</p> : null}
     </div>
@@ -53,7 +53,7 @@ export function CreditsSummary() {
   return (
     <Panel title="Credits" action={{ href: "/dashboard/credits", label: a ? "Manage" : "Open" }}>
       {!API_URL ? (
-        <Empty text="Credits appear here once the check service is live on this network." />
+        <Empty text="Your credits show here as soon as checks run on this network." />
       ) : !session.token ? (
         <SignIn compact busy={session.busy} error={session.error} onSignIn={() => void session.signIn()} />
       ) : !a ? (
@@ -62,8 +62,8 @@ export function CreditsSummary() {
         <Rows
           rows={[
             ["Credits", n(a.credits)],
-            ["Included checks left", `${n(a.month.freeChecksLeft)} of ${n(a.month.freeChecks + a.month.freeChecksLeft)}`],
-            ["Checks this month", n(a.month.checks)],
+            ["Included checks remaining", `${n(a.month.freeChecksLeft)} of ${n(a.month.freeChecks + a.month.freeChecksLeft)}`],
+            ["Checks so far this month", n(a.month.checks)],
             ["Plan", a.planUntil ? `Active until ${date(a.planUntil)}` : "None"],
           ]}
         />
@@ -79,14 +79,14 @@ export function CreditsPrices() {
   const pricing = usePricing().data;
   if (!API_URL || !pricing) return null;
   return (
-    <Panel title="Check pricing" className="cp-guest">
+    <Panel title="Prices per check" className="cp-guest">
       <Rows
         rows={[
-          [`First ${n(pricing.freeChecksPerMonth)} checks a month`, "Included"],
-          [`Up to ${n(pricing.volumeChecks)} checks a month`, `${perCheck(pricing, pricing.creditsPerCheck)} USDG a check`],
-          [`Past ${n(pricing.volumeChecks)} checks a month`, `${perCheck(pricing, pricing.volumeCreditsPerCheck)} USDG a check`],
-          ["Credit pack", `${usdg(pricing.packPrice)} USDG for ${n(pricing.packSize)} credits`],
-          ["Monthly plan", `${usdg(pricing.plan.price)} USDG for ${pricing.plan.days} days, ${n(pricing.plan.credits)} credits`],
+          [`First ${n(pricing.freeChecksPerMonth)} each month`, "Included"],
+          [`Through ${n(pricing.volumeChecks)} in a month`, `${perCheck(pricing, pricing.creditsPerCheck)} USDG per check`],
+          [`Beyond ${n(pricing.volumeChecks)} in a month`, `${perCheck(pricing, pricing.volumeCreditsPerCheck)} USDG per check`],
+          ["Credit pack", `${n(pricing.packSize)} credits · ${usdg(pricing.packPrice)} USDG`],
+          ["Monthly plan", `${n(pricing.plan.credits)} credits over ${pricing.plan.days} days · ${usdg(pricing.plan.price)} USDG`],
         ]}
       />
     </Panel>
@@ -116,17 +116,17 @@ export function CreditsView() {
         address,
         product,
         signTypedData: (args) => signTypedDataAsync(args as never) as Promise<Hex>,
-        onPending: () => setNotice({ tone: "", text: "Payment is confirming." }),
+        onPending: () => setNotice({ tone: "", text: "Confirming the payment." }),
       });
       if (out.apiKey) setNewKey(out.apiKey);
       setNotice({
         tone: "ok",
-        text: product === "plan" && out.planUntil ? `Plan active until ${date(out.planUntil)}. Balance ${n(out.credits)} credits.` : `Credits added. Balance ${n(out.credits)} credits.`,
+        text: product === "plan" && out.planUntil ? `Plan is active through ${date(out.planUntil)}, with ${n(out.credits)} credits on hand.` : `Credits added. You now hold ${n(out.credits)} credits.`,
       });
       void refresh();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "Signature request closed." : msg || "The purchase did not finish." });
+      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "You closed the signature request." : msg || "The purchase was not completed." });
     } finally {
       setBusy(null);
     }
@@ -137,17 +137,17 @@ export function CreditsView() {
     setNotice(null);
     try {
       setNewKey(await rotateApiKey(address, (message) => signMessageAsync({ message }) as Promise<Hex>));
-      setNotice({ tone: "ok", text: "New key issued. Any earlier key for this address no longer works." });
+      setNotice({ tone: "ok", text: "Key issued. Every older key for this address is now retired." });
       void refresh();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "Signature request closed." : msg || "The key was not issued." });
+      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "You closed the signature request." : msg || "No key was issued." });
     } finally {
       setBusy(null);
     }
   }
 
-  if (!API_URL) return <Empty text="Credits appear here once the check service is live on this network." />;
+  if (!API_URL) return <Empty text="Your credits show here as soon as checks run on this network." />;
 
   const included = a ? a.month.freeChecks + a.month.freeChecksLeft : pricing?.freeChecksPerMonth;
   const usedShare = a && included ? Math.min(100, Math.round((a.month.freeChecks / included) * 100)) : 0;
@@ -157,8 +157,8 @@ export function CreditsView() {
     <div className="cp-stack">
       <div className="cp-stats">
         <Stat label="Credits" value={a ? n(a.credits) : session.token ? undefined : "Sign in"} />
-        <Stat label="Included checks left" value={a ? n(a.month.freeChecksLeft) : session.token ? undefined : "Sign in"} hint={included ? `of ${n(included)} this month` : undefined} />
-        <Stat label="Checks this month" value={a ? n(a.month.checks) : session.token ? undefined : "Sign in"} />
+        <Stat label="Included checks remaining" value={a ? n(a.month.freeChecksLeft) : session.token ? undefined : "Sign in"} hint={included ? `out of ${n(included)} for this month` : undefined} />
+        <Stat label="Checks so far this month" value={a ? n(a.month.checks) : session.token ? undefined : "Sign in"} />
         <Stat label="Plan" value={a ? (a.planUntil ? `Until ${date(a.planUntil)}` : "None") : session.token ? undefined : "Sign in"} />
       </div>
 
@@ -184,25 +184,25 @@ export function CreditsView() {
                 <h3>Credit pack</h3>
                 <p className="cp-buy-price">{usdg(pricing.packPrice)} USDG</p>
                 <p>
-                  {n(pricing.packSize)} credits. A check costs {pricing.creditsPerCheck} credits ({perCheck(pricing, pricing.creditsPerCheck)} USDG), and {pricing.volumeCreditsPerCheck} credit past {n(pricing.volumeChecks)} checks in a month.
+                  {n(pricing.packSize)} credits. Each check uses {pricing.creditsPerCheck} credits ({perCheck(pricing, pricing.creditsPerCheck)} USDG), dropping to {pricing.volumeCreditsPerCheck} credit once a month passes {n(pricing.volumeChecks)} checks.
                 </p>
                 <button className="cp-btn cp-btn-primary" type="button" onClick={() => void buy("pack")} disabled={!onChain || busy !== null}>
-                  {busy === "pack" ? "Buying" : `Buy for ${usdg(pricing.packPrice)} USDG`}
+                  {busy === "pack" ? "Buying" : `Buy the pack, ${usdg(pricing.packPrice)} USDG`}
                 </button>
               </div>
               <div className="cp-buy-option">
                 <h3>Monthly plan</h3>
                 <p className="cp-buy-price">{usdg(pricing.plan.price)} USDG</p>
                 <p>
-                  {pricing.plan.days} days, {n(pricing.plan.credits)} credits, 1 credit a check and {n(pricing.plan.checksPerMinute)} checks a minute.
+                  {n(pricing.plan.credits)} credits for {pricing.plan.days} days. Each check uses 1 credit, at up to {n(pricing.plan.checksPerMinute)} checks a minute.
                 </p>
                 <button className="cp-btn" type="button" onClick={() => void buy("plan")} disabled={!onChain || busy !== null}>
-                  {busy === "plan" ? "Buying" : `Buy for ${usdg(pricing.plan.price)} USDG`}
+                  {busy === "plan" ? "Buying" : `Buy the plan, ${usdg(pricing.plan.price)} USDG`}
                 </button>
               </div>
               <p className="cp-muted">
-                You sign one USDG payment in your wallet and pay no gas. Each address also has {n(pricing.freeChecksPerMonth)} checks a month included, used before credits.
-                {!onChain ? ` Switch your wallet to ${activeChain.name} to buy.` : ""}
+                One USDG payment signature in your wallet, with no gas. Every address also gets {n(pricing.freeChecksPerMonth)} included checks each month, spent before any credits.
+                {!onChain ? ` To buy, move your wallet to ${activeChain.name}.` : ""}
               </p>
               {releases.isLive("checkout") ? <OrryCheckoutSlot /> : null}
             </div>
@@ -212,15 +212,15 @@ export function CreditsView() {
         <Panel title="API key">
           <Rows
             rows={[
-              ["Status", a ? (a.apiKey.active ? "Active" : "No key yet") : session.token ? "…" : "Sign in to see"],
+              ["Status", a ? (a.apiKey.active ? "Active" : "Not issued") : session.token ? "…" : "Sign in first"],
               ["Issued", a?.apiKey.createdAt ? date(a.apiKey.createdAt) : "None"],
-              ["Used for", "Signed checks from your server with the SDK"],
+              ["Used for", "Your server's signed checks, through the SDK"],
             ]}
           />
           {newKey ? (
             <div className="cp-key">
               <p>
-                <strong>Your API key.</strong> It is shown once. Store it on your server now.
+                <strong>API key, shown one time.</strong> Put it on your server before you leave this page.
               </p>
               <code className="mono">{newKey}</code>
               <button
@@ -236,30 +236,30 @@ export function CreditsView() {
                 {copied ? "Copied" : "Copy key"}
               </button>
               <p>
-                <strong>Your first check.</strong> One request from a terminal, or <code>checkPayment</code> in the SDK.
+                <strong>A first check.</strong> Send one request from a terminal, or call <code>checkPayment</code> from the SDK.
               </p>
               <pre className="cp-snippet">{`curl -H "authorization: Bearer ${newKey}" \\\n  ${API_URL}/v1/check/by-signer/0xPAYING_ADDRESS`}</pre>
             </div>
           ) : null}
           <div className="cp-actions">
             <button className="cp-btn" type="button" onClick={() => void rotate()} disabled={!onChain || busy !== null}>
-              {busy === "key" ? "Waiting for the signature" : a?.apiKey.active ? "Issue a new key" : "Get my API key"}
+              {busy === "key" ? "Awaiting your signature" : a?.apiKey.active ? "Replace the key" : "Issue my API key"}
             </button>
             <Link className="cp-link" href="/docs">
-              How to use the key
+              Using the key
             </Link>
           </div>
-          {a?.apiKey.active ? <p className="cp-muted">A new key replaces the current one at once.</p> : null}
+          {a?.apiKey.active ? <p className="cp-muted">Issuing a key retires the current one immediately.</p> : null}
         </Panel>
       </div>
 
-      <Panel title="Try a check">
+      <Panel title="Test a check">
         <TryCheck apiKey={newKey} onChecked={() => void refresh()} />
       </Panel>
 
       {session.token ? (
         <>
-          <Panel title="Included checks this month">
+          <Panel title="This month's included checks">
             {!a ? (
               <Loading lines={1} />
             ) : (
@@ -268,17 +268,17 @@ export function CreditsView() {
                   <i style={{ width: `${usedShare}%` }} />
                 </span>
                 <p>
-                  {n(a.month.freeChecks)} of {n(included ?? 0)} used. Included checks renew on the first day of each month (UTC); after them a check costs {a.checkCost} {a.checkCost === 1 ? "credit" : "credits"}.
+                  {n(a.month.freeChecks)} of {n(included ?? 0)} used. The count resets on the first day of every month, UTC, and each check past it takes {a.checkCost} {a.checkCost === 1 ? "credit" : "credits"}.
                 </p>
               </div>
             )}
           </Panel>
 
-          <Panel title="Usage, last 30 days">
+          <Panel title="Daily checks, past 30 days">
             {!a ? (
               <Loading />
             ) : !a.usage.daily.length ? (
-              <Empty text="No checks from this address in the last 30 days." action={{ href: "/docs", label: "Make your first check" }} />
+              <Empty text="This address has run no checks in the past 30 days." action={{ href: "/docs", label: "Run a first check" }} />
             ) : (
               <div className="cp-table-wrap">
                 <table className="cp-table">
@@ -312,11 +312,11 @@ export function CreditsView() {
           </Panel>
 
           <div className="cp-grid">
-            <Panel title="By month">
+            <Panel title="Monthly">
               {!a ? (
                 <Loading />
               ) : !a.usage.monthly.length ? (
-                <Empty text="Monthly totals appear after your first check." />
+                <Empty text="Totals by month start with your first check." />
               ) : (
                 <div className="cp-table-wrap">
                   <table className="cp-table">
@@ -344,12 +344,12 @@ export function CreditsView() {
             </Panel>
 
             <Panel title="Purchases">
-              {!a ? <Loading /> : !a.purchases.length ? <Empty text="No purchases from this address yet." /> : <Purchases rows={a.purchases} />}
+              {!a ? <Loading /> : !a.purchases.length ? <Empty text="This address has made no purchases yet." /> : <Purchases rows={a.purchases} />}
             </Panel>
           </div>
 
           <p className="cp-muted">
-            Signed in as this wallet for 24 hours on this device.{" "}
+            This device stays signed in as this wallet for 24 hours.{" "}
             <button className="cp-link" type="button" onClick={() => void session.signOut()}>
               Sign out
             </button>

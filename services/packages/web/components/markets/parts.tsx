@@ -64,7 +64,7 @@ export function BatchClock({ start, commitSeconds, revealSeconds, now, sealed }:
   const commitPct = p.inCommit ? ((now - p.commitStart) / commitSeconds) * 100 : 100;
   const revealPct = p.inCommit ? 0 : ((now - p.commitEnd) / revealSeconds) * 100;
   return (
-    <div className="mk-clock" role="timer" aria-label={`Batch ${p.batch}: ${p.inCommit ? "sealing" : "revealing"}, ${span(p.left)} left`}>
+    <div className="mk-clock" role="timer" aria-label={`Batch ${p.batch}, ${p.inCommit ? "sealing window" : "reveal window"} ends in ${span(p.left)}`}>
       <div className="mk-clock-head">
         <span>
           Batch <b className="mono">{p.batch.toLocaleString("en-US")}</b>
@@ -82,11 +82,11 @@ export function BatchClock({ start, commitSeconds, revealSeconds, now, sealed }:
         </span>
       </div>
       <div className="mk-clock-foot">
-        <span>Orders seal until {clock(p.commitEnd)}</span>
-        <span>Reveals until {clock(p.revealEnd)}, then the batch clears</span>
+        <span>Sealing closes {clock(p.commitEnd)}</span>
+        <span>Reveal closes {clock(p.revealEnd)}, and the batch settles</span>
       </div>
       {sealed !== undefined && p.inCommit ? (
-        <p className="mk-clock-count">{sealed === 0 ? "No orders sealed in this batch yet." : sealed === 1 ? "1 order sealed in this batch so far." : `${sealed.toLocaleString("en-US")} orders sealed in this batch so far.`}</p>
+        <p className="mk-clock-count">{sealed === 0 ? "This batch holds no sealed orders yet." : sealed === 1 ? "This batch holds 1 sealed order." : `This batch holds ${sealed.toLocaleString("en-US")} sealed orders.`}</p>
       ) : null}
     </div>
   );
@@ -108,29 +108,29 @@ function stepOf(o: SealedOrder): number {
 export function sealLine(o: SealedOrder, now: number): string {
   switch (o.state) {
     case "sealing":
-      return "Sealing: confirm in your wallet.";
+      return "Approve the seal in your wallet.";
     case "sealed":
-      if (o.relay) return now < o.revealEnd ? `Sealed. Orrery's relay reveals it ${now < o.commitEnd ? `in ${span(o.commitEnd - now)}` : "now"}; you can close this page.` : "Checking the reveal.";
-      if (now < o.commitEnd) return `Sealed. Your wallet asks you to reveal it in ${span(o.commitEnd - now)}; keep this page open.`;
-      if (now < o.revealEnd) return o.waitForClick ? `Reveal window open for ${span(o.revealEnd - now)}.` : "Revealing now: confirm in your wallet.";
-      return "The reveal window closed before this order was revealed, so nothing moved.";
+      if (o.relay) return now < o.revealEnd ? `Sealed. Orrery's relay will reveal it ${now < o.commitEnd ? `in ${span(o.commitEnd - now)}` : "now"}, so this tab may close.` : "Confirming the reveal on chain.";
+      if (now < o.commitEnd) return `Sealed. In ${span(o.commitEnd - now)} your wallet prompts the reveal, so leave this tab open.`;
+      if (now < o.revealEnd) return o.waitForClick ? `The reveal window has ${span(o.revealEnd - now)} to run.` : "Time to reveal. Approve it in your wallet.";
+      return "The reveal window ended with this order still sealed. Your funds never left the wallet.";
     case "revealing":
-      return "Reveal: confirm in your wallet.";
+      return "Approve the reveal in your wallet.";
     case "revealed":
-      return now < o.revealEnd ? `Revealed. The batch clears in ${span(o.revealEnd - now)}.` : "Clearing at the batch price.";
+      return now < o.revealEnd ? `Revealed. The batch settles in ${span(o.revealEnd - now)}.` : "Settling at the batch price.";
     case "missed":
-      return "The reveal window closed before this order was revealed, so nothing moved.";
+      return "The reveal window ended with this order still sealed. Your funds never left the wallet.";
     case "settled": {
       const out = o.outcome;
       if (!out) return "Settled.";
       const sym = o.symbol;
       const got = o.order.sellAsset ? `${usdg(BigInt(out.output))} USDG` : `${amount(BigInt(out.output), { decimals: o.assetDecimals })} ${sym}`;
       if (out.status === "filled") return `Filled. You received ${got}.`;
-      if (out.status === "partial") return `Partly filled. You received ${got}; the rest stayed in your wallet.`;
-      if (out.status === "expired") return "This batch closed without a price, so nothing moved.";
-      if (out.status === "dropped") return "Not settled in this batch, so nothing moved.";
-      if (out.status === "unfilled" && out.price === undefined) return "Nothing moved in this batch.";
-      return "No matching orders at this price, so nothing moved.";
+      if (out.status === "partial") return `Partly filled. You received ${got}, and the remainder is still in your wallet.`;
+      if (out.status === "expired") return "No price was on record when this batch closed. Your funds stayed put.";
+      if (out.status === "dropped") return "This batch passed the order by. Your funds stayed put.";
+      if (out.status === "unfilled" && out.price === undefined) return "This batch made no trade. Your funds stayed put.";
+      return "No order crossed yours at this price. Your funds stayed put.";
     }
   }
 }
@@ -155,7 +155,7 @@ export function SealedStrip() {
   const live = rt.orders.filter((o) => o.state === "sealing" || o.state === "sealed" || o.state === "revealing" || o.state === "revealed");
   if (live.length === 0) return null;
   return (
-    <section className="mk-strip" aria-label="Your sealed orders" aria-live="polite">
+    <section className="mk-strip" aria-label="Orders in flight" aria-live="polite">
       {live.map((o) => {
         const terms = { sellAsset: o.order.sellAsset, amountIn: BigInt(o.order.amountIn) };
         const canClick = o.state === "sealed" && o.waitForClick && rt.now >= o.commitEnd && rt.now < o.revealEnd;

@@ -41,7 +41,7 @@ async function notice(re, ms) {
 
 await page.goto(`${base}/shield`, { waitUntil: "networkidle" });
 // the wallet may already be connected (an injected wallet that answers eth_accounts reconnects on load)
-const openBtn = page.getByRole("button", { name: "Open my Shield" });
+const openBtn = page.getByRole("button", { name: "Unlock my Shield" });
 const connectBtn = page.getByRole("button", { name: "Connect wallet", disabled: false }).first();
 await Promise.race([openBtn.waitFor({ timeout: 120000 }), connectBtn.waitFor({ timeout: 120000 })]);
 if (!(await openBtn.isVisible())) {
@@ -49,7 +49,7 @@ if (!(await openBtn.isVisible())) {
   await openBtn.waitFor({ timeout: 60000 });
 }
 await openBtn.click();
-say(await notice(/Shield is open/, 120000));
+say(await notice(/Shield unlocked/, 120000));
 await page.locator("#shield-in").fill("100");
 await page.getByRole("button", { name: "Deposit", exact: true }).click();
 say(await notice(/private balance/, 120000));
@@ -58,7 +58,7 @@ await page.locator("input[spellcheck='false']").fill(stack.accounts.bob);
 await page.locator("#shield-amt").fill("20");
 const started = Date.now();
 await page.getByRole("button", { name: "Withdraw", exact: true }).click();
-say(await notice(/withdrawn to/, 600000));
+say(await notice(/left Shield for/, 600000));
 say(`withdrawal with an in-browser proof took ${Math.round((Date.now() - started) / 1000)} s, signing and confirming included`);
 const pub = createPublicClient({ transport: http(rpc) });
 const bobUsdg = await pub.readContract({ address: stack.usdg, abi: parseAbi(["function balanceOf(address) view returns (uint256)"]), functionName: "balanceOf", args: [stack.accounts.bob] });

@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "tech.orrery/orrery",
   "title": "Orrery",
-  "description": "Know-your-agent checks, agent policy records, signed onchain datasets and capped x402 payments on Robinhood Chain.",
+  "description": "Signed readings of paying agents, public policy entries, signed onchain datasets and x402 payments inside set caps, on Robinhood Chain.",
   "version": "0.1.0",
   "websiteUrl": "https://orrery.tech",
   "packages": [
@@ -12,12 +12,12 @@
       "version": "0.1.0",
       "transport": { "type": "stdio" },
       "environmentVariables": [
-        { "name": "ORRERY_API_KEY", "description": "Orrery API key for checks, credits and data queries", "isRequired": false, "isSecret": true },
-        { "name": "ORRERY_API_KEY_FILE", "description": "File where a key issued by a data pack purchase is saved (mode 600)", "isRequired": false, "format": "filepath" },
-        { "name": "ORRERY_AGENT_KEY_FILE", "description": "Session signer key file of your agent (mode 600), for payments from its float", "isRequired": false, "isSecret": true, "format": "filepath" },
-        { "name": "ORRERY_MCP_MAX_PAYMENT_USD", "description": "Payments above this need confirm: true", "isRequired": false, "default": "1" },
-        { "name": "ORRERY_API_URL", "description": "Orrery API", "isRequired": false, "default": "https://api.orrery.tech" },
-        { "name": "ORRERY_RPC_URL", "description": "Robinhood Chain RPC", "isRequired": false, "default": "https://rpc.mainnet.chain.robinhood.com" }
+        { "name": "ORRERY_API_KEY", "description": "Your Orrery API key, used by checks, credits and dataset reads", "isRequired": false, "isSecret": true },
+        { "name": "ORRERY_API_KEY_FILE", "description": "Path that receives the key issued with a data pack purchase (mode 600)", "isRequired": false, "format": "filepath" },
+        { "name": "ORRERY_AGENT_KEY_FILE", "description": "Key file of your agent's session signer (mode 600), used to pay from its float", "isRequired": false, "isSecret": true, "format": "filepath" },
+        { "name": "ORRERY_MCP_MAX_PAYMENT_USD", "description": "USD amount above which a payment requires confirm: true", "isRequired": false, "default": "1" },
+        { "name": "ORRERY_API_URL", "description": "Orrery API base URL", "isRequired": false, "default": "https://api.orrery.tech" },
+        { "name": "ORRERY_RPC_URL", "description": "Robinhood Chain RPC endpoint", "isRequired": false, "default": "https://rpc.mainnet.chain.robinhood.com" }
       ]
     }
   ]

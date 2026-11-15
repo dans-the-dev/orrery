@@ -4,7 +4,7 @@ import { FeatureGate } from "@/components/orry/gate";
 import { R2Shell } from "@/components/r2/shell";
 import { PredictExits, PredictView } from "@/components/r2/PredictView";
 
-export const metadata = { title: "Orrery · Predict", description: "Stake USDG on where a stock or ETH price closes, settled by Chainlink at the first price after the close." };
+export const metadata = { title: "Orrery · Predict", description: "Put USDG on where a stock or ETH price will close. Chainlink settles it with the first price after the close." };
 
 export default function PredictPage() {
   return (
@@ -13,8 +13,8 @@ export default function PredictPage() {
         feature="predict"
         held={
           <>
-            <OrryHead title="Call where a price closes." lead={<p>YES or NO on a stock or ETH price at a set time, settled by Chainlink.</p>} />
-            <ComingSoon title="Predict opens soon." text="Markets, their pools and your positions appear here when Predict opens." />
+            <OrryHead title="Take a view on the close." lead={<p>Take YES or NO on a stock or ETH price at a fixed time. Chainlink decides the outcome.</p>} />
+            <ComingSoon title="Predict starts soon." text="Markets, their pools and your own positions show here once Predict starts." />
             <PredictExits />
           </>
         }

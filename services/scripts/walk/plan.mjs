@@ -21,7 +21,7 @@ const balance = async () => {
 };
 await page.goto(base + "/credits", { waitUntil: "load", timeout: 60000 });
 await page.waitForTimeout(3000);
-await page.getByRole("button", { name: "Get my API key" }).click();
+await page.getByRole("button", { name: "Issue my API key" }).click();
 await page.locator(".key-box").waitFor({ timeout: 30000 });
 say(`1 before: ${await balance()}`);
 await page.getByRole("button", { name: "Start the plan" }).click();

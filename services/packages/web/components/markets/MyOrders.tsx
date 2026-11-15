@@ -15,9 +15,9 @@ export const ORDER_STATUS: Record<HistoryStatus, string> = {
   revealed: "Revealed",
   filled: "Filled",
   partial: "Partly filled",
-  unfilled: "No match at this price",
+  unfilled: "Nothing crossed at this price",
   dropped: "Not settled",
-  expired: "Closed without a price",
+  expired: "No price on record",
   missed: "Not revealed",
 };
 
@@ -110,9 +110,9 @@ export function MyOrders({ markets, market, mode }: { markets: Market[]; market?
         <h2>Your orders</h2>
       </div>
       {!address ? (
-        <p className="rc-muted">Connect a wallet to see your orders.</p>
+        <p className="rc-muted">Connect a wallet to read its order record.</p>
       ) : rows.length === 0 ? (
-        <p className="rc-muted">{history.isLoading ? "…" : "Orders you seal appear here, with their result once the batch clears."}</p>
+        <p className="rc-muted">{history.isLoading ? "…" : "Each order you seal is logged here, and its outcome follows when the batch clears."}</p>
       ) : (
         <table className="rc-table mk-orders">
           <thead>

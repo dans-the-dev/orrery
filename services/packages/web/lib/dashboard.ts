@@ -19,12 +19,12 @@ export interface ConsoleSection {
 }
 
 export const CONSOLE_SECTIONS: ConsoleSection[] = [
-  { href: DASHBOARD_HREF, label: "Overview", icon: "overview", lead: "Your wallet across Orrery." },
-  { href: `${DASHBOARD_HREF}/credits`, label: "Credits", icon: "credits", lead: "Buy credits, see what is left, and every purchase and check." },
-  { href: `${DASHBOARD_HREF}/agents`, label: "Agents", icon: "agents", lead: "Set up the agents you run and the limits they pay within.", core: true },
-  { href: `${DASHBOARD_HREF}/merchant`, label: "Merchant", icon: "merchant", lead: "Your payment address for x402 payments from agents.", features: ["facilitator"] },
-  { href: `${DASHBOARD_HREF}/positions`, label: "Positions", icon: "positions", lead: "Stake, Earn shares and everything ready to claim.", features: ["stake", "earn"] },
-  { href: `${DASHBOARD_HREF}/orders`, label: "Orders", icon: "orders", lead: "Your sealed orders on Stocks, Private Swap and Dark Pool.", features: ["stocks", "swap", "darkpool"] },
+  { href: DASHBOARD_HREF, label: "Overview", icon: "overview", lead: "Everything this wallet does on Orrery, in one view." },
+  { href: `${DASHBOARD_HREF}/credits`, label: "Credits", icon: "credits", lead: "Credit balance, purchases and every check, plus buying more." },
+  { href: `${DASHBOARD_HREF}/agents`, label: "Agents", icon: "agents", lead: "Set each agent's orbit: the caps and targets it pays within.", core: true },
+  { href: `${DASHBOARD_HREF}/merchant`, label: "Merchant", icon: "merchant", lead: "The address where agents pay you over x402.", features: ["facilitator"] },
+  { href: `${DASHBOARD_HREF}/positions`, label: "Positions", icon: "positions", lead: "Stake, Earn shares and whatever is claimable.", features: ["stake", "earn"] },
+  { href: `${DASHBOARD_HREF}/orders`, label: "Orders", icon: "orders", lead: "Sealed orders across Stocks, Private Swap and Dark Pool.", features: ["stocks", "swap", "darkpool"] },
 ];
 
 /** The section a path belongs to: the deepest match, the overview otherwise. */

@@ -32,7 +32,7 @@ export interface CommunityRouteDeps {
   allowPublic: (ip: string) => boolean;
 }
 
-const READ_FAILED = "Could not read this right now. Try again shortly.";
+const READ_FAILED = "This read failed. Retry in a few seconds.";
 const DAY = 86_400_000;
 
 function addr(raw: string): string | null {
@@ -51,7 +51,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
       return reply.code(503).send({ error: READ_FAILED });
     }
     if (!open) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   async function guarded<T>(reply: FastifyReply, fn: () => Promise<T>) {
     try {
@@ -75,7 +75,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
   let configCache: { at: number; body: unknown } | null = null;
   app.get("/v1/community/config", async (req, reply) => {
     if (!c) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
     return guarded(reply, async () => {
       if (configCache && Date.now() - configCache.at < 60_000) return configCache.body;
       const p = await communityPrices(c, chain);
@@ -134,7 +134,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
     const room = Number(req.query.room ?? 0);
     const limit = Math.min(Math.max(Number(req.query.limit ?? 50) || 50, 1), 100);
     const before = req.query.before && /^\d{1,30}$/.test(req.query.before) ? req.query.before : null;
-    if (!Number.isInteger(room) || room < 0) return reply.code(400).send({ error: "room must be a room number" });
+    if (!Number.isInteger(room) || room < 0) return reply.code(400).send({ error: "room expects a whole room number" });
     return guarded(reply, async () => {
       const rows = await sql<{ id: string; room: number; author: string; reply_to: string | null; text: string; fee: string; tips: string; reports: number; hidden: boolean; block_time: Date; tx_hash: string; until: Date | null }[]>`
         select m.*, b.until from community_messages m
@@ -163,7 +163,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
 
   app.get<{ Params: { address: string } }>("/v1/community/names/:address", { preHandler: gate("chat") }, async (req, reply) => {
     const a = addr(req.params.address);
-    if (!a) return reply.code(400).send({ error: "address must be a 0x address" });
+    if (!a) return reply.code(400).send({ error: "address expects a 0x address" });
     return guarded(reply, async () => {
       const [r] = await sql<{ name: string }[]>`select name from community_names where address = ${a}`;
       return { address: getAddress(a), name: r?.name ?? null };
@@ -218,7 +218,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
   /** R-40: the recipients' leaderboard by completion time, masked (R-5); no remaining-slot count. */
   app.get<{ Params: { id: string } }>("/v1/community/achievements/:id/recipients", { preHandler: gate("achievements") }, async (req, reply) => {
     const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0) return reply.code(400).send({ error: "id must be an achievement number" });
+    if (!Number.isInteger(id) || id <= 0) return reply.code(400).send({ error: "id expects an achievement number" });
     return guarded(reply, async () => {
       const rows = await sql<{ account: string; completed_at: Date; amount: string }[]>`
         select account, completed_at, amount from community_achievement_claims where id = ${id} order by completed_at, rank limit 500`;
@@ -246,7 +246,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
 
   app.get<{ Params: { address: string } }>("/v1/community/passes/:address", { preHandler: gate("passes") }, async (req, reply) => {
     const a = addr(req.params.address);
-    if (!a) return reply.code(400).send({ error: "address must be a 0x address" });
+    if (!a) return reply.code(400).send({ error: "address expects a 0x address" });
     return guarded(reply, async () => {
       const [r] = await sql<{ until: Date }[]>`select until from community_passes where account = ${a}`;
       return { address: getAddress(a), until: r ? r.until.toISOString() : null, active: !!r && r.until.getTime() > Date.now() };
@@ -322,7 +322,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
 
   app.get<{ Params: { address: string } }>("/v1/community/referrals/:address", { preHandler: gate("referrals") }, async (req, reply) => {
     const a = addr(req.params.address);
-    if (!a) return reply.code(400).send({ error: "address must be a 0x address" });
+    if (!a) return reply.code(400).send({ error: "address expects a 0x address" });
     return guarded(reply, async () => {
       const [link] = await sql<{ referrer: string; linked_at: Date }[]>`select referrer, linked_at from community_referrals where referee = ${a}`;
       const [n] = await sql<{ n: number }[]>`select count(*)::int as n from community_referrals where referrer = ${a}`;
@@ -339,7 +339,7 @@ export function registerCommunityRoutes(app: FastifyInstance, cfg: Config, chain
 
   app.get<{ Params: { address: string } }>("/v1/community/cashback/:address", { preHandler: gate("cashback") }, async (req, reply) => {
     const a = addr(req.params.address);
-    if (!a) return reply.code(400).send({ error: "address must be a 0x address" });
+    if (!a) return reply.code(400).send({ error: "address expects a 0x address" });
     return guarded(reply, async () => {
       const records = await sql<{ fee_usd: string; reward_usd: string; fee_paid_at: Date; kind: number }[]>`
         select fee_usd, reward_usd, fee_paid_at, kind from community_accruals where account = ${a} and kind = 1 order by fee_paid_at desc limit 100`;

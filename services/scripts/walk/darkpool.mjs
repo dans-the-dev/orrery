@@ -41,11 +41,11 @@ async function seal(t) {
   if (await btn.isDisabled()) throw new Error(`${t.role}: seal button stays disabled: ${await page.locator(".mk-problem").innerText().catch(() => "")}`);
   await btn.click();
   for (let i = 0; i < 90; i++) {
-    const strip = await page.locator('[aria-label="Your sealed orders"]').innerText().catch(() => "");
+    const strip = await page.locator('[aria-label="Orders in flight"]').innerText().catch(() => "");
     if (/Sealed\./.test(strip)) return strip.replace(/\s+/g, " ").slice(0, 200);
     await page.waitForTimeout(1500);
   }
-  return (await page.locator('[aria-label="Your sealed orders"]').innerText().catch(() => "no strip")).replace(/\s+/g, " ").slice(0, 200);
+  return (await page.locator('[aria-label="Orders in flight"]').innerText().catch(() => "no strip")).replace(/\s+/g, " ").slice(0, 200);
 }
 
 const buyer = await trader("walk", "buy", "400", "360");

@@ -473,11 +473,11 @@ describe("ORRY checkout quotes", () => {
     expect(paid).toMatchObject({ kind: "credits", credits: "1250", signer: quoteSigner.address, usdValue: "2000000", usdDecimals: 6, decimals: 18 });
     expect(paid.domain).toEqual(treasuryDomain(31337, getAddress(treasury)));
     expect(await verifyQuote(pub, treasury, paid, { sender: buyer.account.address })).toEqual({ ok: true });
-    expect((await verifyQuote(pub, treasury, paid, { sender: payer.account.address })).reason).toBe("quote is for another address");
+    expect((await verifyQuote(pub, treasury, paid, { sender: payer.account.address })).reason).toBe("quote names a different sender");
 
     await mined(await buyer.sendTransaction({ to: treasury, data: orryCalls.burnForCredits(paid), chain: foundry, account: buyer.account }));
     await expect(buyer.sendTransaction({ to: treasury, data: orryCalls.burnForCredits(paid), chain: foundry, account: buyer.account })).rejects.toThrow();
-    expect((await verifyQuote(pub, treasury, paid)).reason).toBe("quote already used");
+    expect((await verifyQuote(pub, treasury, paid)).reason).toBe("quote already redeemed");
 
     await catchUp();
     const [acct] = await sql`select credits::text from credit_accounts where address = ${buyer.account.address.toLowerCase()}`;
@@ -536,7 +536,7 @@ describe("ORRY checkout quotes", () => {
     expect(q).toMatchObject({ kind: "checks", checks: 3, credits: "6", usdValue: "9600", quote: { buyer: buyer.account.address, packs: 3 } });
     expect(q.quote.orryAmount).toBe((9_600n * 121n * 10n ** 4n * 2n ** 30n).toString());
     expect(await verifyQuote(pub, treasury, q, { sender: buyer.account.address })).toEqual({ ok: true });
-    expect((await verifyQuote(pub, treasury, q, { sender: payer.account.address })).reason).toBe("quote is for another address");
+    expect((await verifyQuote(pub, treasury, q, { sender: payer.account.address })).reason).toBe("quote names a different sender");
     await mined(await buyer.sendTransaction({ to: treasury, data: orryCalls.burnForCredits(q), chain: foundry, account: buyer.account }));
     await catchUp();
     const [acct] = await sql`select credits::text from credit_accounts where address = ${buyer.account.address.toLowerCase()}`;
@@ -560,7 +560,7 @@ describe("ORRY checkout quotes", () => {
     const unused = (await (await quote(1)).json()) as OrryCreditsQuoteResponse;
     expect((await verifyQuote(pub, treasury, unused, { now: BigInt(unused.quote.expiry) + 1n })).reason).toBe("expired quote");
     const edited: OrryCreditsQuoteResponse = { ...unused, quote: { ...unused.quote, orryAmount: "1" } };
-    expect((await verifyQuote(pub, treasury, edited)).reason).toBe("signed by another key");
+    expect((await verifyQuote(pub, treasury, edited)).reason).toBe("signer key mismatch");
   });
 
   it("signs a verification quote; the burn is indexed as source 3", async () => {
@@ -780,8 +780,8 @@ describe("check result v2", () => {
     const { stakeActive: _a, stakeLeaving: _b, stakeLeavingAt: _c, stakeLockedUntil: _e, stakedBy: _d, ...v1Fields } = res.result;
     const downgraded = { ...res, result: v1Fields, domain: { ...res.domain, version: "1" } };
     expect((await verifyCheck(pub, attestor, downgraded, { now: BigInt(res.result.issuedAt as string) })).ok).toBe(false);
-    expect((await verifyCheck(pub, attestor, { ...res, domain: { ...res.domain, version: "3" } })).reason).toBe("unknown check version");
-    expect((await verifyCheck(pub, attestor, { ...res, result: v1Fields })).reason).toBe("fields do not match the check version");
+    expect((await verifyCheck(pub, attestor, { ...res, domain: { ...res.domain, version: "3" } })).reason).toBe("unsupported check version");
+    expect((await verifyCheck(pub, attestor, { ...res, result: v1Fields })).reason).toBe("result fields disagree with the check version");
   });
 
   it("signs version 1 while stake is held, and version 1 still verifies", async () => {

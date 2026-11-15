@@ -21,7 +21,7 @@ export function DocsTabs() {
   const releases = useReleases();
   const isLive = (f: (typeof DOCS)[number]["feature"]) => !releases.ready || releases.isLive(f);
   return (
-    <nav className="rc-tabs" aria-label="ORRY guides">
+    <nav className="rc-tabs" aria-label="ORRY docs">
       <Link href="/docs">Docs</Link>
       {DOCS.map((d) => (
         <Link key={d.href} href={d.href} aria-current={path === d.href ? "page" : undefined} className={isLive(d.feature) ? undefined : "is-held"}>
@@ -35,12 +35,12 @@ export function DocsTabs() {
 
 type Name = "depositLock" | "earnStream" | "plainCooldown" | "agentCooldown" | "stakeStream" | "distributeInterval";
 const FALLBACK: Record<Name, string> = {
-  depositLock: "the deposit lock",
-  earnStream: "the stream period",
-  plainCooldown: "the unstake cooldown",
-  agentCooldown: "the agent cooldown",
-  stakeStream: "the stream period",
-  distributeInterval: "the distribute interval",
+  depositLock: "the lock set on each deposit",
+  earnStream: "the fee streaming window",
+  plainCooldown: "the wait after an unstake request",
+  agentCooldown: "the wait on an agent unstake",
+  stakeStream: "the reward streaming window",
+  distributeInterval: "the gap between distributions",
 };
 
 /** A period set in a contract constructor, read from the chain and written out in words. */
@@ -53,11 +53,11 @@ export function Period({ name }: { name: Name }) {
 /** "once an hour" style wording of the distribute interval, read from the chain. */
 export function DistributeEvery() {
   const c = useOrryConstants();
-  return <>{c.distributeInterval ? every(c.distributeInterval) : "once per interval"}</>;
+  return <>{c.distributeInterval ? every(c.distributeInterval) : "on a fixed schedule"}</>;
 }
 
 /** The router's staker share, read from the chain. */
 export function StakersShare() {
   const { data } = useReadContract({ address: ORRY.router, abi: iOrryRewardsRouterAbi, functionName: "STAKERS_BPS", query: { enabled: Boolean(ORRY.router), staleTime: Infinity } });
-  return <>{data !== undefined ? `${Number(data) / 100}%` : "the stakers' share"}</>;
+  return <>{data !== undefined ? `${Number(data) / 100}%` : "the share set for stakers"}</>;
 }

@@ -13,9 +13,9 @@ const STATUS: Record<BatchStatus, string> = {
   reveal: "Revealing",
   clearing: "Clearing",
   cleared: "Cleared",
-  expired: "Closed without a price",
+  expired: "No price on record",
 };
-const FILL: Record<string, string> = { filled: "Filled", partial: "Partly filled", unfilled: "No match", dropped: "Not settled", revealed: "Waiting for clearing", expired: "Closed without a price" };
+const FILL: Record<string, string> = { filled: "Filled", partial: "Partly filled", unfilled: "No match", dropped: "Not settled", revealed: "Awaiting settlement", expired: "No price on record" };
 
 /**
  * The revealed book of one batch after its reveal window, its clearing result, and the market's recent batches.
@@ -54,38 +54,38 @@ export function BatchBook({ m }: { m: Market }) {
       <section className="rc-panel mk-book" aria-label="Revealed orders">
         <div className="rc-panel-head">
           <h2>{batch === undefined ? "Revealed orders" : `Batch ${batch.toLocaleString("en-US")}, revealed`}</h2>
-          <p>Orders stay sealed while a batch is open. Once its reveal window ends, every order in it is listed here with the price it cleared at.</p>
+          <p>An open batch keeps every order sealed. After its reveal window, the full book goes on record here beside its clearing price.</p>
         </div>
         {batch === undefined ? (
-          <p className="rc-muted">The first batch is listed here once its reveal window ends.</p>
+          <p className="rc-muted">The opening batch goes on record here after its reveal window.</p>
         ) : (
           <>
             <dl className="rc-rows mk-result">
-              <Row label="Clearing price" hint={res?.cleared ? "Chainlink price at the end of the reveal window" : undefined}>
-                {res?.cleared ? <Fig v={usd(pricePerToken(res.price, d))} unit={`USDG per ${m.symbol}`} /> : <span className="rc-muted-inline">{expired ? "Closed without a price" : chain.loaded ? (count > 0 ? "Clearing" : "No orders") : "…"}</span>}
+              <Row label="Clearing price" hint={res?.cleared ? "Chainlink reading as the reveal window ended" : undefined}>
+                {res?.cleared ? <Fig v={usd(pricePerToken(res.price, d))} unit={`USDG per ${m.symbol}`} /> : <span className="rc-muted-inline">{expired ? "No price on record" : chain.loaded ? (count > 0 ? "Clearing" : "No orders") : "…"}</span>}
               </Row>
               {res?.cleared && nothingMoved ? (
                 <Row label="Result">
-                  <span className="rc-muted-inline">No fill in this batch, nothing moved</span>
+                  <span className="rc-muted-inline">No trade this batch, funds stayed put</span>
                 </Row>
               ) : null}
               {res?.cleared && !nothingMoved ? (
                 <>
                   {res.assetFilled > 0n || res.assetViaPool === 0n ? (
-                    <Row label="Crossed between orders">
+                    <Row label="Matched order to order">
                       <Fig v={amount(res.assetFilled, { decimals: d })} unit={`${m.symbol}, ${usdg(res.usdgFilled)} USDG`} />
                     </Row>
                   ) : null}
                   {res.assetViaPool > 0n ? (
-                    <Row label="Filled against the Uniswap pool" hint="Unmatched Private Swap orders">
+                    <Row label="Traded in the Uniswap pool" hint="Private Swap orders left unmatched">
                       <Fig v={amount(res.assetViaPool, { decimals: d })} unit={`${m.symbol}, ${usdg(res.usdgViaPool)} USDG`} />
                     </Row>
                   ) : null}
-                  <Row label="Fees to the treasury">
+                  <Row label="Treasury fees">
                     <Fig v={usdg(res.usdgFees)} unit="USDG" />
                   </Row>
                   {res.orryFeesBurned > 0n ? (
-                    <Row label="Fees paid in ORRY, burned">
+                    <Row label="ORRY fees burned">
                       <Fig v={amount(res.orryFeesBurned, { frac: 2 })} unit="ORRY" />
                     </Row>
                   ) : null}
@@ -93,14 +93,14 @@ export function BatchBook({ m }: { m: Market }) {
               ) : null}
             </dl>
             {count === 0 ? (
-              chain.loaded || detail.isFetched ? <p className="rc-muted">No orders were revealed in this batch.</p> : null
+              chain.loaded || detail.isFetched ? <p className="rc-muted">This batch ended with no revealed orders.</p> : null
             ) : (
               <div className="mk-sides">
                 {([["Buy orders", buys, false], ["Sell orders", sells, true]] as const).map(([title, rows, sell]) => (
                   <div key={title}>
                     <h3>{title}</h3>
                     {rows.length === 0 ? (
-                      <p className="rc-muted">None in this batch.</p>
+                      <p className="rc-muted">Nothing on this side.</p>
                     ) : (
                       <table className="rc-table mk-side-table">
                         <thead>
@@ -121,7 +121,7 @@ export function BatchBook({ m }: { m: Market }) {
                                 <td data-label="Size" className="num mono">{sell ? amount(o.amountIn, { decimals: d }) : usdg(o.amountIn)}</td>
                                 <td data-label="Limit" className="num mono">{usd(pricePerToken(o.limitPrice, d))}</td>
                                 <td data-label="Venue">{o.mode === 1 ? "Private Swap" : "Dark Pool"}</td>
-                                <td data-label="Result">{st ? FILL[st] : res?.cleared ? "Settled" : "Waiting for clearing"}</td>
+                                <td data-label="Result">{st ? FILL[st] : res?.cleared ? "Settled" : "Awaiting settlement"}</td>
                               </tr>
                             );
                           })}
@@ -143,7 +143,7 @@ export function BatchBook({ m }: { m: Market }) {
         {batches.isLoading ? (
           <p className="rc-muted">…</p>
         ) : past.length === 0 ? (
-          <p className="rc-muted">{batches.isError ? "Batch results appear here in a moment." : "Results appear here as each batch clears."}</p>
+          <p className="rc-muted">{batches.isError ? "Batch readings come into view in a moment." : "Each batch goes on record here as it clears."}</p>
         ) : (
           <table className="rc-table mk-batches">
             <thead>
@@ -166,7 +166,7 @@ export function BatchBook({ m }: { m: Market }) {
                     </button>
                     <small className="mk-sub">{ago(b.revealEndsAt, rt.now)}</small>
                   </td>
-                  <td data-label="Result">{b.reveals === 0 && b.status !== "cleared" ? "No orders revealed" : b.status === "cleared" && b.result && b.result.ordersFilled === 0 ? "Cleared, no fill" : STATUS[b.status]}</td>
+                  <td data-label="Result">{b.reveals === 0 && b.status !== "cleared" ? "Nothing revealed" : b.status === "cleared" && b.result && b.result.ordersFilled === 0 ? "Cleared, nothing filled" : STATUS[b.status]}</td>
                   <td data-label="Price" className="num mono">{b.result && b.result.price > 0n ? usd(pricePerToken(b.result.price, d)) : ""}</td>
                   <td data-label="Filled" className="num mono">{b.result ? `${amount(b.result.assetFilled, { decimals: d })} ${m.symbol}` : ""}</td>
                   <td data-label="Volume" className="num mono">{b.result ? `${usdg(b.result.usdgFilled)} USDG` : ""}</td>

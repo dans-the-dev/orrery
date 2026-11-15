@@ -258,7 +258,7 @@ export async function stakeQuota(cfg: Config, chain: Chain, account: Address): P
 
 export function profileMessage(cfg: Config, merchant: Address, nonce: string, expiresAt: Date): string {
   return [
-    "Orrery merchant profile",
+    "Update the public profile of an Orrery merchant",
     `Merchant: ${getAddress(merchant)}`,
     `Chain: ${cfg.chainId}`,
     `Nonce: ${nonce}`,
@@ -284,10 +284,10 @@ export function registerFacilitatorRoutes(app: FastifyInstance, cfg: Config, cha
     try {
       open = await isOpen(feature);
     } catch {
-      return reply.code(503).send({ error: "Try again in a moment." });
+      return reply.code(503).send({ error: "Retry in a few seconds." });
     }
     if (!open) return reply.callNotFound();
-    if (!limit(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!limit(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   const network = caip2(cfg.chainId);
 
@@ -301,7 +301,7 @@ export function registerFacilitatorRoutes(app: FastifyInstance, cfg: Config, cha
         asset: x.asset,
         extra: x.method === "eip3009" ? { assetTransferMethod: "eip3009", name: cfg.usdgDomain.name, version: cfg.usdgDomain.version } : { assetTransferMethod: "permit2", proxy: f.permit2Proxy, permit2: f.permit2 },
       })),
-      payTo: "Each merchant's own Orrery payment address: GET /v1/merchants/<address>",
+      payTo: "Per merchant Orrery payment address, listed at GET /v1/merchants/<address>",
       feeBps: 20,
     };
   });
@@ -317,7 +317,7 @@ export function registerFacilitatorRoutes(app: FastifyInstance, cfg: Config, cha
 
   // A merchant's page: its payment address (known before it exists), stake, discount, badge and volume.
   app.get<{ Params: { address: string } }>("/v1/merchants/:address", { preHandler: gate("facilitator") }, async (req, reply) => {
-    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
     const merchant = getAddress(req.params.address);
     const [splitter, row, stake, volume] = await Promise.all([
       chain.public.readContract({ address: f.factory, abi: iMerchantSplitterFactoryAbi as Abi, functionName: "splitterOf", args: [merchant] }) as Promise<Address>,
@@ -357,7 +357,7 @@ export function registerFacilitatorRoutes(app: FastifyInstance, cfg: Config, cha
   });
 
   app.get<{ Querystring: { address?: string } }>("/v1/merchants/profile/nonce", { preHandler: gate("facilitator") }, async (req, reply) => {
-    if (!isAddress(req.query.address ?? "")) return reply.code(400).send({ error: "Pass ?address=0x..." });
+    if (!isAddress(req.query.address ?? "")) return reply.code(400).send({ error: "Add ?address=0x... to the request." });
     const merchant = getAddress(req.query.address!);
     const nonce = randomBytes(16).toString("hex");
     const expiresAt = new Date(Date.now() + 10 * 60_000);
@@ -368,18 +368,18 @@ export function registerFacilitatorRoutes(app: FastifyInstance, cfg: Config, cha
 
   app.post("/v1/merchants/profile", { preHandler: gate("facilitator") }, async (req, reply) => {
     const b = (req.body ?? {}) as { merchant?: string; nonce?: string; signature?: Hex; name?: string; url?: string; description?: string };
-    if (!isAddress(b.merchant ?? "") || !b.nonce || !b.signature) return reply.code(400).send({ error: "Send merchant, nonce, signature, name." });
+    if (!isAddress(b.merchant ?? "") || !b.nonce || !b.signature) return reply.code(400).send({ error: "Required fields: merchant, nonce, signature, name." });
     const name = (b.name ?? "").trim();
     const url = (b.url ?? "").trim();
     const description = (b.description ?? "").trim();
-    if (name.length < 2 || name.length > 40) return reply.code(400).send({ error: "A name of 2 to 40 characters." });
-    if (url && (!/^https:\/\/[^\s]{3,200}$/.test(url))) return reply.code(400).send({ error: "The link starts with https:// and is up to 200 characters." });
-    if (description.length > 200) return reply.code(400).send({ error: "A description of up to 200 characters." });
+    if (name.length < 2 || name.length > 40) return reply.code(400).send({ error: "Name length must be 2 to 40 characters." });
+    if (url && (!/^https:\/\/[^\s]{3,200}$/.test(url))) return reply.code(400).send({ error: "Link must begin with https:// and stay within 200 characters." });
+    if (description.length > 200) return reply.code(400).send({ error: "Description must stay within 200 characters." });
     const merchant = getAddress(b.merchant!);
     const [n] = await sql<{ nonce: string; expires_at: Date }[]>`select nonce, expires_at from merchant_profile_nonces where merchant = ${lower(merchant)}`;
-    if (!n || n.nonce !== b.nonce || n.expires_at.getTime() < Date.now()) return reply.code(400).send({ error: "That sign-in message expired. Get a new one." });
+    if (!n || n.nonce !== b.nonce || n.expires_at.getTime() < Date.now()) return reply.code(400).send({ error: "This sign-in message is past its expiry. Request a fresh one." });
     const ok = await verifyMessage({ address: merchant, message: profileMessage(cfg, merchant, n.nonce, n.expires_at), signature: b.signature }).catch(() => false);
-    if (!ok) return reply.code(400).send({ error: "The signature does not match this address." });
+    if (!ok) return reply.code(400).send({ error: "Signature and address disagree." });
     await sql`delete from merchant_profile_nonces where merchant = ${lower(merchant)}`;
     const updated = await sql`update merchants set name = ${name}, url = ${url || null}, description = ${description || null}, profile_updated_at = now()
       where merchant = ${lower(merchant)} returning merchant`;
@@ -387,7 +387,7 @@ export function registerFacilitatorRoutes(app: FastifyInstance, cfg: Config, cha
       // Created on chain but not indexed yet (the indexer waits for confirmations): keep the profile now; the indexer
       // fills in the block and transaction when SplitterCreated reaches it.
       const splitter = (await chain.public.readContract({ address: f.factory, abi: iMerchantSplitterFactoryAbi as Abi, functionName: "splitterOf", args: [merchant] })) as Address;
-      if (!(await isSplitter(chain, f, splitter))) return reply.code(404).send({ error: "Create your payment address first." });
+      if (!(await isSplitter(chain, f, splitter))) return reply.code(404).send({ error: "Set up your payment address before adding a profile." });
       await sql`insert into merchants (merchant, splitter, created_block, created_tx, created_at, name, url, description, profile_updated_at)
         values (${lower(merchant)}, ${lower(splitter)}, 0, '', now(), ${name}, ${url || null}, ${description || null}, now())
         on conflict (merchant) do update set name = excluded.name, url = excluded.url, description = excluded.description, profile_updated_at = now()`;

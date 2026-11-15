@@ -40,19 +40,19 @@ function EarlyDesk({ coin, symbol, publicOpenAt, now }: { coin: Address; symbol:
     if (!address || !a) return;
     await tx.run("Early buy", async ({ send, step, ensureAllowance }) => {
       await ensureAllowance(address, AL, a, step);
-      step("Confirm the early buy in your wallet.");
+      step("Approve the early buy in your wallet.");
       await send({ address: AL, abi: launchAbi, functionName: "buyEarly", args: [coin, a, 1n, BigInt(Math.floor(Date.now() / 1000) + 300)] });
       setAmt("");
-      return `Bought ${symbol} before the public opening.`;
+      return `${symbol} bought ahead of the public window.`;
     });
   }
   return (
-    <section className="rc-desk" aria-label="Stakers buy first">
-      <h2 className="ln-desk-title">Stakers buy first, for {span(publicOpenAt - now)} more</h2>
+    <section className="rc-desk" aria-label="Staker window">
+      <h2 className="ln-desk-title">Staker window, {span(publicOpenAt - now)} left</h2>
       <p className="rc-muted">
-        Your allocation grows with the USD value of your ORRY stake
-        {params ? `, up to ${params.earlyMaxBps / 100}% of the supply at ${(Number(params.earlyFullUsd) / 1e6).toLocaleString("en-US")} USD` : ""}.
-        Early buys pay 1%.
+        The more USD your ORRY stake is worth, the larger your allocation
+        {params ? `, reaching ${params.earlyMaxBps / 100}% of the supply at ${(Number(params.earlyFullUsd) / 1e6).toLocaleString("en-US")} USD` : ""}.
+        Early buys carry the 1% fee.
       </p>
       {!ready ? (
         <WalletButton />
@@ -60,18 +60,18 @@ function EarlyDesk({ coin, symbol, publicOpenAt, now }: { coin: Address; symbol:
         <div className="rc-desk-body">
           <dl className="rc-rows">
             <Row label="Your stake">{acc.data ? (acc.data.stakeUsd !== null ? `${orry(BigInt(acc.data.stakeUsd) * 10n ** 12n)} USD` : "…") : "…"}</Row>
-            <Row label="Your allocation left">{acc.data ? `${orry(room)} ${symbol}` : "…"}</Row>
+            <Row label="Allocation remaining">{acc.data ? `${orry(room)} ${symbol}` : "…"}</Row>
           </dl>
           {room > 0n ? (
             <>
-              <AmountField id="early-amt" label="ORRY to spend" unit="ORRY" value={amt} onChange={setAmt} />
+              <AmountField id="early-amt" label="ORRY amount" unit="ORRY" value={amt} onChange={setAmt} />
               <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !parseAmount(amt)} onClick={() => void buy()}>
                 {tx.busy ? "Buying…" : `Buy ${symbol} early`}
               </button>
             </>
           ) : (
             <p className="rc-muted">
-              Stake ORRY on the <Link href="/stake">Stake page</Link> to buy in the next early window.
+              Join the next early window by staking ORRY on the <Link href="/stake">Stake page</Link>.
             </p>
           )}
           <NoticeLine notice={tx.notice} />
@@ -98,12 +98,12 @@ function TradeDesk({ coin, symbol, live }: { coin: Address; symbol: string; live
     await tx.run(side === "buy" ? "Buy" : "Sell", async ({ send, step, ensureAllowance }) => {
       if (side === "buy") {
         await ensureAllowance(address, ROUTER, a, step);
-        step("Confirm the buy in your wallet.");
+        step("Approve the buy in your wallet.");
         await send({ address: ROUTER, abi: spokeRouterAbi as Abi, functionName: "buy", args: [coin, a, withLimit(quote, bps), BigInt(Math.floor(Date.now() / 1000) + 300)] });
       } else {
-        step(`Approve ${symbol} in your wallet.`);
+        step(`Approve the ${symbol} spend in your wallet.`);
         await send({ address: coin, abi: parseAbi(["function approve(address,uint256) returns (bool)"]) as Abi, functionName: "approve", args: [ROUTER, a] });
-        step("Confirm the sale in your wallet.");
+        step("Approve the sale in your wallet.");
         await send({ address: ROUTER, abi: spokeRouterAbi as Abi, functionName: "sell", args: [coin, a, withLimit(quote, bps), BigInt(Math.floor(Date.now() / 1000) + 300)] });
       }
       setAmt("");
@@ -116,13 +116,13 @@ function TradeDesk({ coin, symbol, live }: { coin: Address; symbol: string; live
       <div className="rc-desk-body">
         <AmountField
           id="trade-amt"
-          label={side === "buy" ? "ORRY to spend" : `${symbol} to sell`}
+          label={side === "buy" ? "ORRY amount" : `${symbol} amount`}
           unit={side === "buy" ? "ORRY" : symbol}
           value={amt}
           onChange={setAmt}
           max={side === "sell" && bal !== undefined ? orry(bal) : undefined}
           onMax={() => bal !== undefined && setAmt(formatUnits(bal, 18))}
-          hint={a > 0n ? `About ${orry(quote)} ${side === "buy" ? symbol : "ORRY"}, fee ${pct(side === "buy" ? live.feePips : 10_000)}` : `Fee ${pct(side === "buy" ? live.feePips : 10_000)}`}
+          hint={a > 0n ? `Roughly ${orry(quote)} ${side === "buy" ? symbol : "ORRY"} · fee ${pct(side === "buy" ? live.feePips : 10_000)}` : `Fee ${pct(side === "buy" ? live.feePips : 10_000)}`}
         />
         <SlippagePicker value={bps} onChange={setBps} />
         {ready ? (
@@ -147,13 +147,13 @@ function Fees({ coin, data }: { coin: Address; data: LaunchCoinResponse }) {
   async function split() {
     await tx.run("Split fees", async ({ send }) => {
       await send({ address: AL, abi: launchAbi, functionName: "distribute", args: [coin] });
-      return "Fees split: the agent's share is waiting, the Earn share streams to depositors, the burn share is burned.";
+      return "Split done. Agent share held for payout, Earn share streaming to depositors, burn share burned.";
     });
   }
   async function pay() {
-    await tx.run("Pay the agent", async ({ send }) => {
+    await tx.run("Pay out to agent", async ({ send }) => {
       await send({ address: AL, abi: launchAbi, functionName: "claimCreatorFees", args: [coin] });
-      return "Paid to the agent's account.";
+      return "Agent share sent to its account.";
     });
   }
   return (
@@ -162,20 +162,20 @@ function Fees({ coin, data }: { coin: Address; data: LaunchCoinResponse }) {
         <h2>Fees</h2>
       </div>
       <dl className="rc-rows">
-        <Row label="Split so far">{`${orry(BigInt(c.feesDistributed))} ORRY`}</Row>
-        <Row label="To the agent's account">{`${orry(BigInt(c.creatorFees))} ORRY`}</Row>
-        <Row label="To Earn depositors">{`${orry(BigInt(c.earnFees))} ORRY`}</Row>
+        <Row label="Divided to date">{`${orry(BigInt(c.feesDistributed))} ORRY`}</Row>
+        <Row label="Agent account">{`${orry(BigInt(c.creatorFees))} ORRY`}</Row>
+        <Row label="Earn depositors">{`${orry(BigInt(c.earnFees))} ORRY`}</Row>
         <Row label="Burned">{`${orry(BigInt(c.burned))} ORRY`}</Row>
-        <Row label="To Orrery">{`${orry(BigInt(c.ownerFees))} ORRY`}</Row>
-        <Row label="Waiting to be split">{live ? `${orry(pending)} ORRY` : "…"}</Row>
-        <Row label="Waiting for the agent" hint={live?.agentWallet ? mask(live.agentWallet) : undefined}>{live ? `${orry(owed)} ORRY` : "…"}</Row>
+        <Row label="Orrery">{`${orry(BigInt(c.ownerFees))} ORRY`}</Row>
+        <Row label="Not yet divided">{live ? `${orry(pending)} ORRY` : "…"}</Row>
+        <Row label="Held for the agent" hint={live?.agentWallet ? mask(live.agentWallet) : undefined}>{live ? `${orry(owed)} ORRY` : "…"}</Row>
       </dl>
       <div className="ln-actions">
         <button type="button" className="secondary" disabled={Boolean(tx.busy) || pending === 0n} onClick={() => void split()}>
           Split fees
         </button>
         <button type="button" className="secondary" disabled={Boolean(tx.busy) || owed === 0n || !live?.walletBound} onClick={() => void pay()}>
-          Pay the agent
+          Pay out to agent
         </button>
       </div>
       <NoticeLine notice={tx.notice} />
@@ -189,7 +189,7 @@ export function CoinView({ coin }: { coin: Address }) {
   const d = q.data;
   if (q.isError && !d) {
     // a coin launched seconds ago reaches the list on the next indexed block
-    return <p className="rc-muted">{q.error instanceof LaunchApiError && q.error.status === 404 ? "This coin appears here in a moment." : "Loading the coin again in a moment."}</p>;
+    return <p className="rc-muted">{q.error instanceof LaunchApiError && q.error.status === 404 ? "This coin shows up once the next block is indexed." : "Fetching the coin again."}</p>;
   }
   if (!d) return <div className="rc-gate-wait" aria-busy="true" aria-label="Loading" />;
   const c = d.coin;
@@ -202,8 +202,8 @@ export function CoinView({ coin }: { coin: Address }) {
         title={`${c.name}`}
         lead={
           <p>
-            {c.symbol} was launched by a Orrery-verified agent. Half of every trade&apos;s fee goes to the agent&apos;s account; read its
-            spending caps and its live record on <Link href={agentHref}>the agent&apos;s page</Link>.
+            {c.symbol} belongs to an agent Orrery has verified. Half of each trade fee is paid to the agent&apos;s account. Its spending caps
+            and live record are open on <Link href={agentHref}>its record page</Link>.
           </p>
         }
         reading={
@@ -227,12 +227,12 @@ export function CoinView({ coin }: { coin: Address }) {
         <TradeDesk coin={coin} symbol={c.symbol} live={d.live} />
       ) : null}
       <Fees coin={coin} data={d} />
-      <section className="rc-panel" aria-label="Recent trades">
+      <section className="rc-panel" aria-label="Latest trades">
         <div className="rc-panel-head">
-          <h2>Recent trades</h2>
+          <h2>Latest trades</h2>
         </div>
         {d.trades.length === 0 ? (
-          <p className="rc-muted">Trades appear here as they happen.</p>
+          <p className="rc-muted">Each trade shows here as it lands.</p>
         ) : (
           <table className="rc-table">
             <thead>

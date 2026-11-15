@@ -3,16 +3,29 @@ import type { ReactNode } from "react";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { PageHead } from "@/components/PageHead";
-import { DISCORD_URL, X_HANDLE, X_URL } from "@/lib/config";
+import { DISCORD_URL, X_HANDLE, X_URL } from "@/components/social";
 
 export const metadata = {
   title: "Orrery · Privacy Policy",
-  description: "What Orrery keeps when you use orrery.tech, the Orrery API and the Discord bot, and why.",
+  description: "The records Orrery holds when you use orrery.tech, the Orrery API or the Discord bot, and the reason for each.",
 };
 
 const UPDATED = "9 November 2026";
 
 type Section = { id: string; title: string; body: ReactNode };
+
+/** The contact line names only the channels that are configured; with none, it points to the site. */
+function Contact() {
+  const channels: ReactNode[] = [];
+  if (X_URL) channels.push(<>on X at <a href={X_URL} target="_blank" rel="noreferrer">{X_HANDLE}</a></>);
+  if (DISCORD_URL) channels.push(<>in the <a href={DISCORD_URL} target="_blank" rel="noreferrer">Orrery Discord</a></>);
+  return (
+    <p>
+      {channels.length ? <>Write to the team {channels[0]}{channels[1] ? <> or {channels[1]}</> : null}. </> : <>Write to the team through the contact channels published on orrery.tech. </>}
+      The rules for using the service sit in the <Link href="/terms">Terms of Use</Link>.
+    </p>
+  );
+}
 
 const SECTIONS: Section[] = [
   {
@@ -21,42 +34,42 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          This policy covers orrery.tech, the Orrery API and the Orrery Discord bot. Orrery works with wallet addresses. The records the service keeps are listed below, together with what each one is for.
+          This policy applies to orrery.tech, the Orrery API and the Orrery Discord bot. Orrery identifies people by wallet address. Each record the service holds is described below, with the reason it is held.
         </p>
-        <p>The service asks for no name, email address, phone number or password, and the website runs without advertising or analytics trackers.</p>
+        <p>Orrery never asks for your name, email, phone number or a password, and the website carries no advertising or analytics trackers.</p>
       </>
     ),
   },
   {
     id: "chain",
-    title: "Public chain data",
+    title: "Data read from the chain",
     body: (
       <>
         <p>
-          The service indexes events from the Orrery contracts and the ORRY pools on Robinhood Chain: addresses, amounts, transaction hashes and times. From these events it keeps totals per address, such as stakes, Earn shares and amounts claimed and earned.
+          The service reads events emitted by the Orrery contracts and the ORRY pools on Robinhood Chain: addresses, amounts, transaction hashes and timestamps. From them it builds running totals for each address, for example stakes, Earn shares, and amounts claimed and earned.
         </p>
-        <p>These totals power your account views and the leaderboard. Every one of them comes from records that are already public on Robinhood Chain.</p>
+        <p>Those totals feed your account views and the leaderboard. All of them derive from records anyone can already read on Robinhood Chain.</p>
       </>
     ),
   },
   {
     id: "credits",
-    title: "Check credits and API keys",
+    title: "Credits and API keys",
     body: (
       <>
-        <p>When an address signs in for an API key, buys check credits or buys the platform plan, the service keeps:</p>
+        <p>If an address signs in for an API key, purchases check credits or purchases the platform plan, the service records:</p>
         <ul>
-          <li>the wallet address and its credit balance;</li>
-          <li>the date its platform plan runs until, when it has one;</li>
-          <li>the payment record: amount, status and transaction hash;</li>
-          <li>for payments in ORRY, the signed price quote: the buyer address, the number of packs or the agent id, and the ORRY amount;</li>
-          <li>the number of checks the address makes each month and how many of them were included, to apply the monthly included checks and the price tier.</li>
+          <li>the wallet address, with its credit balance;</li>
+          <li>the end date of its platform plan, if it holds one;</li>
+          <li>each payment: its amount, its status and its transaction hash;</li>
+          <li>for an ORRY payment, the signed price quote, meaning the buyer address, the pack count or agent id, and the ORRY amount;</li>
+          <li>how many checks the address runs in each month, and how many of those fell within the included allowance, so the included checks and the price tier can be applied.</li>
         </ul>
-        <p>The service also keeps a daily total of checks across all addresses, with no address attached. Unused price quotes are deleted one day after they expire.</p>
+        <p>A daily count of checks across every address is kept as well, with no address attached to it. A price quote that goes unused is deleted one day after its expiry.</p>
         <p>
-          API keys are stored as a SHA-256 hash linked to your address. The full key is returned to you once, when it is issued. Signing in for a key, or replacing one, uses a one-time message that is valid for five minutes.
+          An API key is held only as a SHA-256 hash tied to your address, and you see the full key a single time, when it is issued. Signing in for a key, or rotating one, relies on a one-time message valid for five minutes.
         </p>
-        <p>A check reads the paying address you ask about and leaves no record of it. Your credit balance and your monthly check count are the records that change.</p>
+        <p>When you read a paying address, nothing about that address is stored. The only records that change are your credit balance and your check count for the month.</p>
       </>
     ),
   },
@@ -66,9 +79,9 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          For an agent registered on ERC-8004, the service reads its public registration file, the HTTPS endpoints it advertises and its domain. It keeps the result: whether the endpoints answered, whether the registration is valid, whether the domain is verified, a hash of the registration and the time of the probe.
+          For an agent registered under ERC-8004, the service fetches its public registration file, the HTTPS endpoints it lists and its domain. It stores the outcome: whether the endpoints responded, whether the registration is valid, whether the domain is verified, a hash of the registration, and when the probe ran.
         </p>
-        <p>The probe results are also recorded on Robinhood Chain, where anyone can read them.</p>
+        <p>Probe outcomes are also written to Robinhood Chain, where they are public to read.</p>
       </>
     ),
   },
@@ -78,12 +91,12 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          When you run <code>/verify</code> in the Orrery Discord and sign a message with your wallet, the service keeps your Discord user id, the linked wallet address, the roles it gave you and when the link was made and last checked. The one-time verification link expires after 15 minutes.
+          If you use <code>/verify</code> in the Orrery Discord and sign with your wallet, the service stores your Discord user id, the wallet address you tied to it, the roles assigned, and the times the link was created and last reviewed. Each one-time verification link lapses after 15 minutes.
         </p>
         <p>
-          The bot checks linked wallets on a schedule and updates roles to match each wallet&apos;s ORRY balance and stake, the agents it owns and its credit purchases. Linking a different wallet replaces the earlier link.
+          On a schedule, the bot reviews every linked wallet and adjusts roles to fit its ORRY balance and stake, the agents it owns and the credits it has bought. Tying a new wallet replaces the earlier link.
         </p>
-        <p>The bot also keeps the Discord user ids of members it has welcomed, so that each member is welcomed once.</p>
+        <p>The bot also stores the Discord user ids of the members it has greeted, so nobody is greeted twice.</p>
       </>
     ),
   },
@@ -92,28 +105,28 @@ const SECTIONS: Section[] = [
     title: "The website",
     body: (
       <>
-        <p>The website stores your wallet connection in cookies, so the connection stays in place when you reload a page. These cookies are used for that alone.</p>
+        <p>Cookies hold your wallet connection, so it survives a page reload. They serve no other purpose.</p>
         <p>
-          The website is served by a hosting provider, and your browser reads Robinhood Chain through a public RPC endpoint. Both receive standard request data such as your IP address, under their own privacy policies. Your wallet app handles your keys and signatures under its own policy.
+          A hosting provider serves the website, and your browser reaches Robinhood Chain through a public RPC endpoint. Each of them receives ordinary request data, your IP address among it, under its own privacy policy. Your keys and signatures are handled by your wallet app, under that app&apos;s policy.
         </p>
       </>
     ),
   },
   {
     id: "requests",
-    title: "Rate limits and logs",
+    title: "Request limits and logs",
     body: (
       <p>
-        The Orrery API uses your IP address in memory to apply request rate limits and does not write it to its database. The servers keep operational logs, such as indexer progress and the actions of the Discord bot.
+        To enforce request rate limits, the Orrery API holds your IP address in memory only and never writes it to its database. The servers keep operational logs, for example indexer progress and what the Discord bot did.
       </p>
     ),
   },
   {
     id: "use",
-    title: "How the data is used",
+    title: "Why the data is held",
     body: (
       <p>
-        The records above are used to run the service: to issue keys, grant credits and plans, apply the monthly included checks and price tiers, answer checks, show balances and earnings, keep the leaderboard, give Discord roles and keep the API available. The service shares data with the providers that run it, such as hosting, Robinhood Chain access and Discord for roles, and where the law requires it.
+        Every record above exists to operate the service: issuing keys, granting credits and plans, applying the included checks and price tiers, answering readings, showing balances and earnings, maintaining the leaderboard, assigning Discord roles and keeping the API reachable. Data is shared with the providers that run the service, such as hosting, Robinhood Chain access and Discord for roles, and wherever the law requires it.
       </p>
     ),
   },
@@ -122,7 +135,7 @@ const SECTIONS: Section[] = [
     title: "Security",
     body: (
       <p>
-        API keys are stored as hashes. Signing in for a key, replacing a key and Discord verification use one-time messages signed by your wallet. Your private keys and seed phrase stay in your wallet, and the service has no use for them.
+        API keys are held as hashes. Key sign in, key rotation and Discord verification each rely on a one-time message your wallet signs. Your private keys and seed phrase never leave your wallet, and the service never needs them.
       </p>
     ),
   },
@@ -131,32 +144,20 @@ const SECTIONS: Section[] = [
     title: "Your choices",
     body: (
       <>
-        <p>You choose which wallet you connect and which messages and transactions you sign. You can disconnect your wallet from the website at any time.</p>
-        <p>Records on Robinhood Chain are public and stay on the chain. For questions about the records the service holds for your address or Discord account, including your Discord link, contact the team through the channels below.</p>
+        <p>You decide which wallet to connect and which messages and transactions to sign, and you can disconnect the wallet from the website whenever you like.</p>
+        <p>Records written to Robinhood Chain are public and remain on chain. To ask about anything the service holds for your address or Discord account, your Discord link included, use the contact details in the last section.</p>
       </>
     ),
   },
   {
     id: "changes",
-    title: "Changes to this policy",
-    body: <p>This policy is updated when the service changes what it keeps. Each update is posted on this page with a new date at the top.</p>,
+    title: "Revisions",
+    body: <p>Whenever the service changes what it holds, this policy is revised. Each revision appears on this page with a fresh date at the top.</p>,
   },
   {
     id: "contact",
     title: "Contact",
-    body: (
-      <p>
-        Reach the team on X at{" "}
-        <a href={X_URL} target="_blank" rel="noreferrer">
-          {X_HANDLE}
-        </a>{" "}
-        or in the{" "}
-        <a href={DISCORD_URL} target="_blank" rel="noreferrer">
-          Orrery Discord
-        </a>
-        . The terms for using the service are in the <Link href="/terms">Terms of Use</Link>.
-      </p>
-    ),
+    body: <Contact />,
   },
 ];
 
@@ -168,7 +169,7 @@ export default function Privacy() {
         <PageHead
           kicker="Legal"
           title="Privacy Policy"
-          lead={<p>What Orrery keeps when you use orrery.tech, the Orrery API and the Discord bot, and what each record is for.</p>}
+          lead={<p>The records Orrery holds when you use orrery.tech, the Orrery API or the Discord bot, and the purpose of each one.</p>}
           art="signer-lookup"
         />
         <div className="legal">

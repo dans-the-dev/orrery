@@ -6,7 +6,7 @@
 .cm-link:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 3px; }
 .cm-link:disabled { opacity: 0.45; cursor: not-allowed; }
 .cm-quiet { color: var(--muted); }
-.cm-label { display: block; font-size: 0.82rem; font-weight: 600; color: #2a3350; margin-bottom: 6px; }
+.cm-label { display: block; font-size: 0.82rem; font-weight: 600; color: #2b2f52; margin-bottom: 6px; }
 .cm-input, .cm-compose textarea, .cm-code { width: 100%; padding: 13px 16px; border: 1px solid var(--hairline); border-radius: 14px; background: var(--paper); color: var(--ink); font-family: var(--text); font-size: 1rem; line-height: 1.5; outline: none; transition: border-color var(--motion-fast), background var(--motion-fast); }
 .cm-input:focus, .cm-compose textarea:focus, .cm-code:focus { border-color: var(--brand); background: #fff; outline: 2px solid color-mix(in srgb, var(--brand) 22%, transparent); }
 .cm-input { height: 52px; }
@@ -46,7 +46,7 @@
 .cm-bytes { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .cm-bytes.is-over { color: var(--danger); font-weight: 700; }
 .cm-fee strong { font-family: var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
-.cm-replying { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--paper); font-size: 0.86rem; color: #2a3350; }
+.cm-replying { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--paper); font-size: 0.86rem; color: #2b2f52; }
 .cm-replying span { min-width: 0; overflow-wrap: anywhere; }
 
 .cm-msgs { margin-top: 28px; }
@@ -59,7 +59,7 @@
 .cm-msg-head .rc-tx { margin-left: auto; }
 .cm-you { font-size: 0.74rem; font-weight: 700; color: var(--brand); }
 .cm-time { font-size: 0.8rem; color: var(--muted); }
-.cm-quote { margin-top: 6px; padding-left: 10px; border-left: 2px solid #dfe4ec; font-size: 0.84rem; color: var(--muted); overflow-wrap: anywhere; }
+.cm-quote { margin-top: 6px; padding-left: 10px; border-left: 2px solid #d8d4ea; font-size: 0.84rem; color: var(--muted); overflow-wrap: anywhere; }
 .cm-text { margin-top: 6px; font-size: 1rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .cm-hidden { margin-top: 6px; font-size: 0.9rem; color: var(--muted); }
 .cm-tips { margin-top: 6px; font-family: var(--mono); font-size: 0.8rem; color: var(--success); }
@@ -78,7 +78,7 @@
 .cm-event-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
 .cm-event-main > div:first-child { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .cm-event-main strong { font-family: var(--display); font-weight: 600; font-size: 1.08rem; letter-spacing: -0.015em; }
-.cm-event-main > div:first-child span { font-size: 0.88rem; color: #2a3350; }
+.cm-event-main > div:first-child span { font-size: 0.88rem; color: #2b2f52; }
 .cm-amount { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .cm-reward { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .cm-reward small { font-size: 0.74rem; color: var(--muted); }
@@ -102,7 +102,7 @@
 /* Referrals */
 .cm-reflink { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--paper); font-size: 0.82rem; overflow-wrap: anywhere; }
 .cm-offer { margin: 0 0 32px; }
-.cm-offer-text { margin-top: 4px; color: #eef1fb; font-size: 0.95rem; }
+.cm-offer-text { margin-top: 4px; color: #ecebf7; font-size: 0.95rem; }
 .cm-offer .rc-notice { margin-top: 10px; }
 
 /* Passes */

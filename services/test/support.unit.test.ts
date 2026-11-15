@@ -16,10 +16,10 @@ describe("support knowledge base", () => {
 
   it("states live pricing in USDG, not base units", () => {
     const t = pricingText(JSON.stringify({ packPrice: "1000000", packSize: 500, freeChecksPerMonth: 1000, creditsPerCheck: 2, volumeCreditsPerCheck: 1, volumeChecks: 100000, checksPerMinute: 120, plan: { price: "99000000", credits: 49500, days: 30, checksPerMinute: 1200 } }))!;
-    expect(t).toContain("1 USDG buys 500 credits");
+    expect(t).toContain("500 credits for 1 USDG");
     expect(t).toContain("2 credits (0.004 USDG)");
-    expect(t).toContain("1 credit (0.002 USDG) above 100,000 checks");
-    expect(t).toContain("99 USDG for 30 days with 49,500 credits");
+    expect(t).toContain("1 credit (0.002 USDG) past 100,000 checks");
+    expect(t).toContain("30 days, 49,500 credits and up to 1,200 checks a minute for 99 USDG");
     expect(pricingText("not json")).toBeNull();
   });
 });
@@ -61,8 +61,8 @@ describe("support drafts", () => {
 
   it("shows the approver what to do, and blocks a draft that needs a fix", () => {
     const base = { source: "discord" as const, author: "ann", text: "how?", link: "https://discord.com/channels/1/2/3", category: "faq", reason: "", status: "pending" as const };
-    expect(queuePost({ ...base, draft: "Open orrery.tech/operator." }, "#help")).toContain("React ✅ to send");
-    expect(queuePost({ ...base, draft: "" }, "#help")).toContain("Fix before sending");
+    expect(queuePost({ ...base, draft: "Open orrery.tech/operator." }, "#help")).toContain("✅ sends it");
+    expect(queuePost({ ...base, draft: "" }, "#help")).toContain("Edit needed first");
   });
 });
 

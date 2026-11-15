@@ -152,7 +152,7 @@ export async function buildCheck(
     domain,
     extras: {
       targets: view.targets.map((t) => ({ target: t.target, selector: t.selector })),
-      coverage: "outflow of the listed tokens and native from this account by this signer",
+      coverage: "caps cover outflows of the listed tokens and native ETH from this account, made by this signer",
       probe: probe ? { probedAt: probe.probedAt, fresh } : null,
     },
   };

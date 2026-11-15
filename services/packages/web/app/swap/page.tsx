@@ -4,7 +4,7 @@ import { MarketsShell } from "@/components/markets/shell";
 import { SwapView } from "@/components/markets/views";
 import { FeatureGate } from "@/components/orry/gate";
 
-export const metadata = { title: "Orrery · Private Swap", description: "Swap stock tokens for USDG with the order sealed until the batch clears at the Chainlink price." };
+export const metadata = { title: "Orrery · Private Swap", description: "Trade stock tokens for USDG while the order stays sealed, then clear at the Chainlink price with the batch." };
 
 export default function SwapPage() {
   return (
@@ -13,8 +13,8 @@ export default function SwapPage() {
         feature="swap"
         held={
         <>
-          <OrryHead title="Swap stock tokens with your order sealed." lead={<p>Nobody sees the amount before the batch closes. It then settles at one Chainlink price.</p>} />
-          <ComingSoon title="Private Swap opens soon." text="The swap form and your sealed orders appear here when Private Swap opens." />
+          <OrryHead title="Swap stock tokens out of sight." lead={<p>The size of your order stays hidden until the batch closes, and the whole batch settles at a single Chainlink price.</p>} />
+          <ComingSoon title="Private Swap starts soon." text="The swap ticket and your sealed orders show here once Private Swap starts." />
         </>
         }
       >

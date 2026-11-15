@@ -23,33 +23,33 @@ export default function AgentPage({ params }: { params: Promise<{ agentId: strin
       <Nav />
       <main className="signer-main">
         <PageHead
-          kicker="Agent record"
+          kicker="Agent chart"
           title={`Agent #${agentId}`}
-          lead={account ? <p className="mono">on account {account}</p> : null}
+          lead={account ? <p className="mono">paying from {account}</p> : null}
           art="agent-tag"
         />
         {!valid ? (
           <>
             <PageGuide
-              audience="Anyone checking what an AI agent may spend, and from which account."
+              audience="Anyone who wants to see what an AI agent may spend, and the account it spends from."
               steps={[
-                { title: "Find the account", text: "The Safe the agent pays from. Its operator shares it, and it shows in every signed check." },
-                { title: "Open the record", text: "Enter the account below. The record is read from the chain." },
-                { title: "Read the limits", text: "Caps, spend today, allowed calls, verification and the latest endpoint probe." },
+                { title: "Get the account", text: "The agent pays from a Safe. Its operator can give you the address, and every signed reading names it." },
+                { title: "Paste it below", text: "The chart is drawn from chain state as the page loads." },
+                { title: "Read the orbit", text: "Every cap, today's spend, the allowed calls, verification status and the most recent endpoint probe." },
               ]}
             />
             <form className="panel lookup-form" onSubmit={(e) => { e.preventDefault(); if (/^\d+$/.test(agentId) && isAddress(accIn.trim())) router.push(`/agent/${agentId}?account=${accIn.trim()}`); }}>
-              <h2>Which account does agent #{agentId} use?</h2>
+              <h2>Which Safe pays for agent #{agentId}?</h2>
               <div className="row">
-                <label className="field">Account<input value={accIn} onChange={(e) => setAccIn(e.target.value)} placeholder="0x… the agent's Safe" spellCheck={false} /></label>
-                <button className="primary" type="submit" disabled={!isAddress(accIn.trim())}>Open record</button>
+                <label className="field">Account<input value={accIn} onChange={(e) => setAccIn(e.target.value)} placeholder="Safe address, 0x…" spellCheck={false} /></label>
+                <button className="primary" type="submit" disabled={!isAddress(accIn.trim())}>Open chart</button>
               </div>
             </form>
           </>
         )
-          : !deployed ? <div className="panel"><h2>Lookups open soon</h2><p>Agent records appear here once the contracts are live on this network.</p></div>
-          : isLoading ? <div className="panel"><h2>Reading the chain</h2></div>
-          : error || !data ? <div className="panel"><h2>The read did not finish</h2><p>Refresh in a moment.</p></div>
+          : !deployed ? <div className="panel"><h2>Readings start soon</h2><p>Agent charts show here as soon as the contracts go live on this network.</p></div>
+          : isLoading ? <div className="panel"><h2>Reading chain state</h2></div>
+          : error || !data ? <div className="panel"><h2>Reading incomplete</h2><p>Reload the page in a moment.</p></div>
           : <Record view={data} />}
       </main>
       <Footer />

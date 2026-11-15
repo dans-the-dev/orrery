@@ -9,7 +9,7 @@ import { ADDRESSES } from "@/lib/config";
 
 type View = ContractFunctionReturnType<typeof orreryLensAbi, "view", "checkBySigner">;
 
-const KIND = ["Not recognised", "Safe with the Safe7579 adapter"];
+const KIND = ["Not recognised", "Safe · Safe7579 adapter"];
 
 function useNow() {
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
@@ -31,8 +31,8 @@ export function Record({ view }: { view: View }) {
   if (isZero(view.account)) {
     return (
       <div className="panel">
-        <h2>No session for this address</h2>
-        <p>This address has never been a Orrery signer. Payments from it carry no Orrery policy.</p>
+        <h2>Nothing on record for this address</h2>
+        <p>This address has never signed for an Orrery agent, so its payments follow no Orrery bounds.</p>
       </div>
     );
   }
@@ -53,12 +53,12 @@ export function Record({ view }: { view: View }) {
           <div><dt>Account</dt><dd>{view.account}</dd></div>
           <div><dt>Agent</dt><dd>#{view.agentId.toString()}</dd></div>
           <div><dt>Agent owner</dt><dd>{isZero(view.owner) ? "Not found" : view.owner}</dd></div>
-          <div><dt>Bound to this account</dt><dd>{view.bound ? "Yes" : "No"}</dd></div>
+          <div><dt>Tied to this account</dt><dd>{view.bound ? "Yes" : "No"}</dd></div>
           <div><dt>Module installed</dt><dd>{view.installed ? "Yes" : "No"}</dd></div>
           <div><dt>Account kind</dt><dd>{KIND[view.accountKind] ?? "Not recognised"}</dd></div>
-          <div><dt>Other grants on the account</dt><dd>{view.otherAccountModules || view.signerIsAccountOwner || view.signerHasCode ? "Present" : "None found"}</dd></div>
+          <div><dt>Other access on this account</dt><dd>{view.otherAccountModules || view.signerIsAccountOwner || view.signerHasCode ? "Present" : "None found"}</dd></div>
           <div><dt>Verified</dt><dd>{view.verified ? "Yes" : "No"}</dd></div>
-          <div><dt>Last probe</dt><dd>{view.attestation.observedAt > 0n ? `${new Date(Number(view.attestation.observedAt) * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC · ${view.attestation.endpointsLive ? "endpoints live" : "endpoints not live"}` : "None"}</dd></div>
+          <div><dt>Last probe</dt><dd>{view.attestation.observedAt > 0n ? `${new Date(Number(view.attestation.observedAt) * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC · ${view.attestation.endpointsLive ? "endpoints responding" : "endpoints not responding"}` : "None"}</dd></div>
         </dl>
       </section>
       <section className="signer-caps">
@@ -79,7 +79,7 @@ export function Record({ view }: { view: View }) {
         })}
         <div className="targets">
           <h3>Allowed calls</h3>
-          {view.targets.length === 0 ? <p>None. This signer can only top up its float.</p> : view.targets.map((t) => (
+          {view.targets.length === 0 ? <p>None. The one move open to this signer is a float top up.</p> : view.targets.map((t) => (
             <div className="target-row" key={`${t.target}${t.selector}`}>
               <span className="target-art">⌁</span>
               <div><strong className="mono">{short(t.target)}</strong><small>{t.selector}</small></div>
@@ -88,7 +88,7 @@ export function Record({ view }: { view: View }) {
         </div>
         <div className="signer-bottom">
           <span>Increase delay {duration(view.increaseDelay)}</span>
-          <span>{view.pendingReadyAt > 0n ? `Increase ready in ${duration(Number(view.pendingReadyAt) - now)}` : windowLeft > 0 ? `Limits hold for at least ${duration(windowLeft)}` : "Limits can change now"}</span>
+          <span>{view.pendingReadyAt > 0n ? `Higher cap applies in ${duration(Number(view.pendingReadyAt) - now)}` : windowLeft > 0 ? `Caps stay fixed for at least ${duration(windowLeft)}` : "A cap change can apply now"}</span>
         </div>
       </section>
     </div>

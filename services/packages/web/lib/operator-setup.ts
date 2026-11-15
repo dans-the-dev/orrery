@@ -121,7 +121,7 @@ export function remember(chainId: number, owner: string, v: Remembered): void {
 /** The file the operator hands to the agent: everything `AgentClient` needs, as environment variables. */
 export function agentEnvFile(a: { signerKey: Hex; signer: Address; chainId: number; rpcUrl: string; module: Address; account: Address; agentId: bigint }): string {
   return [
-    `# Orrery agent signer for agent #${a.agentId} on chain ${a.chainId}. Keep this file with the agent only.`,
+    `# Orrery signer key · agent #${a.agentId} · chain ${a.chainId}. This file belongs on the agent's machine only.`,
     `ORRERY_SIGNER_KEY=${a.signerKey}`,
     `ORRERY_SIGNER_ADDRESS=${a.signer}`,
     `ORRERY_CHAIN_ID=${a.chainId}`,

@@ -18,7 +18,7 @@ export class LaunchApiError extends Error {
 }
 
 async function call<T>(path: string): Promise<T> {
-  if (!API_URL) throw new LaunchApiError(0, "The Orrery API is not configured in this build.");
+  if (!API_URL) throw new LaunchApiError(0, "This build has no Orrery API address set.");
   const r = await fetch(`${API_URL}${path}`, { headers: { accept: "application/json" } });
   const body = (await r.json().catch(() => ({}))) as T & { error?: string };
   if (!r.ok) throw new LaunchApiError(r.status, body.error ?? `Request failed (${r.status}).`);

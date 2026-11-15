@@ -16,13 +16,13 @@ export function PayerConsole() {
   const has = data && data.account !== "0x0000000000000000000000000000000000000000";
   const active = has && data.status === 1;
   const pct = cap && cap.perDay > 0n ? Number((cap.spentToday * 10000n) / cap.perDay) / 100 : 0;
-  const state = !deployed ? "Lookups open soon" : !query ? "Enter a paying address" : has ? STATUS[data.status] : error ? "Read did not finish" : isFetching ? "Checking" : "No session for this address";
+  const state = !deployed ? "Readings start soon" : !query ? "Paste the address that paid" : has ? STATUS[data.status] : error ? "Reading incomplete, try again" : isFetching ? "Reading" : "Nothing on record for this address";
 
   return (
-    <div className={`console${query ? "" : " is-idle"}`} aria-label="Payer check">
+    <div className={`console${query ? "" : " is-idle"}`} aria-label="Payer reading">
       <div className="console-head">
-        <span>Check a payer</span>
-        <span className="console-source">{isFetching ? "Reading the chain" : has ? "Read from the chain" : "Public read"}</span>
+        <span>Take a reading</span>
+        <span className="console-source">{isFetching ? "Reading chain state" : has ? "Plotted from chain state" : "Open to anyone"}</span>
       </div>
       <form
         className="console-form"
@@ -31,13 +31,13 @@ export function PayerConsole() {
           if (isAddress(input.trim())) setQuery(input.trim());
         }}
       >
-        <input id="c-payer" placeholder="0x… paying address" value={input} onChange={(e) => setInput(e.target.value)} aria-label="Payer address" spellCheck={false} />
-        <button type="submit" disabled={!deployed || !isAddress(input.trim())}>Run check</button>
+        <input id="c-payer" placeholder="Paying address, 0x…" value={input} onChange={(e) => setInput(e.target.value)} aria-label="Payer address" spellCheck={false} />
+        <button type="submit" disabled={!deployed || !isAddress(input.trim())}>Take reading</button>
       </form>
       <div className={`console-state${active ? " is-active" : ""}`}>
         <i aria-hidden="true" />
         <strong>{state}</strong>
-        {has ? <span>{data.attestation.endpointsLive ? "Endpoints live" : "No live probe"}</span> : null}
+        {has ? <span>{data.attestation.endpointsLive ? "Endpoints responding" : "No recent probe"}</span> : null}
       </div>
       <div className="console-grid">
         <div className="console-day">
@@ -55,8 +55,8 @@ export function PayerConsole() {
         </div>
       </div>
       <div className="console-foot">
-        <span>{has ? `Account ${short(data.account)}` : "Signed checks through the API"}</span>
-        {has ? <Link href={`/signer/${query}`}>Full record</Link> : <Link href="/dashboard/credits">Get credits</Link>}
+        <span>{has ? `Account ${short(data.account)}` : "Signed readings come from the API"}</span>
+        {has ? <Link href={`/signer/${query}`}>Open record</Link> : <Link href="/dashboard/credits">Get credits</Link>}
       </div>
     </div>
   );

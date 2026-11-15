@@ -18,7 +18,7 @@ type Run = ReturnType<typeof useTx>["run"];
 
 /** The agent stake sentence from the copy notes, with the cooldown read from the contract. */
 export function agentStakeLine(cooldown?: number) {
-  return `Stake ORRY behind this agent. Merchants see the amount in every check.${cooldown ? ` Unstaking takes ${period(cooldown)}.` : ""}`;
+  return `ORRY staked on an agent is part of every reading a merchant takes of it.${cooldown ? ` An unstake completes after ${period(cooldown)}.` : ""}`;
 }
 
 /** Form: stake ORRY behind an agentId. The caller must be the agent's owner or its agent wallet. */
@@ -32,12 +32,12 @@ export function StakeForAgentForm({ run, busy, fixedAgentId }: { run: Run; busy:
 
   async function stake() {
     if (!address || agentId === undefined || !amount) return;
-    await run("Stake behind agent", async ({ send, step, ensureAllowance }) => {
+    await run("Agent stake", async ({ send, step, ensureAllowance }) => {
       await ensureAllowance(address, STAKING, amount, step);
-      step("Confirm the stake in your wallet.");
+      step("Sign the stake in your wallet.");
       await send({ address: STAKING, abi: stakingAbi, functionName: "stakeForAgent", args: [agentId, amount] });
       setAmountIn("");
-      return `Staked ${orry(amount)} ORRY behind agent #${agentId}. Checks for this agent now show it.`;
+      return `Stake on record · ${orry(amount)} ORRY on agent #${agentId}. Every check of this agent now includes it.`;
     });
   }
 
@@ -50,12 +50,12 @@ export function StakeForAgentForm({ run, busy, fixedAgentId }: { run: Run; busy:
             <input id="agent-id" inputMode="numeric" autoComplete="off" placeholder="1" value={agentIn} onChange={(e) => setAgentIn(e.target.value.replace(/\D/g, ""))} />
             <span className="rc-unit">ERC-8004</span>
           </div>
-          <div className="rc-amount-foot"><span>You must be the agent&apos;s owner or its agent wallet.</span></div>
+          <div className="rc-amount-foot"><span>Open to the agent owner and the agent wallet.</span></div>
         </div>
       ) : null}
-      <AmountField id={`agent-amount-${fixedAgentId ?? "any"}`} label="ORRY to stake" unit="ORRY" value={amountIn} onChange={setAmountIn} max={me.orryBalance !== undefined ? orry(me.orryBalance) : undefined} onMax={() => me.orryBalance !== undefined && setAmountIn(toInput(me.orryBalance))} />
+      <AmountField id={`agent-amount-${fixedAgentId ?? "any"}`} label="Amount to stake" unit="ORRY" value={amountIn} onChange={setAmountIn} max={me.orryBalance !== undefined ? orry(me.orryBalance) : undefined} onMax={() => me.orryBalance !== undefined && setAmountIn(toInput(me.orryBalance))} />
       <button className="primary rc-go" type="button" disabled={!ready || busy || agentId === undefined || !amount} onClick={() => void stake()}>
-        Stake behind agent
+        Stake on agent
       </button>
     </div>
   );
@@ -108,13 +108,13 @@ export function AgentPositionRow({
     await run("Agent unstake", async ({ send }) => {
       await send({ address: STAKING, abi: stakingAbi, functionName: "requestAgentUnstake", args: [agentId, owner, amount] });
       setAmountIn("");
-      return `Unstake requested for ${orry(amount)} ORRY behind agent #${agentId}.`;
+      return `Unstake request on record · ${orry(amount)} ORRY on agent #${agentId}.`;
     });
   }
   async function withdraw() {
     await run("Agent withdraw", async ({ send }) => {
       await send({ address: STAKING, abi: stakingAbi, functionName: "withdrawAgent", args: [agentId, owner] });
-      return `Withdrawn from agent #${agentId} to your wallet.`;
+      return `The stake on agent #${agentId} went back to your wallet.`;
     });
   }
 
@@ -124,11 +124,11 @@ export function AgentPositionRow({
         <>
           <div className="rc-agent-head">
             <strong>Agent #{agentId.toString()}</strong>
-            <span>{reportedForAgent ? "Shown in this agent's checks" : `Recorded for the earlier owner ${mask(owner)}`}</span>
+            <span>{reportedForAgent ? "Part of every check of this agent" : `On record for the previous owner ${mask(owner)}`}</span>
           </div>
           <dl className="rc-rows rc-rows-tight">
             <Row label="Active">{orry(active)} ORRY</Row>
-            <Row label="Leaving">{leaving > 0n ? `${orry(leaving)} ORRY, ${readyNow ? "ready now" : `ready in ${span(leavingAt - now)}`}` : "None"}</Row>
+            <Row label="Unstaking">{leaving > 0n ? `${orry(leaving)} ORRY · ${readyNow ? "withdrawable" : `withdrawable in ${span(leavingAt - now)}`}` : "None"}</Row>
             {locked ? <Row label="Lock">Locked until {utc(lockEnd)}</Row> : null}
           </dl>
         </>
@@ -136,7 +136,7 @@ export function AgentPositionRow({
       <div className="rc-agent-actions">
         {active > 0n ? (
           <div className="rc-inline">
-            <input aria-label={`ORRY to unstake from agent ${agentId}`} inputMode="decimal" placeholder="Amount" value={amountIn} onChange={(e) => setAmountIn(e.target.value.replace(/[^\d.]/g, ""))} />
+            <input aria-label={`Amount to unstake from agent ${agentId}`} inputMode="decimal" placeholder="Amount" value={amountIn} onChange={(e) => setAmountIn(e.target.value.replace(/[^\d.]/g, ""))} />
             <button type="button" className="rc-max" onClick={() => setAmountIn(toInput(active))}>All</button>
             <button className="secondary" type="button" disabled={!ready || busy || locked || !amount || amount > active} onClick={() => void unstake()} title={locked ? `Locked until ${utc(lockEnd)}` : undefined}>
               Request unstake
@@ -175,8 +175,8 @@ export function AgentStakePanel({ agentId, exitOnly = false }: { agentId: bigint
       <dl className="rc-rows">
         <Row label="Agent">#{agentId.toString()}</Row>
         <Row label="Active">{pos ? `${orry(pos.active)} ORRY` : "…"}</Row>
-        <Row label="Leaving">{pos ? (pos.leaving > 0n ? `${orry(pos.leaving)} ORRY, ${Number(pos.leavingAt) <= now ? "ready now" : `ready in ${span(Number(pos.leavingAt) - now)}`}` : "None") : "…"}</Row>
-        <Row label="Staker">{pos ? (staker ? <span className="mono">{mask(staker)}{mine ? " (you)" : ""}</span> : "No stake yet") : "…"}</Row>
+        <Row label="Unstaking">{pos ? (pos.leaving > 0n ? `${orry(pos.leaving)} ORRY · ${Number(pos.leavingAt) <= now ? "withdrawable" : `withdrawable in ${span(Number(pos.leavingAt) - now)}`}` : "None") : "…"}</Row>
+        <Row label="Staker">{pos ? (staker ? <span className="mono">{mask(staker)}{mine ? " (you)" : ""}</span> : "None so far") : "…"}</Row>
         {pos && Number(pos.lockedUntil) > now ? <Row label="Lock">Locked until {utc(Number(pos.lockedUntil))}</Row> : null}
       </dl>
       {exitOnly || (staker && !mine) ? null : <StakeForAgentForm run={tx.run} busy={Boolean(tx.busy)} fixedAgentId={agentId} />}

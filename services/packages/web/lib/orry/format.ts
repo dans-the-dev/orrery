@@ -66,9 +66,9 @@ export function period(seconds: number): string {
 
 /** How often something may run: "once an hour", "once a day", "once every 6 hours". */
 export function every(seconds: number): string {
-  if (seconds === 3600) return "once an hour";
-  if (seconds === 86400) return "once a day";
-  return `once every ${period(seconds)}`;
+  if (seconds === 3600) return "at most once per hour";
+  if (seconds === 86400) return "at most once per day";
+  return `at most once per ${period(seconds)}`;
 }
 
 export function ago(unixSeconds: number, now: number): string {

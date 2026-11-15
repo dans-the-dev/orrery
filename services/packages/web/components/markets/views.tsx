@@ -25,7 +25,7 @@ function useMarketList() {
 }
 
 function Waiting({ empty }: { empty: boolean }) {
-  return <p className="rc-muted mk-wait">{empty ? "Stock markets are listed here as each one opens." : "Stock markets appear here in a moment."}</p>;
+  return <p className="rc-muted mk-wait">{empty ? "Each stock market is plotted here the day it opens." : "Stock markets come into view in a moment."}</p>;
 }
 
 const priceOf = (m: Market) => (m.price ? pricePerToken(feedToPrice(m.price.answer, m.price.decimals, m.decimals), m.decimals) : undefined);
@@ -36,8 +36,8 @@ export function SwapView() {
   return (
     <>
       <OrryHead
-        title="Swap stock tokens with your order sealed."
-        lead={<p>Your amount stays hidden on chain until the batch closes. This page reveals the order for you, and it settles at the batch&apos;s Chainlink price straight from and to your wallet.</p>}
+        title="Trade stock tokens without showing your hand."
+        lead={<p>Until the batch closes, the chain holds only a hash of your order. This page reveals it for you, and the trade settles wallet to wallet at the batch&apos;s Chainlink price.</p>}
         reading={m ? <div className="rc-card"><p className="rc-card-title">{m.name}<span>{m.symbol}</span></p><MarketClock m={m} skew={skew} /></div> : undefined}
       />
       {!m ? (
@@ -47,19 +47,19 @@ export function SwapView() {
           <div className="rc-grid">
             <OrderDesk mode={1} markets={markets} symbol={m.symbol} onSymbol={pick} skew={skew} />
             <aside className="rc-side">
-              <h2>How a swap settles</h2>
+              <h2>The course of one swap</h2>
               <ol className="mk-steps">
                 <li>
                   <strong>Seal</strong>
-                  <span>Only a hash of your order goes on chain. The amount and the side stay with you.</span>
+                  <span>The chain records a hash. Your amount and side are known only to you.</span>
                 </li>
                 <li>
                   <strong>Reveal</strong>
-                  <span>When the sealing window closes, this page reveals the order from your wallet.</span>
+                  <span>As soon as sealing ends, this page asks your wallet to reveal the order.</span>
                 </li>
                 <li>
                   <strong>Clear</strong>
-                  <span>Matched orders settle at one Chainlink price. In a market with a Uniswap pool, the unmatched part fills there within a set distance of that price; anything left returns to your wallet in the same transaction.</span>
+                  <span>Orders that cross settle at a single Chainlink price. Where the market has a Uniswap pool, the unmatched part trades there, held close to that price. Whatever remains comes back to your wallet in the same transaction.</span>
                 </li>
               </ol>
               <MarketFacts m={m} />
@@ -78,8 +78,8 @@ export function DarkPoolView() {
   return (
     <>
       <OrryHead
-        title="Large orders, crossed at one price."
-        lead={<p>Limit orders here meet other orders only, at the Chainlink price when the batch clears, so size moves no price. Every order is sealed until its batch closes, then published in the book below.</p>}
+        title="Size that leaves the price where it was."
+        lead={<p>Here a limit order crosses only with other orders, at the Chainlink price on record when the batch clears, so a large ticket leaves no mark on the price. Each order stays sealed through its batch and goes on record in the book below afterwards.</p>}
         reading={m ? <div className="rc-card"><p className="rc-card-title">{m.name}<span>{m.symbol}</span></p><MarketClock m={m} skew={skew} /></div> : undefined}
       />
       {!m ? (
@@ -116,21 +116,21 @@ export function StocksView() {
   return (
     <>
       <OrryHead
-        title="Stock tokens on Robinhood Chain."
-        lead={<p>Each one trades against USDG in sealed batches, at its Chainlink price. Prices below come from the same feeds the markets clear at.</p>}
+        title="Every listed stock token, on one chart."
+        lead={<p>Robinhood Chain stock tokens, each traded for USDG in sealed batches at its Chainlink price. The figures below read the very feeds those batches clear at.</p>}
         reading={
           <div className="rc-card">
-            <p className="rc-card-title">Your stock tokens</p>
+            <p className="rc-card-title">Held in this wallet</p>
             {address ? (
               <>
                 <p className="rc-big">
                   <Fig v={total !== undefined ? usdg(total) : undefined} unit="USDG" />
                 </p>
-                <p className="rc-muted">{held ? (owned === 0 ? "None in this wallet yet." : owned === 1 ? "One stock token in this wallet, at today's prices." : `${owned} stock tokens in this wallet, at today's prices.`) : "…"}</p>
+                <p className="rc-muted">{held ? (owned === 0 ? "No stock tokens here so far." : owned === 1 ? "Valued at today's price, across 1 stock token." : `Valued at today's prices, across ${owned} stock tokens.`) : "…"}</p>
               </>
             ) : (
               <div className="rc-connect">
-                <p>Connect a wallet to see your holdings.</p>
+                <p>Connect a wallet to read its holdings.</p>
                 <WalletButton />
               </div>
             )}
@@ -170,7 +170,7 @@ export function StocksView() {
                         </span>
                       </Link>
                     </td>
-                    <td data-label="Price" className="num mono">{p !== undefined ? `${usd(p)} USDG` : "Updating"}{m.fresh ? null : <small className="mk-sub">Next US session</small>}</td>
+                    <td data-label="Price" className="num mono">{p !== undefined ? `${usd(p)} USDG` : "Updating"}{m.fresh ? null : <small className="mk-sub">Moves next US session</small>}</td>
                     <td data-label="Updated">{m.price?.updatedAt ? ago(m.price.updatedAt, rt.now) : ""}</td>
                     <td data-label="You hold" className="num mono">{address ? (h === undefined ? "…" : `${amount(h, { decimals: m.decimals })} ${m.symbol}`) : ""}</td>
                     <td data-label="Value" className="num mono">{address && v !== undefined ? `${usdg(v)} USDG` : ""}</td>
@@ -207,7 +207,7 @@ export function AssetView({ symbol }: { symbol: string }) {
           <Waiting empty={false} />
         ) : (
           <p className="rc-muted mk-wait">
-            {empty ? "Stock markets are listed here as each one opens." : `${symbol.toUpperCase()} is not listed.`} <Link href="/stocks">All stocks</Link>
+            {empty ? "Each stock market is plotted here the day it opens." : `There is no ${symbol.toUpperCase()} market here.`} <Link href="/stocks">All stocks</Link>
           </p>
         )}
       </>
@@ -219,7 +219,7 @@ export function AssetView({ symbol }: { symbol: string }) {
       <OrryHead
         kicker={m.symbol}
         title={m.name}
-        lead={<p>Buy or sell {m.symbol} for USDG in the next batch. The order stays sealed until the batch closes and settles at the Chainlink price.</p>}
+        lead={<p>Trade {m.symbol} for USDG in the coming batch. Your order is sealed for the whole batch, then settles at the Chainlink price.</p>}
         reading={
           <div className="rc-card">
             <p className="rc-card-title">
@@ -248,7 +248,7 @@ export function AssetView({ symbol }: { symbol: string }) {
           <MarketClock m={m} skew={skew} />
           <MarketFacts m={m} />
           <p className="mk-more">
-            Placing a large order? <Link href={`/dark-pool?stock=${m.symbol}`}>Set a limit in the Dark Pool</Link>
+            Trading in size? <Link href={`/dark-pool?stock=${m.symbol}`}>Name your limit in the Dark Pool</Link>
           </p>
         </aside>
       </div>

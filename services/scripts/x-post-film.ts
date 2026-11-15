@@ -1,5 +1,5 @@
 /**
- * Posts a film with its caption on X as @OrreryHQ (owner approval per post). Reads the X block of a captions file.
+ * Posts a film with its caption on X as the Orrery X account (owner approval per post). Reads the X block of a captions file.
  *   tsx scripts/x-post-film.ts <video.mp4> <captions.md> [--dry-run]
  * Credentials: ~/.secrets/orrery/x-api.json (OAuth 1.0a, read and write), never printed.
  */
@@ -21,4 +21,4 @@ if (!c) throw new Error("~/.secrets/orrery/x-api.json is missing or incomplete."
 const x = xMedia(c);
 const media = await x.uploadVideo(bytes, (s) => console.log(s));
 const id = await x.post(text, [media]);
-console.log(`posted https://x.com/OrreryHQ/status/${id}`);
+console.log(`posted https://x.com/i/status/${id}`);

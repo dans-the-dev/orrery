@@ -1,5 +1,10 @@
 # Mainnet 4663: deployment runbook and pre-launch evidence
 
+> **Orrery note (2026-11-15):** this document records Runcore's own run, from the codebase Orrery was copied from,
+> with the names switched to Orrery's by the rename pass. Orrery itself has no deployment, keys, X or Discord account
+> yet; addresses, ids and dates below are Runcore's and serve only as a worked example of the procedure.
+
+
 Internal engineering document. Status on 2026-11-07: the code path to mainnet is rehearsed; the live deployment waits
 for the owner's inputs and the owner's CONFIRM.
 

@@ -81,7 +81,7 @@ export function discordLink(guildId: string, channelId: string, messageId: strin
 
 const quote = (s: string, max = 900) => (s.length > max ? s.slice(0, max) + " …" : s).split("\n").map((l) => `> ${l}`).join("\n");
 
-const LABEL: Record<string, string> = { faq: "Answer from the docs", greeting: "Greeting", needs_owner: "Needs you", not_for_us: "No reply needed" };
+const LABEL: Record<string, string> = { faq: "Docs answer", greeting: "Greeting", needs_owner: "Your call", not_for_us: "Leave unanswered" };
 
 /** The queue post an approver sees. */
 export function queuePost(i: Pick<SupportItem, "source" | "author" | "text" | "link" | "category" | "reason" | "draft" | "status">, where: string, note?: string): string {
@@ -91,10 +91,10 @@ export function queuePost(i: Pick<SupportItem, "source" | "author" | "text" | "l
     head,
     quote(i.text),
     `**${LABEL[i.category] ?? i.category}**${i.reason ? `: ${i.reason}` : ""}`,
-    i.draft ? "Draft:\n" + quote(i.draft, 2000) : "No draft yet.",
+    i.draft ? "Draft:\n" + quote(i.draft, 2000) : "Draft still empty.",
   ];
   if (i.status === "pending") {
-    lines.push(problems.length ? `Fix before sending: ${problems.join("; ")}. Reply to this post with the text to send.` : `React ${SEND} to send, ${SKIP} to skip, or reply to this post with the text to send instead.`);
+    lines.push(problems.length ? `Edit needed first: ${problems.join("; ")}. Answer this post with the text that should go out.` : `${SEND} sends it, ${SKIP} skips it, or answer this post with replacement text.`);
   }
   if (note) lines.push(note);
   return lines.join("\n").slice(0, 2000);
@@ -155,7 +155,7 @@ async function enqueue(c: SupportContext, item: Omit<SupportItem, "id" | "status
     const [claimed] = await c.sql<SupportItem[]>`update support_items set status = 'sending', decided_by = 'auto', decided_at = now() where id = ${row.id} and status = 'pending' returning *`;
     if (!claimed) return;
     const done = await sendItem(c, claimed);
-    const note = done.status === "sent" ? `Sent automatically: <${done.sent_ref}>. React ${SKIP} to delete it.` : `Automatic send failed: ${done.error ?? "unknown error"}`;
+    const note = done.status === "sent" ? `Auto-sent: <${done.sent_ref}>. ${SKIP} removes it.` : `Auto-send did not go through: ${done.error ?? "unknown error"}`;
     const msg = (await c.api.raw("POST", `/channels/${c.queueChannelId}/messages`, { content: queuePost(done, m.where, note), allowed_mentions: { parse: [] } })) as { id: string };
     await c.sql`update support_items set queue_message_id = ${msg.id} where id = ${row.id}`;
     if (done.status === "sent") await react(msg.id, [SKIP]);
@@ -165,7 +165,7 @@ async function enqueue(c: SupportContext, item: Omit<SupportItem, "id" | "status
 
   const ping = d.category === "needs_owner" && c.pingRoleId ? await pingDue(c.sql) : false;
   const head = ping ? `<@&${c.pingRoleId}> ` : "";
-  const note = c.auto.categories.has(row.category) ? `Waiting for you: ${why}.` : undefined;
+  const note = c.auto.categories.has(row.category) ? `Held for you: ${why}.` : undefined;
   const msg = (await c.api.raw("POST", `/channels/${c.queueChannelId}/messages`, {
     content: (head + queuePost(row, m.where, note)).slice(0, 2000),
     allowed_mentions: ping ? { parse: [], roles: [c.pingRoleId] } : { parse: [] },
@@ -177,13 +177,13 @@ async function enqueue(c: SupportContext, item: Omit<SupportItem, "id" | "status
 
 /** Why an item may not be sent automatically, or null when it may. */
 async function autoBlock(c: SupportContext, row: SupportItem): Promise<string | null> {
-  if (!c.auto.categories.has(row.category)) return "needs approval";
-  if (draftProblems(row.draft, row.source).length) return "the draft needs an edit";
+  if (!c.auto.categories.has(row.category)) return "approval required";
+  if (draftProblems(row.draft, row.source).length) return "the draft has to be edited";
   if (row.source === "x" && !c.x) return "X is not configured";
   const [day] = await c.sql<{ n: number }[]>`select count(*)::int as n from support_items where decided_by = 'auto' and decided_at > now() - interval '1 day'`;
-  if (day!.n >= c.auto.maxPerDay) return `the daily limit of ${c.auto.maxPerDay} automatic replies is reached`;
+  if (day!.n >= c.auto.maxPerDay) return `today's ${c.auto.maxPerDay} automatic replies are used`;
   const [hour] = await c.sql<{ n: number }[]>`select count(*)::int as n from support_items where decided_by = 'auto' and author = ${row.author} and source = ${row.source} and decided_at > now() - interval '1 hour'`;
-  if (hour!.n >= c.auto.maxPerAuthorHour) return `${row.author} already got ${c.auto.maxPerAuthorHour} automatic replies this hour`;
+  if (hour!.n >= c.auto.maxPerAuthorHour) return `${row.author} has had ${c.auto.maxPerAuthorHour} automatic replies within the hour`;
   return null;
 }
 
@@ -213,7 +213,7 @@ export async function sendItem(c: SupportContext, row: SupportItem): Promise<Sup
     } else {
       if (!c.x) throw new Error("X is not configured");
       sentId = await c.x.reply(row.draft, row.source_id);
-      ref = `https://x.com/OrreryHQ/status/${sentId}`;
+      ref = `https://x.com/i/status/${sentId}`;
     }
     const [done] = await c.sql<SupportItem[]>`update support_items set status = 'sent', sent_id = ${sentId}, sent_ref = ${ref} where id = ${row.id} returning *`;
     c.log({ support: "sent", id: row.id, source: row.source, by: row.decided_by });
@@ -290,7 +290,7 @@ export async function onReaction(c: SupportContext, r: GatewayReaction, channelN
 
   if (r.emoji.name === SKIP) {
     const [skipped] = await c.sql<SupportItem[]>`update support_items set status = 'skipped', decided_by = ${by}, decided_at = now() where queue_message_id = ${r.message_id} and status = 'pending' returning *`;
-    if (skipped) return void (await edit(skipped, `Skipped by ${by}.`));
+    if (skipped) return void (await edit(skipped, `${by} skipped this one.`));
     // Undo: claim the sent item, delete its reply, then record it.
     const [sent] = await c.sql<SupportItem[]>`update support_items set status = 'sending' where queue_message_id = ${r.message_id} and status = 'sent' returning *`;
     if (!sent) return;
@@ -299,11 +299,11 @@ export async function onReaction(c: SupportContext, r: GatewayReaction, channelN
       else if (c.x) await c.x.deleteTweet(sent.sent_id!);
       else throw new Error("X is not configured");
       const [gone] = await c.sql<SupportItem[]>`update support_items set status = 'deleted' where id = ${sent.id} returning *`;
-      await edit(gone!, `Reply deleted by ${by}.`);
+      await edit(gone!, `${by} removed the reply.`);
       c.log({ support: "deleted", id: sent.id, source: sent.source });
     } catch (e) {
       await c.sql`update support_items set status = 'sent' where id = ${sent.id}`;
-      await edit(sent, `Could not delete the reply: ${e instanceof Error ? e.message.split("\n")[0] : String(e)}`);
+      await edit(sent, `Reply removal did not go through: ${e instanceof Error ? e.message.split("\n")[0] : String(e)}`);
     }
     return;
   }
@@ -313,11 +313,11 @@ export async function onReaction(c: SupportContext, r: GatewayReaction, channelN
   const problems = draftProblems(row.draft, row.source);
   if (problems.length) {
     await c.sql`update support_items set status = 'pending', decided_by = null, decided_at = null where id = ${row.id}`;
-    await edit({ ...row, status: "pending" }, `Not sent: ${problems.join("; ")}.`);
+    await edit({ ...row, status: "pending" }, `Held back: ${problems.join("; ")}.`);
     return;
   }
   const done = await sendItem(c, row);
-  await edit(done, done.status === "sent" ? `Sent by ${by}: <${done.sent_ref}>. React ${SKIP} to delete it.` : `Sending failed: ${done.error ?? "unknown error"}`);
+  await edit(done, done.status === "sent" ? `${by} sent it: <${done.sent_ref}>. ${SKIP} removes it.` : `Send did not go through: ${done.error ?? "unknown error"}`);
 }
 
 /** One X pass: new mentions since the last one become queue items. The first pass only records where to start. */
@@ -363,7 +363,7 @@ export async function ensureQueueChannel(api: DiscordApi, guildId: string): Prom
     type: 0,
     parent_id: drafts.parent_id,
     permission_overwrites: drafts.permission_overwrites,
-    topic: `Drafted replies to Discord questions and X mentions. ${SEND} sends, ${SKIP} skips, a reply to a post replaces its draft.`,
+    topic: `Reply drafts for Discord questions and X mentions. ${SEND} sends one, ${SKIP} skips it, and answering a post swaps in your own text.`,
   })) as { id: string };
   return { queueId: created.id, teamCategoryId: drafts.parent_id };
 }

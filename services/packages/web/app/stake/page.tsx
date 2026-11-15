@@ -4,7 +4,7 @@ import { ComingSoon, OrryHead } from "@/components/orry/parts";
 import { StakeView } from "@/components/orry/StakeView";
 import { OrryShell } from "@/components/orry/shell";
 
-export const metadata = { title: "Orrery · Stake", description: "Stake ORRY and receive ETH and ORRY from Orrery's own revenue." };
+export const metadata = { title: "Orrery · Stake", description: "Stake ORRY to receive ETH and ORRY drawn from what Orrery itself earns." };
 
 export default function StakePage() {
   return (
@@ -13,8 +13,8 @@ export default function StakePage() {
         feature="stake"
         held={
         <>
-          <OrryHead title="Stake ORRY, share Orrery's revenue." lead={<p>Stakers receive ETH and ORRY from Orrery&apos;s own revenue.</p>} />
-          <ComingSoon title="Staking opens soon." text="New stakes and stake behind an agent appear on this page when staking opens." />
+          <OrryHead title="Stake ORRY, take part in what Orrery earns." lead={<p>Revenue Orrery earns comes back to stakers in ETH and ORRY.</p>} />
+          <ComingSoon title="Staking starts soon." text="New stakes, and stake placed behind an agent, show here once staking starts." />
           <StakeView exitOnly />
         </>
         }
@@ -22,11 +22,11 @@ export default function StakePage() {
         <StakeView />
       </FeatureGate>
       <PageGuide
-        audience={"ORRY holders who want a share of Orrery's revenue."}
+        audience={"ORRY holders who want part of what Orrery earns."}
         steps={[
-          { title: "Stake ORRY", text: "Your stake starts earning from the next reward that arrives." },
-          { title: "Receive rewards", text: "ETH and ORRY from pool fees and from ORRY bought with product revenue stream to every active stake over 7 days." },
-          { title: "Leave when you want", text: "Request unstake, then withdraw 7 days later. Stake behind an agent waits 14 days and shows in that agent's checks." },
+          { title: "Stake ORRY", text: "Earning begins with the next reward to arrive after you stake." },
+          { title: "Receive rewards", text: "Pool fees and ORRY bought with product revenue reach every active stake in ETH and ORRY, streamed over 7 days." },
+          { title: "Step out on your schedule", text: "Ask to unstake, then withdraw 7 days on. Stake placed behind an agent takes 14 days and appears in that agent's readings." },
         ]}
       />
     </OrryShell>

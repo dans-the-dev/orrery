@@ -1,5 +1,5 @@
 /**
- * Posts a plan on X as @OrreryHQ, one item after another (owner approval covers the plan).
+ * Posts a plan on X as the Orrery X account, one item after another (owner approval covers the plan).
  *   tsx scripts/x-send.ts <plan.json> [--dry-run]
  * plan.json: [{ "text": "...", "image"?: "file.png", "video"?: "file.mp4", "replyTo"?: "<post id>" | "prev" | "first",
  *              "quote"?: "<post id>", "waitSec"?: 240, "label"?: "..." }]
@@ -42,7 +42,7 @@ for (const [i, it] of plan.entries()) {
     const id = await x.post(it.text, media, { replyTo, quote: it.quote });
     ids[i] = id;
     appendFileSync(resultFile, JSON.stringify({ i, id, label: it.label, at: new Date().toISOString() }) + "\n");
-    console.log(`${i} posted https://x.com/OrreryHQ/status/${id} ${it.label ?? ""}`);
+    console.log(`${i} posted https://x.com/i/status/${id} ${it.label ?? ""}`);
   } catch (e) {
     const error = e instanceof Error ? e.message : String(e);
     appendFileSync(resultFile, JSON.stringify({ i, error, label: it.label, at: new Date().toISOString() }) + "\n");

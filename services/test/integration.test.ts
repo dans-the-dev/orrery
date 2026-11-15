@@ -246,7 +246,7 @@ describe("x402 credits", () => {
     const later = await verifyCheck(pub, attestor, res, { now: v.result.issuedAt + 1n });
     expect(later.ok).toBe(false);
     const wrongPayer = await verifyCheck(pub, attestor, res, { now: v.result.issuedAt, payer: merchant.account.address });
-    expect(wrongPayer.reason).toBe("check is about another address");
+    expect(wrongPayer.reason).toBe("check names a different address");
   });
 
   it("credits never go below zero under parallel requests", async () => {
@@ -277,7 +277,7 @@ describe("x402 credits", () => {
     const post = (path: string, body: unknown, auth?: string) =>
       fetch(`${baseUrl}${path}`, { method: "POST", headers: { "content-type": "application/json", ...(auth ? { authorization: `Bearer ${auth}` } : {}) }, body: JSON.stringify(body) });
     const n = (await (await fetch(`${baseUrl}/v1/account/nonce?address=${who}`)).json()) as { nonce: string; message: string };
-    expect(n.message).toContain("does not spend credits");
+    expect(n.message).toContain("spends no credits");
     const signature = await merchant.signMessage({ account: merchant.account, message: n.message });
     // a sign-in signature cannot rotate the key
     expect((await post("/v1/keys/rotate", { address: who, nonce: n.nonce, signature })).status).toBe(401);
@@ -407,7 +407,7 @@ describe("check pricing (R-58)", () => {
     }
     const out = await check(keys.buyer);
     expect(out.status).toBe(402);
-    expect(((await out.json()) as { error: string }).error).toMatch(/No included checks or credits left/);
+    expect(((await out.json()) as { error: string }).error).toMatch(/Included checks and credits are used up/);
   });
 
   it("credits pay 2 a check, 1 past the monthly volume", async () => {

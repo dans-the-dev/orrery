@@ -40,8 +40,8 @@ function bearer(req: FastifyRequest): string | undefined {
 function paymentRequired(cfg: Config, url: string, error: string, product: Product = "pack"): PaymentRequired {
   const description =
     product === "plan"
-      ? `Orrery platform plan: ${cfg.pricing.planDays} days, ${cfg.pricing.planCredits} check credits`
-      : `Orrery check credits: ${cfg.packSize} credits`;
+      ? `Orrery plan · ${cfg.pricing.planDays} days · ${cfg.pricing.planCredits} check credits`
+      : `Orrery credit pack · ${cfg.packSize} check credits`;
   return {
     x402Version: X402_VERSION,
     error,
@@ -79,8 +79,8 @@ export function limiter(perMinute: number, maxEntries = 50_000, now: () => numbe
 }
 
 const CLIENT_ERRORS: Record<number, string> = {
-  413: "The request body is too large.",
-  415: "Send the body as JSON.",
+  413: "Request body exceeds the 64 KB limit.",
+  415: "Use Content-Type application/json for the body.",
 };
 
 export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
@@ -94,10 +94,10 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
   app.setErrorHandler((err, req, reply) => {
     const code = (err as { statusCode?: number }).statusCode;
     if (code && code >= 400 && code < 500) {
-      return reply.code(code).send({ error: CLIENT_ERRORS[code] ?? "The request could not be read. Check it and send it again." });
+      return reply.code(code).send({ error: CLIENT_ERRORS[code] ?? "Malformed request. Fix the fields and resend." });
     }
     console.error(`api ${req.method} ${req.routeOptions.url ?? "unknown route"}: ${logLine(err)}`);
-    return reply.code(500).send({ error: "Something went wrong on our side. Try again shortly." });
+    return reply.code(500).send({ error: "Unexpected server error. Please retry in a few seconds." });
   });
 
   // CORS for the web app: the x402 headers must be readable and sendable from the browser.
@@ -135,13 +135,13 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
     const url = `${cfg.publicUrl}/v1/credits${product === "plan" ? "?product=plan" : ""}`;
     const header = req.headers[HEADER_SIGNATURE.toLowerCase()];
     if (!header || Array.isArray(header)) {
-      return reply.code(402).header(HEADER_REQUIRED, encodeHeader(paymentRequired(cfg, url, `${HEADER_SIGNATURE} header is required`, product))).send({});
+      return reply.code(402).header(HEADER_REQUIRED, encodeHeader(paymentRequired(cfg, url, `Attach the ${HEADER_SIGNATURE} header to pay`, product))).send({});
     }
     let payload: PaymentPayload;
     try {
       payload = decodeHeader<PaymentPayload>(header);
     } catch {
-      return reply.code(400).send({ error: "The payment header could not be read. Send base64 JSON." });
+      return reply.code(400).send({ error: "Payment header is not valid base64 JSON." });
     }
     const out = await settlePayment(cfg, chain, sql, payload);
     if (!out.ok) {
@@ -156,7 +156,7 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
       reply.header(HEADER_RESPONSE, encodeHeader(settlement));
       if (status === 402) reply.header(HEADER_REQUIRED, encodeHeader(paymentRequired(cfg, url, out.reason, product)));
       return reply.code(status).send({
-        error: out.reason === "settlement_pending" ? "Payment is confirming. Send the same request again in a few seconds." : `Payment not accepted: ${out.reason}.`,
+        error: out.reason === "settlement_pending" ? "Payment awaiting confirmation. Repeat this exact request in a few seconds." : `Payment refused (${out.reason}).`,
       });
     }
     const key = await issueKeyIfNone(sql, out.payer);
@@ -173,7 +173,7 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
 
   app.get("/v1/credits", async (req, reply) => {
     const address = await addressForKey(sql, bearer(req));
-    if (!address) return reply.code(401).send({ error: "Send your API key as a Bearer token." });
+    if (!address) return reply.code(401).send({ error: "Missing API key. Use an Authorization: Bearer header." });
     const history = await sql`select g.nonce, g.credits, g.kind, g.created_at, p.tx_hash from credit_grants g
       left join payments p on p.payer = g.payer and p.nonce = g.nonce where g.payer = ${address.toLowerCase()} order by g.created_at desc limit 50`;
     const acct = await checkAccount(p, sql, address, new Date(), await extraFree(address));
@@ -196,9 +196,9 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
 
   app.post<{ Body: { address?: string; nonce?: string; signature?: string } }>("/v1/keys/rotate", async (req, reply) => {
     const { address, nonce, signature } = req.body ?? {};
-    if (!address || !isAddress(address) || !nonce || !signature) return reply.code(400).send({ error: "Send address, nonce and signature." });
+    if (!address || !isAddress(address) || !nonce || !signature) return reply.code(400).send({ error: "Required fields: address, nonce, signature." });
     const key = await rotateKey(cfg, chain, sql, getAddress(address), nonce, signature as Hex);
-    if (!key) return reply.code(401).send({ error: "The signed message did not verify. Request a new nonce and sign it again." });
+    if (!key) return reply.code(401).send({ error: "Signature check failed. Fetch a fresh nonce and sign that one." });
     return { apiKey: key };
   });
 
@@ -206,18 +206,18 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
   // One signed message opens a 24 hour read session for the dashboard: credits, purchases, usage, key status. A session
   // never spends a check, issues a key or moves funds; the API key stays the only way to call a check.
   app.get<{ Querystring: { address?: string } }>("/v1/account/nonce", async (req, reply) => {
-    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
     const a = req.query.address;
     if (!a || !isAddress(a)) return reply.code(400).send({ error: "Pass ?address=0x..." });
     return newSessionNonce(cfg, sql, getAddress(a));
   });
 
   app.post<{ Body: { address?: string; nonce?: string; signature?: string } }>("/v1/account/session", async (req, reply) => {
-    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
     const { address, nonce, signature } = req.body ?? {};
-    if (!address || !isAddress(address) || !nonce || !signature) return reply.code(400).send({ error: "Send address, nonce and signature." });
+    if (!address || !isAddress(address) || !nonce || !signature) return reply.code(400).send({ error: "Required fields: address, nonce, signature." });
     const s = await openSession(cfg, chain, sql, getAddress(address), nonce, signature as Hex);
-    if (!s) return reply.code(401).send({ error: "The signed message did not verify. Request a new nonce and sign it again." });
+    if (!s) return reply.code(401).send({ error: "Signature check failed. Fetch a fresh nonce and sign that one." });
     return { token: s.token, expiresAt: s.expiresAt.toISOString() };
   });
 
@@ -229,7 +229,7 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
 
   app.get("/v1/account", async (req, reply) => {
     const address = await addressForReader(sql, bearer(req));
-    if (!address) return reply.code(401).send({ error: "Sign in with your wallet to see your credits." });
+    if (!address) return reply.code(401).send({ error: "Connect and sign in with your wallet to view credits." });
     const a = address.toLowerCase();
     const acct = await checkAccount(p, sql, address, new Date(), await extraFree(address));
     const [key] = await sql<{ created_at: Date }[]>`select created_at from api_keys where address = ${a} and active`;
@@ -270,22 +270,22 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
   const noCredits = (reply: FastifyReply) =>
     reply
       .code(402)
-      .header(HEADER_REQUIRED, encodeHeader(paymentRequired(cfg, `${cfg.publicUrl}/v1/credits`, "No credits left")))
-      .send({ error: "No included checks or credits left. Buy credits at POST /v1/credits." });
+      .header(HEADER_REQUIRED, encodeHeader(paymentRequired(cfg, `${cfg.publicUrl}/v1/credits`, "Credits used up")))
+      .send({ error: "Included checks and credits are used up. POST /v1/credits buys more." });
 
   async function paidCheck(req: FastifyRequest, reply: FastifyReply, by: { signer: Address } | { agentId: bigint; account: Address }) {
     const address = await addressForKey(sql, bearer(req));
-    if (!address) return reply.code(401).send({ error: "Send your API key as a Bearer token." });
+    if (!address) return reply.code(401).send({ error: "Missing API key. Use an Authorization: Bearer header." });
     const acct = await checkAccount(p, sql, address, new Date(), await extraFree(address));
     if (!(acct.planActive ? allowPlanChecks : allowChecks)(address.toLowerCase())) {
-      return reply.code(429).send({ error: "Too many checks this minute for this key. Try again shortly." });
+      return reply.code(429).send({ error: "This key reached its per minute check limit. Retry next minute." });
     }
     if (!canCheck(acct)) return noCredits(reply);
     let signed;
     try {
       signed = await buildCheck(cfg, chain, sql, by);
     } catch {
-      return reply.code(503).send({ error: "The check could not be built right now. No credit was used. Try again shortly." });
+      return reply.code(503).send({ error: "Reading not produced, and no credit was charged. Retry in a few seconds." });
     }
     const spent = await spendCheck(p, sql, address, new Date(), await extraFree(address));
     if (!spent.ok) return noCredits(reply);
@@ -294,13 +294,13 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
   }
 
   app.get<{ Params: { address: string } }>("/v1/check/by-signer/:address", async (req, reply) => {
-    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
     return paidCheck(req, reply, { signer: getAddress(req.params.address) });
   });
 
   app.get<{ Params: { agentId: string }; Querystring: { account?: string } }>("/v1/check/by-agent/:agentId", async (req, reply) => {
     const acc = req.query.account;
-    if (!/^\d+$/.test(req.params.agentId) || !acc || !isAddress(acc)) return reply.code(400).send({ error: "Pass an agentId and ?account=0x..." });
+    if (!/^\d+$/.test(req.params.agentId) || !acc || !isAddress(acc)) return reply.code(400).send({ error: "Expected a numeric agentId plus ?account=0x..." });
     return paidCheck(req, reply, { agentId: BigInt(req.params.agentId), account: getAddress(acc) });
   });
 
@@ -310,20 +310,20 @@ export function buildApi(cfg: Config, chain: Chain, sql: Sql): FastifyInstance {
       return toJson(await readLens(cfg, chain, by));
     } catch (err) {
       console.error(`api public read: ${logLine(err)}`);
-      return reply.code(503).send({ error: "The chain read did not finish. Try again shortly." });
+      return reply.code(503).send({ error: "Chain read failed. Retry in a few seconds." });
     }
   }
 
   app.get<{ Params: { address: string } }>("/v1/signers/:address", async (req, reply) => {
-    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
-    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
+    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
     return publicRead(reply, { signer: getAddress(req.params.address) });
   });
 
   app.get<{ Params: { agentId: string }; Querystring: { account?: string } }>("/v1/agents/:agentId", async (req, reply) => {
-    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
     const acc = req.query.account;
-    if (!/^\d+$/.test(req.params.agentId) || !acc || !isAddress(acc)) return reply.code(400).send({ error: "Pass an agentId and ?account=0x..." });
+    if (!/^\d+$/.test(req.params.agentId) || !acc || !isAddress(acc)) return reply.code(400).send({ error: "Expected a numeric agentId plus ?account=0x..." });
     return publicRead(reply, { agentId: BigInt(req.params.agentId), account: getAddress(acc) });
   });
 

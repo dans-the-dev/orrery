@@ -40,14 +40,14 @@
 .rc-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 28px; align-items: start; }
 .rc-desk { background: #fff; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); padding: 8px 28px 28px; }
 .rc-desk-body { display: flex; flex-direction: column; gap: 16px; padding-top: 22px; }
-.rc-desk-note { color: #2a3350; font-size: 0.95rem; line-height: 1.55; }
+.rc-desk-note { color: #2b2f52; font-size: 0.95rem; line-height: 1.55; }
 .rc-go { width: 100%; }
 .rc-side { padding: 18px 4px 0; }
 .rc-side h2, .rc-panel h2 { font-size: clamp(1.5rem, 2.2vw, 1.9rem); }
 .rc-side > .rc-rows { margin-top: 16px; }
 .rc-muted { color: var(--muted); font-size: 0.95rem; margin-top: 12px; }
 .rc-explain { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--hairline); }
-.rc-explain p { color: #2a3350; font-size: 0.95rem; line-height: 1.6; }
+.rc-explain p { color: #2b2f52; font-size: 0.95rem; line-height: 1.6; }
 .rc-explain .lp-link { margin-top: 14px; }
 .rc-connect { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 18px; padding: 14px 16px; border-radius: 14px; background: var(--paper); }
 .rc-connect p { font-size: 0.92rem; }
@@ -68,12 +68,12 @@
 .rc-asset-line { display: block; }
 
 /* Claim strip: the figure that a claim button pays */
-.rc-claim { display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 18px; padding: 18px 20px; border-radius: 16px; background: var(--ground-dark); color: #eef1fb; }
+.rc-claim { display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 18px; padding: 18px 20px; border-radius: 16px; background: var(--ground-dark); color: #ecebf7; }
 .rc-claim-label { font-size: 0.82rem; color: #b9c3e3; font-weight: 600; }
 .rc-claim-value { display: flex; flex-wrap: wrap; gap: 2px 18px; margin-top: 4px; }
 .rc-claim-value .rc-fig { font-family: var(--mono); font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
-.rc-claim-value .rc-fig em { color: #9aa5c4; }
-.rc-claim .primary:disabled { background: #2a3760; border-color: #2a3760; color: #8f9bc0; opacity: 1; }
+.rc-claim-value .rc-fig em { color: #a7a3c4; }
+.rc-claim .primary:disabled { background: #2e3366; border-color: #2e3366; color: #9e99c2; opacity: 1; }
 
 /* Text tabs inside a surface */
 .rc-seg { display: flex; flex-wrap: wrap; gap: 4px 22px; border-bottom: 1px solid #e3e8ee; }
@@ -84,30 +84,30 @@
 .rc-desk-body .rc-seg button { min-height: 40px; font-size: 0.88rem; }
 
 /* Amount input */
-.rc-amount label { display: block; font-size: 0.82rem; font-weight: 600; color: #2a3350; margin-bottom: 6px; }
+.rc-amount label { display: block; font-size: 0.82rem; font-weight: 600; color: #2b2f52; margin-bottom: 6px; }
 .rc-amount-box { display: flex; align-items: center; gap: 10px; height: 58px; padding: 0 14px 0 16px; border: 1px solid var(--hairline); border-radius: 14px; background: var(--paper); transition: border-color var(--motion-fast), background var(--motion-fast); }
 .rc-amount-box:focus-within { border-color: var(--brand); background: #fff; outline: 2px solid color-mix(in srgb, var(--brand) 22%, transparent); }
 .rc-amount-box input { flex: 1; min-width: 0; border: 0; background: transparent; font-family: var(--mono); font-size: 1.25rem; font-weight: 700; color: var(--ink); outline: none; font-variant-numeric: tabular-nums; }
 .rc-unit { font-weight: 700; font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
 .rc-amount-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 26px; margin-top: 4px; font-size: 0.8rem; color: var(--muted); }
 .rc-quick { justify-content: flex-start; }
-.rc-max { min-height: 32px; padding: 4px 10px; border: 1px solid #dfe4ec; border-radius: 8px; background: #fff; color: var(--ink); font-family: var(--mono); font-size: 0.75rem; font-weight: 700; }
+.rc-max { min-height: 32px; padding: 4px 10px; border: 1px solid #d8d4ea; border-radius: 8px; background: #fff; color: var(--ink); font-family: var(--mono); font-size: 0.75rem; font-weight: 700; }
 .rc-max:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
 .rc-max:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .rc-slip { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted); font-weight: 600; }
 .rc-slip span { margin-right: 4px; }
-.rc-slip button { min-height: 32px; padding: 4px 10px; border: 1px solid #dfe4ec; border-radius: 8px; background: #fff; font-family: var(--mono); font-size: 0.76rem; font-weight: 700; color: var(--ink); }
+.rc-slip button { min-height: 32px; padding: 4px 10px; border: 1px solid #d8d4ea; border-radius: 8px; background: #fff; font-family: var(--mono); font-size: 0.76rem; font-weight: 700; color: var(--ink); }
 .rc-slip button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
 
-.rc-notice { margin-top: 14px; padding: 11px 14px; border-radius: 12px; background: var(--paper); font-size: 0.88rem; line-height: 1.45; color: #2a3350; }
+.rc-notice { margin-top: 14px; padding: 11px 14px; border-radius: 12px; background: var(--paper); font-size: 0.88rem; line-height: 1.45; color: #2b2f52; }
 .rc-notice.ok { background: #e8f4ee; color: var(--success); }
 .rc-notice.error { background: #fdf0f1; color: var(--danger); }
 
 /* Panels below the fold */
 .rc-panel { margin-top: 36px; background: #fff; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); padding: 26px 30px 28px; }
 .rc-panel-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
-.rc-panel-head p { color: #2a3350; font-size: 0.97rem; max-width: 70ch; }
+.rc-panel-head p { color: #2b2f52; font-size: 0.97rem; max-width: 70ch; }
 .rc-split { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: end; }
 .rc-split-act { display: flex; flex-direction: column; align-items: flex-end; }
 .rc-split-act .secondary { min-width: 160px; }
@@ -119,7 +119,7 @@
 .rc-claims li:first-child { border-top: 0; }
 .rc-claims li > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .rc-claims strong { font-family: var(--display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.015em; }
-.rc-claims span { font-family: var(--mono); font-size: 0.86rem; color: #2a3350; overflow-wrap: anywhere; }
+.rc-claims span { font-family: var(--mono); font-size: 0.86rem; color: #2b2f52; overflow-wrap: anywhere; }
 .rc-claims .secondary { min-width: 150px; flex: none; }
 
 /* Agent stakes */
@@ -140,7 +140,7 @@
 /* Burn sources: share of all burned ORRY per source */
 .rc-sources { list-style: none; margin: 10px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .rc-source-label { display: flex; justify-content: space-between; gap: 12px; font-size: 0.86rem; }
-.rc-source-label span { color: #2a3350; }
+.rc-source-label span { color: #2b2f52; }
 .rc-source-label strong { font-family: var(--mono); font-size: 0.82rem; white-space: nowrap; }
 .rc-bar { display: block; height: 8px; margin-top: 6px; border-radius: 6px; background: #e6eaf0; overflow: hidden; }
 .rc-bar i { display: block; height: 100%; border-radius: 6px; background: var(--brand); transition: width var(--motion-base) var(--ease-out); }
@@ -168,7 +168,7 @@
 .rc-soon + .rc-soon, .stack .rc-soon, .app-main .stack + .rc-soon { margin-top: 28px; }
 .rc-soon-mark { display: inline-block; font-weight: 700; font-size: 0.82rem; color: var(--brand); }
 .rc-soon h2 { margin-top: 8px; font-size: clamp(1.4rem, 2.2vw, 1.85rem); max-width: 30ch; }
-.rc-soon p:last-child { margin-top: 8px; color: #2a3350; }
+.rc-soon p:last-child { margin-top: 8px; color: #2b2f52; }
 
 /* Checkout on the credits page */
 .rc-checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 22px; }

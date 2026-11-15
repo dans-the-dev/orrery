@@ -54,7 +54,7 @@ if (mode === "plain") {
   const b0 = await bal();
   await page.goto(base + "/operator", { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(2500);
-  await page.getByPlaceholder("0x… your Safe").fill(account);
+  await page.getByPlaceholder("0x… Safe address").fill(account);
   await page.getByPlaceholder("1", { exact: true }).fill(agentId);
   const panel = page.locator('section[aria-label="Agent stake"]');
   await panel.waitFor({ timeout: 40000 });

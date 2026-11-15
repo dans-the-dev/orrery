@@ -27,7 +27,7 @@ export function StakeReading() {
         {data?.updatedAt ? <span>{ago(data.updatedAt, now)}</span> : null}
       </p>
       {isError && !data ? (
-        <p className="rc-card-wait">Stake figures appear here in a moment.</p>
+        <p className="rc-card-wait">Stake readings load in a moment.</p>
       ) : (
         <>
           <p className="rc-big">
@@ -35,8 +35,8 @@ export function StakeReading() {
           </p>
           <dl className="rc-rows">
             <Row label="Stakers">{data ? data.stakers.toLocaleString("en-US") : "…"}</Row>
-            <Row label="Rewards, last 7 days">{data ? `${eth(data.rewards7d.eth)} ETH + ${orry(data.rewards7d.orry)} ORRY` : "…"}</Row>
-            <Row label="Rewards, all time">{data ? `${eth(data.rewardsAllTime.eth)} ETH + ${orry(data.rewardsAllTime.orry)} ORRY` : "…"}</Row>
+            <Row label="Rewards · 7 days">{data ? `${eth(data.rewards7d.eth)} ETH + ${orry(data.rewards7d.orry)} ORRY` : "…"}</Row>
+            <Row label="Rewards · since launch">{data ? `${eth(data.rewardsAllTime.eth)} ETH + ${orry(data.rewardsAllTime.orry)} ORRY` : "…"}</Row>
           </dl>
         </>
       )}
@@ -71,10 +71,10 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
     if (!address || !a) return;
     await tx.run("Stake", async ({ send, step, ensureAllowance }) => {
       await ensureAllowance(address, STAKING, a, step);
-      step("Confirm the stake in your wallet.");
+      step("Sign the stake in your wallet.");
       await send({ address: STAKING, abi: stakingAbi, functionName: "stake", args: [a] });
       setStakeIn("");
-      return `Staked ${orry(a)} ORRY. It earns from the next reward stream.`;
+      return `Stake on record · ${orry(a)} ORRY. Rewards reach it from the next stream on.`;
     });
   }
   async function requestUnstake() {
@@ -83,19 +83,19 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
     await tx.run("Request unstake", async ({ send }) => {
       await send({ address: STAKING, abi: stakingAbi, functionName: "requestUnstake", args: [a] });
       setUnstakeIn("");
-      return `Unstake requested for ${orry(a)} ORRY.${consts.plainCooldown ? ` It is ready to withdraw in ${period(consts.plainCooldown)}.` : ""}`;
+      return `Unstake request on record · ${orry(a)} ORRY.${consts.plainCooldown ? ` Withdrawal opens in ${period(consts.plainCooldown)}.` : ""}`;
     });
   }
   async function withdraw() {
     await tx.run("Withdraw", async ({ send }) => {
       await send({ address: STAKING, abi: stakingAbi, functionName: "withdraw" });
-      return "Withdrawn to your wallet.";
+      return "The ORRY went back to your wallet.";
     });
   }
   async function claimRewards() {
     await tx.run("Claim rewards", async ({ send }) => {
       await send({ address: STAKING, abi: stakingAbi, functionName: "claimRewards" });
-      return "Rewards claimed to your wallet.";
+      return "The rewards went to your wallet.";
     });
   }
 
@@ -104,15 +104,15 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
   const agentOpen = useReleases().isLive("agent-stake") && !exitOnly;
   const holds = (me.stakeActive ?? 0n) > 0n || leaving > 0n || hasRewards || agents.length > 0;
 
-  if (exitOnly && !connected) return <ExitConnect text="Connect a wallet to unstake, withdraw or claim rewards." />;
+  if (exitOnly && !connected) return <ExitConnect text="Connect the staking wallet to unstake, withdraw or collect rewards." />;
   if (exitOnly && !tx.notice && !agentTx.notice && (me.stakeActive === undefined || !holds)) return null;
 
   return (
     <>
       {exitOnly ? null : (
         <OrryHead
-          title={<>Stake ORRY, share Orrery&apos;s revenue.</>}
-          lead={<p>Stakers receive ETH and ORRY from the protocol fee of every ORRY pool and from Orrery&apos;s product revenue, streamed to every active stake.</p>}
+          title={<>Stake ORRY and take part in what Orrery earns.</>}
+          lead={<p>The protocol fee from each ORRY pool and the revenue from Orrery products flow to stakers in ETH and ORRY, streamed across all active stake.</p>}
           reading={<StakeReading />}
         />
       )}
@@ -131,7 +131,7 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
           />
           {mode === "stake" ? (
             <div className="rc-desk-body">
-              <AmountField id="stake-in" label="ORRY to stake" unit="ORRY" value={stakeIn} onChange={setStakeIn} max={me.orryBalance !== undefined ? orry(me.orryBalance) : undefined} onMax={() => me.orryBalance !== undefined && setStakeIn(toInput(me.orryBalance))} />
+              <AmountField id="stake-in" label="Amount to stake" unit="ORRY" value={stakeIn} onChange={setStakeIn} max={me.orryBalance !== undefined ? orry(me.orryBalance) : undefined} onMax={() => me.orryBalance !== undefined && setStakeIn(toInput(me.orryBalance))} />
               <button className="primary rc-go" type="button" disabled={!ready || busy || !parseAmount(stakeIn)} onClick={() => void stake()}>
                 {tx.busy === "Stake" ? "Staking…" : "Stake"}
               </button>
@@ -140,9 +140,9 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
           {mode === "unstake" ? (
             <div className="rc-desk-body">
               <p className="rc-desk-note">
-                Requested ORRY stops earning at once{consts.plainCooldown ? ` and is ready to withdraw ${period(consts.plainCooldown)} later` : ""}. A further request adds to it and starts the wait again.
+                ORRY in a request leaves the reward stream right away{consts.plainCooldown ? ` and becomes withdrawable ${period(consts.plainCooldown)} after` : ""}. Another request joins the pending amount and restarts the wait.
               </p>
-              <AmountField id="unstake-in" label="ORRY to unstake" unit="ORRY" value={unstakeIn} onChange={setUnstakeIn} max={me.stakeActive !== undefined ? orry(me.stakeActive) : undefined} onMax={() => me.stakeActive !== undefined && setUnstakeIn(toInput(me.stakeActive))} />
+              <AmountField id="unstake-in" label="Amount to unstake" unit="ORRY" value={unstakeIn} onChange={setUnstakeIn} max={me.stakeActive !== undefined ? orry(me.stakeActive) : undefined} onMax={() => me.stakeActive !== undefined && setUnstakeIn(toInput(me.stakeActive))} />
               <button className="primary rc-go" type="button" disabled={!ready || busy || !parseAmount(unstakeIn) || (me.stakeActive !== undefined && (parseAmount(unstakeIn) ?? 0n) > me.stakeActive)} onClick={() => void requestUnstake()}>
                 {tx.busy === "Request unstake" ? "Requesting…" : "Request unstake"}
               </button>
@@ -151,7 +151,7 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
           {mode === "withdraw" ? (
             <div className="rc-desk-body">
               <dl className="rc-rows rc-rows-tight">
-                <Row label="Ready to withdraw">{leaving > 0n ? `${orry(leaving)} ORRY` : "Nothing requested"}</Row>
+                <Row label="Pending withdrawal">{leaving > 0n ? `${orry(leaving)} ORRY` : "No request"}</Row>
                 {leaving > 0n ? <Row label="Ready">{readyNow ? "Now" : `In ${span(me.stakeReadyAt - now)}`}</Row> : null}
               </dl>
               <button className="primary rc-go" type="button" disabled={!ready || busy || !readyNow} onClick={() => void withdraw()}>
@@ -161,29 +161,29 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
           ) : null}
           {!connected ? (
             <div className="rc-connect">
-              <p>Connect a wallet to stake.</p>
+              <p>A connected wallet is needed to stake.</p>
               <WalletButton />
             </div>
           ) : null}
           <NoticeLine notice={tx.notice} />
         </section>
 
-        <section className="rc-side" aria-label="Your stake">
-          <h2>Your stake</h2>
+        <section className="rc-side" aria-label="Stake position">
+          <h2>Stake position</h2>
           {!address ? (
-            <p className="rc-muted">Your stake and rewards show here once a wallet is connected.</p>
+            <p className="rc-muted">Connect a wallet to see its stake and rewards.</p>
           ) : (
             <>
               <dl className="rc-rows">
-                <Row label="Earning" hint={stats.data?.totalEarning && me.earning ? `${pct(me.earning, stats.data.totalEarning)} of all stake` : undefined}>
+                <Row label="Earning" hint={stats.data?.totalEarning && me.earning ? `${pct(me.earning, stats.data.totalEarning)} of total stake` : undefined}>
                   <Fig v={orry(me.earning)} unit="ORRY" />
                 </Row>
                 <Row label="Plain stake">{me.stakeActive !== undefined ? `${orry(me.stakeActive)} ORRY` : "…"}</Row>
-                <Row label="Leaving">{leaving > 0n ? `${orry(leaving)} ORRY, ${readyNow ? "ready now" : `ready in ${span(me.stakeReadyAt - now)}`}` : "None"}</Row>
+                <Row label="Leaving">{leaving > 0n ? `${orry(leaving)} ORRY · ${readyNow ? "withdrawable" : `withdrawable in ${span(me.stakeReadyAt - now)}`}` : "None"}</Row>
               </dl>
               <div className="rc-claim">
                 <div>
-                  <p className="rc-claim-label">Rewards ready to claim</p>
+                  <p className="rc-claim-label">Rewards to collect</p>
                   <p className="rc-claim-value">
                     <Fig v={eth(me.rewardsEth)} unit="ETH" />
                     <Fig v={orry(me.rewardsOrry)} unit="ORRY" />
@@ -197,31 +197,31 @@ export function StakeView({ exitOnly = false }: { exitOnly?: boolean }) {
           )}
           <div className="rc-explain">
             <p>
-              Rewards stream over {consts.stakeStream ? period(consts.stakeStream) : "the stream period"} to every active stake, in proportion to its size.
-              Stake behind an agent earns the same way and also appears in that agent&apos;s checks.
+              Each reward is paid out across {consts.stakeStream ? period(consts.stakeStream) : "the streaming window"} and split over active stake by size.
+              A stake placed on an agent earns on the same terms, and it is shown in every check of that agent.
             </p>
-            <Link className="lp-link" href="/docs/stake">Read the Stake guide</Link>
+            <Link className="lp-link" href="/docs/stake">How staking works</Link>
           </div>
         </section>
       </div>
 
       {!exitOnly && !agentOpen ? (
-        <ComingSoon title="Stake behind an agent opens soon." text="Merchants will see the amount in every check. The form appears here when agent stake opens." />
+        <ComingSoon title="Agent stake is on its way." text="A stake placed on an agent is shown to merchants in each check. The form is added here once agent stake begins." />
       ) : null}
       {!agentOpen && agents.length === 0 ? null : (
-      <section className="rc-panel rc-agents" aria-label="Stake behind an agent">
+      <section className="rc-panel rc-agents" aria-label="Agent stake">
         <div className="rc-panel-head">
-          <h2>{agentOpen ? "Stake behind an agent" : "Your agent stakes"}</h2>
+          <h2>{agentOpen ? "Stake on an agent" : "Agent stakes"}</h2>
           <p>{agentStakeLine(consts.agentCooldown)}</p>
         </div>
         <div className="rc-agents-grid">
           {agentOpen ? <StakeForAgentForm run={agentTx.run} busy={Boolean(agentTx.busy)} /> : null}
           <div>
-            <h3>Your agent stakes</h3>
+            <h3>Agent stakes from this wallet</h3>
             {!address ? (
-              <p className="rc-muted">Connect a wallet to see the agents you stake behind.</p>
+              <p className="rc-muted">Connect a wallet to see the agents it stakes on.</p>
             ) : agents.length === 0 ? (
-              <p className="rc-muted">{account.isLoading ? "…" : "No agent stakes from this address yet."}</p>
+              <p className="rc-muted">{account.isLoading ? "…" : "This address has no agent stake."}</p>
             ) : (
               <ul className="rc-agent-list">
                 {agents.map((a) => (

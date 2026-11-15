@@ -25,7 +25,7 @@ import { launchLinks, type LaunchLinks } from "./launch-indexer.js";
  * Coin lists come from the indexer; the coin page adds live reads (pending fees, the creator share, the early window).
  */
 
-const READ_FAILED = "Could not read the chain right now. Try again shortly.";
+const READ_FAILED = "Chain read failed. Retry in a few seconds.";
 const ZERO = "0x0000000000000000000000000000000000000000";
 const extAbi = parseAbi([
   "function ownerOf(uint256 agentId) view returns (address)",
@@ -143,7 +143,7 @@ export function registerLaunchRoutes(app: FastifyInstance, cfg: Config, chain: C
       return reply.code(503).send({ error: READ_FAILED });
     }
     if (!open) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
 
   app.get("/v1/launch/coins", { preHandler: gate }, async (_req, reply) => {
@@ -172,10 +172,10 @@ export function registerLaunchRoutes(app: FastifyInstance, cfg: Config, chain: C
   });
 
   app.get<{ Params: { coin: string } }>("/v1/launch/coins/:coin", { preHandler: gate }, async (req, reply) => {
-    if (!isAddress(req.params.coin)) return reply.code(400).send({ error: "coin must be a 0x address" });
+    if (!isAddress(req.params.coin)) return reply.code(400).send({ error: "coin expects a 0x address" });
     const coin = req.params.coin.toLowerCase();
     const [row] = await sql<CoinRow[]>`select * from launch_coins where coin = ${coin}`;
-    if (!row) return reply.code(404).send({ error: "No coin was launched at this address." });
+    if (!row) return reply.code(404).send({ error: "No launched coin exists at this address." });
     try {
       const l = await links();
       const trades = await sql<{ tx_hash: string; kind: "early" | "buy" | "sell"; account: string; orry: string; coins: string; block_time: Date }[]>`
@@ -229,9 +229,9 @@ export function registerLaunchRoutes(app: FastifyInstance, cfg: Config, chain: C
     "/v1/launch/agents/:agentId",
     { preHandler: gate },
     async (req, reply) => {
-      if (!/^\d{1,30}$/.test(req.params.agentId)) return reply.code(400).send({ error: "agentId must be a number" });
+      if (!/^\d{1,30}$/.test(req.params.agentId)) return reply.code(400).send({ error: "agentId expects a whole number" });
       const caller = req.query.caller ?? ZERO;
-      if (!isAddress(caller)) return reply.code(400).send({ error: "caller must be a 0x address" });
+      if (!isAddress(caller)) return reply.code(400).send({ error: "caller expects a 0x address" });
       const agentId = BigInt(req.params.agentId);
       try {
         const l = await links();
@@ -272,7 +272,7 @@ export function registerLaunchRoutes(app: FastifyInstance, cfg: Config, chain: C
   );
 
   app.get<{ Params: { address: string } }>("/v1/launch/accounts/:address", { preHandler: gate }, async (req, reply) => {
-    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "address must be a 0x address" });
+    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "address expects a 0x address" });
     const account = getAddress(req.params.address);
     try {
       const l = await links();

@@ -3,7 +3,7 @@ import { FeatureGate } from "@/components/orry/gate";
 import { R2Shell } from "@/components/r2/shell";
 import { GasExits, GasView } from "@/components/r2/GasView";
 
-export const metadata = { title: "Orrery · Gas in ORRY", description: "Prepay ORRY for a smart account and its ERC-4337 operations are paid from it at the USD price of gas." };
+export const metadata = { title: "Orrery · Gas in ORRY", description: "Top up a smart account with ORRY and its ERC-4337 operations draw on that balance at the USD price of gas." };
 
 export default function GasPage() {
   return (
@@ -12,8 +12,8 @@ export default function GasPage() {
         feature="paymaster"
         held={
           <>
-            <OrryHead title="Pay your agents' gas in ORRY." lead={<p>Prepaid ORRY covers a smart account&apos;s operations at the USD price of gas.</p>} />
-            <ComingSoon title="Gas in ORRY opens soon." text="Funding, balances and the paymaster address appear here when it opens." />
+            <OrryHead title="Agent gas, settled in ORRY." lead={<p>An ORRY balance paid in advance covers each operation a smart account sends, priced at the USD cost of gas.</p>} />
+            <ComingSoon title="Gas in ORRY starts soon." text="Top ups, balances and the paymaster address show here once it starts." />
             <GasExits />
           </>
         }

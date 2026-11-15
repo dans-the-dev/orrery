@@ -110,7 +110,7 @@ export class InsufficientNotesError extends Error {
     readonly needed: bigint,
     readonly bestPair: bigint,
   ) {
-    super(`needs ${needed}, the two largest notes hold ${bestPair}`);
+    super(`Your two largest notes hold ${bestPair}, short of the ${needed} this move needs.`);
   }
 }
 
@@ -158,9 +158,9 @@ export function prepareTransact(a: BuildTransactArgs): PreparedTransact {
   if (a.kind === "withdraw") {
     const floor = a.protocolFeeFloor ?? 0n;
     protocolFee = a.protocolFee ?? floor;
-    if (protocolFee < floor) throw new Error("protocol fee below the pool's floor");
+    if (protocolFee < floor) throw new Error("The protocol fee is under the pool's minimum.");
   } else if (a.protocolFee) {
-    throw new Error("a send pays no protocol fee");
+    throw new Error("A private send carries no protocol fee.");
   }
   const needed = a.amount + a.fee + protocolFee;
   const spent = selectNotes(a.notes, needed);
@@ -171,7 +171,7 @@ export function prepareTransact(a: BuildTransactArgs): PreparedTransact {
   let outputs: [Note, Note];
   let enc0: Hex;
   if (a.kind === "send") {
-    if (!a.recipient) throw new Error("send needs the recipient's registered keys");
+    if (!a.recipient) throw new Error("A send needs the recipient's registered Shield keys.");
     const out0: Note = {
       asset,
       amount: a.amount,
@@ -239,7 +239,7 @@ export function prepareTransact(a: BuildTransactArgs): PreparedTransact {
     const pubHex = await recoverPublicKey({ hash: digest, signature });
     const pub = hexToBytes(pubHex);
     if (publicKeyToAddress(pubHex) !== getAddress(a.owner)) {
-      throw new Error("signature is not from the note owner");
+      throw new Error("The signature does not match the note owner.");
     }
     const { r, s } = parseSignature(signature);
     let sv = BigInt(s);

@@ -6,14 +6,14 @@ startCommand:
     properties:
       apiKey:
         type: string
-        description: Orrery API key for checks, credits and data queries
+        description: Your Orrery API key, used by checks, credits and dataset reads
       agentKeyFile:
         type: string
-        description: Session signer key file of your agent (mode 600), for payments from its float
+        description: Key file of your agent's session signer (mode 600), used to pay from its float
       maxPaymentUsd:
         type: number
         default: 1
-        description: Payments above this need confirm true
+        description: USD amount above which a payment requires confirm true
   commandFunction: |-
     (config) => ({
       command: 'npx',

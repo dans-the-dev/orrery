@@ -8,7 +8,8 @@ import { Nav } from "@/components/Nav";
 import { PageGuide } from "@/components/PageGuide";
 import { PageHead } from "@/components/PageHead";
 import { WalletButton } from "@/components/WalletButton";
-import { API_URL, DISCORD_URL } from "@/lib/config";
+import { DISCORD_URL } from "@/components/social";
+import { API_URL } from "@/lib/config";
 
 function message(user: string, nonce: string) {
   return `Orrery Discord verification\nDiscord user: ${user}\nNonce: ${nonce}`;
@@ -27,7 +28,7 @@ function Verify() {
   async function run() {
     if (!address || !API_URL) return;
     setBusy(true);
-    setState({ tone: "", text: "Sign the message in your wallet." });
+    setState({ tone: "", text: "Approve the signature request in your wallet." });
     try {
       const signature = await signMessageAsync({ message: message(user, nonce) });
       const r = await fetch(`${API_URL}/v1/discord/verify`, {
@@ -36,11 +37,11 @@ function Verify() {
         body: JSON.stringify({ nonce, address, signature }),
       });
       const j = (await r.json().catch(() => ({}))) as { roles?: string[]; test?: boolean; error?: string };
-      if (r.ok && j.roles && j.test) setState({ tone: "ok", text: `Verified on the development network. On mainnet this wallet would get: ${j.roles.join(", ")}. Your server roles stay as they are.` });
-      else if (r.ok && j.roles) setState({ tone: "ok", text: `Verified. Your roles in the Orrery server: ${j.roles.join(", ")}.` });
-      else setState({ tone: "error", text: j.error ?? "Verification did not finish. Run /verify in Discord again." });
+      if (r.ok && j.roles && j.test) setState({ tone: "ok", text: `Wallet confirmed on the development network. On mainnet it would receive: ${j.roles.join(", ")}. Your current server roles are unchanged.` });
+      else if (r.ok && j.roles) setState({ tone: "ok", text: `Wallet confirmed. Roles now set in the Orrery server: ${j.roles.join(", ")}.` });
+      else setState({ tone: "error", text: j.error ?? "Verification incomplete. Send /verify in Discord for a new link." });
     } catch {
-      setState({ tone: "error", text: "The signature was not given. Try again when you are ready." });
+      setState({ tone: "error", text: "No signature received. Start again whenever you are ready." });
     } finally {
       setBusy(false);
     }
@@ -49,25 +50,25 @@ function Verify() {
   return (
     <>
       <PageGuide
-        audience="Members of the Orrery Discord server."
+        audience="People in the Orrery Discord server."
         steps={[
-          { title: "Run /verify in Discord", text: "The bot answers with a link that only you can see. It works once, for 15 minutes." },
-          { title: "Connect and sign", text: "Connect the wallet you use with Orrery and sign one message. Signing costs nothing and moves no funds." },
-          { title: "Get your roles", text: "Verified for everyone, ORRY Holder for ORRY held or staked, Operator for an agent you own, Merchant for credits bought." },
+          { title: "Send /verify in Discord", text: "The bot replies with a private link meant for you alone. It opens once, within 15 minutes." },
+          { title: "Connect, then sign", text: "Connect the wallet you use on Orrery and sign a single message. The signature is free and moves no funds." },
+          { title: "Receive your roles", text: "Everyone gets Verified. ORRY Holder follows ORRY held or staked, Operator follows an agent you own, and Merchant follows credits you bought." },
         ]}
       />
       <section className="panel lookup-form">
-        <h2>Link your wallet to Discord</h2>
+        <h2>Tie a wallet to your Discord account</h2>
         {!valid ? (
-          <p>This page opens from the link the Orrery bot sends after <code>/verify</code>. <a href={DISCORD_URL} target="_blank" rel="noreferrer">Join the server</a></p>
+          <p>Reach this page through the link the Orrery bot sends when you use <code>/verify</code>.{DISCORD_URL ? <> <a href={DISCORD_URL} target="_blank" rel="noreferrer">Join the Orrery server</a></> : null}</p>
         ) : !API_URL ? (
-          <p>Verification opens soon.</p>
+          <p>Wallet verification starts soon.</p>
         ) : !isConnected ? (
-          <div className="row"><p>Connect the wallet you want to link.</p><WalletButton /></div>
+          <div className="row"><p>Connect the wallet you want tied to Discord.</p><WalletButton /></div>
         ) : (
           <div className="row">
-            <p>Wallet {address}</p>
-            <button className="primary" type="button" disabled={busy} onClick={run}>Sign and verify</button>
+            <p>Connected as {address}</p>
+            <button className="primary" type="button" disabled={busy} onClick={run}>Sign to confirm</button>
           </div>
         )}
         {state.text ? <p className={state.tone === "error" ? "notice error" : "notice"} role="status">{state.text}</p> : null}
@@ -81,7 +82,7 @@ export default function DiscordVerifyPage() {
     <div className="product-page circuit">
       <Nav />
       <main className="signer-main">
-        <PageHead kicker="Discord" title="Verify your wallet." lead={<p>Link a wallet to your Discord account and get the roles that match what you do on Orrery.</p>} art="agent-tag" />
+        <PageHead kicker="Discord" title="Confirm your wallet for Discord." lead={<p>Tie a wallet to your Discord account, and your server roles follow what that wallet does on Orrery.</p>} art="agent-tag" />
         <Suspense fallback={null}>
           <Verify />
         </Suspense>

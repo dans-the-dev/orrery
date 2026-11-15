@@ -24,10 +24,10 @@ const sharesFor = (p: CreditPoolView, assets: bigint) => {
 function useUsdgAllowance() {
   const pub = usePublicClient();
   return async (owner: Address, spender: Address, amt: bigint, send: (c: { address: Address; abi: Abi; functionName: string; args?: readonly unknown[] }) => Promise<unknown>, step: (t: string) => void) => {
-    if (!pub || !ADDRESSES.usdg) throw new Error("USDG is not configured.");
+    if (!pub || !ADDRESSES.usdg) throw new Error("The USDG token address is not set for this network.");
     const current = await pub.readContract({ address: ADDRESSES.usdg, abi: erc20Abi, functionName: "allowance", args: [owner, spender] });
     if (current >= amt) return;
-    step("Approve USDG in your wallet.");
+    step("Your wallet asks you to approve USDG.");
     await send({ address: ADDRESSES.usdg, abi: erc20Abi as Abi, functionName: "approve", args: [spender, amt] });
   };
 }
@@ -40,8 +40,8 @@ function Reading({ pool }: { pool?: CreditPoolView }) {
         <Fig v={usd(pool?.totalAssets)} unit="USDG" />
       </p>
       <dl className="rc-rows">
-        <Row label="Lent to agents">{pool ? `${usd(pool.totalPrincipal)} USDG` : "…"}</Row>
-        <Row label="Interest">{pool ? `${bps(pool.params.aprBps)} a year` : "…"}</Row>
+        <Row label="Out with agents">{pool ? `${usd(pool.totalPrincipal)} USDG` : "…"}</Row>
+        <Row label="Interest">{pool ? `${bps(pool.params.aprBps)} yearly` : "…"}</Row>
         <Row label="Open lines">{pool ? pool.lines : "…"}</Row>
       </dl>
     </div>
@@ -55,7 +55,7 @@ function LineMeter({ line }: { line: CreditLineView }) {
   const scale = [limit, drawn].reduce((a, b) => (b > a ? b : a), 1n);
   const w = (v: bigint) => `${Number((v * 1000n) / scale) / 10}%`;
   return (
-    <div className="cr-meter" role="img" aria-label={`${usd(drawn)} of ${usd(limit)} USDG drawn`}>
+    <div className="cr-meter" role="img" aria-label={`${usd(drawn)} USDG drawn against a ${usd(limit)} USDG line`}>
       <div className="cr-meter-track">
         <span className="cr-meter-limit" style={{ width: w(limit) }} />
         <span className="cr-meter-drawn" style={{ width: w(drawn) }} />
@@ -85,10 +85,10 @@ function LendDesk({ pool }: { pool: CreditPoolView }) {
     if (!address || !a) return;
     await tx.run("Lend", async ({ send, step }) => {
       await approve(address, pool.pool as Address, a, send, step);
-      step("Confirm the deposit in your wallet.");
+      step("Sign the deposit in your wallet.");
       await send({ address: pool.pool as Address, abi: POOL, functionName: "deposit", args: [a] });
       setAmt("");
-      return `${usd(a)} USDG lent to the pool.`;
+      return `${usd(a)} USDG is now in the pool.`;
     });
   }
   async function withdraw() {
@@ -98,13 +98,13 @@ function LendDesk({ pool }: { pool: CreditPoolView }) {
     await tx.run("Withdraw", async ({ send }) => {
       await send({ address: pool.pool as Address, abi: POOL, functionName: "withdraw", args: [shares] });
       setAmt("");
-      return "USDG back in your wallet.";
+      return "The USDG went back to your wallet.";
     });
   }
   async function claim() {
     await tx.run("Claim ORRY", async ({ send }) => {
       await send({ address: pool.pool as Address, abi: POOL, functionName: "claimOrry" });
-      return "ORRY in your wallet.";
+      return "The ORRY went to your wallet.";
     });
   }
 
@@ -113,13 +113,13 @@ function LendDesk({ pool }: { pool: CreditPoolView }) {
       <Segmented label="Lend actions" value={mode} onChange={setMode} options={[{ id: "deposit", label: "Lend" }, { id: "withdraw", label: "Withdraw" }]} />
       <div className="rc-desk-body">
         {mode === "deposit" ? (
-          <AmountField id="cr-lend" label="USDG to lend" unit="USDG" value={amt} onChange={setAmt} hint={mine ? `Your position ${usd(mine.value)} USDG` : undefined} />
+          <AmountField id="cr-lend" label="Amount to lend" unit="USDG" value={amt} onChange={setAmt} hint={mine ? `Current position · ${usd(mine.value)} USDG` : undefined} />
         ) : (
-          <AmountField id="cr-out" label="USDG to withdraw" unit="USDG" value={amt} onChange={setAmt} max={usd(out)} onMax={() => setAmt(toInput(out, 6))} hint={`Available in the pool now ${usd(cash)} USDG`} />
+          <AmountField id="cr-out" label="Amount to withdraw" unit="USDG" value={amt} onChange={setAmt} max={usd(out)} onMax={() => setAmt(toInput(out, 6))} hint={`Free to withdraw now · ${usd(cash)} USDG`} />
         )}
         {ready ? (
           <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !a || (mode === "deposit" && pool.retired)} onClick={() => void (mode === "deposit" ? deposit() : withdraw())}>
-            {tx.busy ? "Waiting for the wallet…" : mode === "deposit" ? "Lend USDG" : "Withdraw USDG"}
+            {tx.busy ? "Check your wallet…" : mode === "deposit" ? "Lend USDG" : "Withdraw USDG"}
           </button>
         ) : (
           <WalletButton />
@@ -127,7 +127,7 @@ function LendDesk({ pool }: { pool: CreditPoolView }) {
         {mine && BigInt(mine.orryClaimable) > 0n ? (
           <div className="cr-claim">
             <span>
-              <b className="num">{orry(BigInt(mine.orryClaimable))}</b> ORRY from bonds is yours
+              <b className="num">{orry(BigInt(mine.orryClaimable))}</b> ORRY from bonds to collect
             </span>
             <button type="button" className="rc-max" disabled={Boolean(tx.busy)} onClick={() => void claim()}>
               Claim
@@ -163,38 +163,38 @@ function LineDesk({ pool }: { pool: CreditPoolView }) {
     if (mode === "bond") {
       await tx.run("Post bond", async ({ send, step, ensureAllowance }) => {
         await ensureAllowance(address, p, a, step);
-        step("Confirm the bond in your wallet.");
+        step("Sign the bond in your wallet.");
         await send({ address: p, abi: POOL, functionName: "postBond", args: [BigInt(id), a] });
         setAmt("");
-        return `${orry(a)} ORRY locked behind agent ${id}.`;
+        return `Bond on record · ${orry(a)} ORRY for agent ${id}.`;
       });
     } else if (mode === "draw") {
       await tx.run("Draw", async ({ send }) => {
         await send({ address: p, abi: POOL, functionName: "draw", args: [BigInt(id), a] });
         setAmt("");
-        return `${usd(a)} USDG sent to the agent wallet.`;
+        return `${usd(a)} USDG went to the agent wallet.`;
       });
     } else if (mode === "repay") {
       await tx.run("Repay", async ({ send, step }) => {
         await approve(address, p, a, send, step);
-        step("Confirm the repayment in your wallet.");
+        step("Sign the repayment in your wallet.");
         await send({ address: p, abi: POOL, functionName: "repay", args: [BigInt(id), a] });
         setAmt("");
-        return "Repaid.";
+        return "Repayment on record.";
       });
     } else {
       await tx.run("Release bond", async ({ send }) => {
         await send({ address: p, abi: POOL, functionName: "withdrawBond", args: [BigInt(id), a] });
         setAmt("");
-        return `${orry(a)} ORRY back in your wallet.`;
+        return `${orry(a)} ORRY went back to your wallet.`;
       });
     }
   }
 
   return (
-    <section className="rc-panel" aria-label="Agent credit line">
+    <section className="rc-panel" aria-label="Credit line for an agent">
       <div className="rc-panel-head">
-        <h2>Your agent&apos;s line</h2>
+        <h2>Credit line for an agent</h2>
       </div>
       <label className="cr-field">
         <span>Agent id</span>
@@ -207,14 +207,14 @@ function LineDesk({ pool }: { pool: CreditPoolView }) {
             <Row label="Bond">{orry(BigInt(line.bond))} ORRY</Row>
             <Row label="Bond multiple">{(line.tierMultBps / 10_000).toFixed(1)}x</Row>
             <Row label="Owed now">{usd(owed)} USDG</Row>
-            <Row label="Due">{line.dueAt ? (line.dueAt > now ? utc(line.dueAt) : `${utc(line.dueAt)}, grace ends ${utc(line.dueAt + pool.params.grace)}`) : "Nothing owed"}</Row>
+            <Row label="Due">{line.dueAt ? (line.dueAt > now ? utc(line.dueAt) : `${utc(line.dueAt)}, grace ends ${utc(line.dueAt + pool.params.grace)}`) : "Clear"}</Row>
             <Row label="Repays from">
               <span className="mono">{line.router}</span>
             </Row>
           </dl>
         </>
       ) : id && lines.isFetched ? (
-        <p className="rc-muted">No line for agent {id} in this pool yet. Post a bond to open one.</p>
+        <p className="rc-muted">Agent {id} has no line in this pool. A bond opens one.</p>
       ) : null}
       {id ? (
         <div className="rc-desk-body">
@@ -229,7 +229,7 @@ function LineDesk({ pool }: { pool: CreditPoolView }) {
           />
           <AmountField
             id="cr-line"
-            label={mode === "bond" ? "ORRY to lock" : mode === "release" ? "ORRY to release" : mode === "draw" ? "USDG to draw" : "USDG to repay"}
+            label={mode === "bond" ? "Bond amount" : mode === "release" ? "Amount to release" : mode === "draw" ? "Amount to draw" : "Amount to repay"}
             unit={decimals === 18 ? "ORRY" : "USDG"}
             value={amt}
             onChange={setAmt}
@@ -238,7 +238,7 @@ function LineDesk({ pool }: { pool: CreditPoolView }) {
           />
           {ready ? (
             <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !a} onClick={() => void go()}>
-              {tx.busy ? "Waiting for the wallet…" : mode === "bond" ? "Lock ORRY" : mode === "draw" ? "Draw USDG" : mode === "repay" ? "Repay" : "Release ORRY"}
+              {tx.busy ? "Check your wallet…" : mode === "bond" ? "Lock ORRY" : mode === "draw" ? "Draw USDG" : mode === "repay" ? "Repay" : "Release ORRY"}
             </button>
           ) : (
             <WalletButton />
@@ -254,18 +254,18 @@ function Terms({ pool }: { pool: CreditPoolView }) {
   const p = pool.params;
   const tiers = p.tierUsdDays.map((t, i) => `${(p.tierMultBps[i]! / 10_000).toFixed(1)}x from ${amount(BigInt(t), { decimals: 6, frac: 0 })}`).join(", ");
   return (
-    <section className="rc-panel" aria-label="Terms of pool 1">
+    <section className="rc-panel" aria-label="Pool 1 terms">
       <div className="rc-panel-head">
         <h2>Terms</h2>
       </div>
       <dl className="rc-rows">
-        <Row label="Interest">{bps(p.aprBps)} a year, simple, on what is drawn</Row>
-        <Row label="Orrery's share">{bps(p.feeBps)} of interest paid</Row>
-        <Row label="From x402 revenue">{bps(p.repayBps)} of each payment to the agent repays first</Row>
-        <Row label="Limit">bond value times its multiple, at most {usd(p.maxLineUsdg)} USDG and {bps(p.maxLineBps)} of the pool</Row>
+        <Row label="Interest">{bps(p.aprBps)} yearly, simple, charged only on the drawn amount</Row>
+        <Row label="Orrery fee">{bps(p.feeBps)} of the interest collected</Row>
+        <Row label="x402 repayment">{bps(p.repayBps)} of every payment the agent receives goes to the line first</Row>
+        <Row label="Line size">Bond value times its multiple, capped at {usd(p.maxLineUsdg)} USDG and {bps(p.maxLineBps)} of the pool</Row>
         <Row label="Multiple">{tiers} USDG-days repaid</Row>
-        <Row label="Minimum bond">{usd(p.minBondUsd)} USDG of ORRY</Row>
-        <Row label="Term">{days(p.term)} from the first draw, then {days(p.grace)} of grace; after that the bond passes to the pool&apos;s lenders</Row>
+        <Row label="Minimum bond">ORRY worth {usd(p.minBondUsd)} USDG</Row>
+        <Row label="Term">{days(p.term)} counted from the first draw, plus {days(p.grace)} of grace. Past that, the bond goes to the lenders of the pool</Row>
       </dl>
     </section>
   );
@@ -278,8 +278,8 @@ export function CreditView() {
   return (
     <>
       <OrryHead
-        title="Lend USDG to agents that earn."
-        lead={<p>Lenders fund one pool. A verified agent&apos;s owner locks ORRY behind the agent and draws USDG into its wallet, and the agent&apos;s x402 revenue repays the line first.</p>}
+        title="Fund working agents with USDG."
+        lead={<p>All lenders share a single pool. The owner of a verified agent bonds ORRY for it and draws USDG to the agent wallet, and x402 income from the agent pays the line down before anything else.</p>}
         reading={<Reading pool={pool} />}
       />
       {pool ? (
@@ -291,7 +291,7 @@ export function CreditView() {
           {releases.isLive("credit-bond") ? <LineDesk pool={pool} /> : null}
         </>
       ) : pools.isFetched ? (
-        <p className="rc-muted">The first pool opens here.</p>
+        <p className="rc-muted">Pool 1 is listed here once it is live.</p>
       ) : null}
     </>
   );
@@ -305,12 +305,12 @@ export function CreditExits() {
   const held = acct.data?.positions ?? [];
   if (!address || held.length === 0) return null;
   return (
-    <section className="rc-desk" aria-label="Your Credit positions">
+    <section className="rc-desk" aria-label="Credit positions">
       <div className="rc-desk-body">
         {held.map((p) => (
           <div key={p.pool} className="cr-claim">
             <span>
-              <b className="num">{usd(p.value)}</b> USDG lent, <b className="num">{orry(BigInt(p.orryClaimable))}</b> ORRY to claim
+              <b className="num">{usd(p.value)}</b> USDG in the pool · <b className="num">{orry(BigInt(p.orryClaimable))}</b> ORRY to collect
             </span>
             <button
               type="button"
@@ -320,7 +320,7 @@ export function CreditExits() {
                 void tx.run("Withdraw", async ({ send }) => {
                   if (BigInt(p.orryClaimable) > 0n) await send({ address: p.pool as Address, abi: POOL, functionName: "claimOrry" });
                   await send({ address: p.pool as Address, abi: POOL, functionName: "withdraw", args: [BigInt(p.shares)] });
-                  return "Back in your wallet.";
+                  return "Everything went back to your wallet.";
                 })
               }
             >

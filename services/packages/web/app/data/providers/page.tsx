@@ -7,7 +7,7 @@ import { ComingSoon, OrryHead } from "@/components/orry/parts";
 
 export const metadata = {
   title: "Orrery · Data providers",
-  description: "List an x402 data endpoint with an ORRY stake and get paid by agents per call, settled by Orrery.",
+  description: "Put an x402 data endpoint on the list with an ORRY stake, and agents pay you for each call, settled by Orrery.",
 };
 
 export default function DataProvidersPage() {
@@ -19,19 +19,19 @@ export default function DataProvidersPage() {
           feature="data-providers"
           held={
             <>
-              <OrryHead kicker="Data providers" title="Sell data to agents, paid per call." lead={<p>List your x402 endpoint with an ORRY stake.</p>} />
-              <ComingSoon title="Provider listings open soon." text="The provider list and your own listing appear on this page when provider listings open." />
+              <OrryHead kicker="Data providers" title="Agents pay you for every call." lead={<p>An ORRY stake puts your x402 endpoint on the list.</p>} />
+              <ComingSoon title="Provider listings start soon." text="All providers and your own listing show here once provider listings start." />
             </>
           }
         >
           <ProvidersView />
         </FeatureGate>
         <PageGuide
-          audience={"Teams with data agents want to buy, served from their own x402 endpoint."}
+          audience={"Teams serving data that agents want, from an x402 endpoint they run."}
           steps={[
-            { title: "Stake ORRY", text: "A stake worth the listing minimum, valued in USD, keeps your listing active." },
-            { title: "List your endpoint", text: "One transaction names your endpoint, your price per call and your payment address." },
-            { title: "Get paid", text: "Agents pay your payment address. Orrery keeps 1% and forwards the rest to your wallet." },
+            { title: "Stake ORRY", text: "Your listing stays active while your stake is worth at least the listing minimum in USD." },
+            { title: "Register the endpoint", text: "A single transaction records the endpoint, the price per call and the payment address." },
+            { title: "Get paid", text: "Agents pay to your payment address. Orrery retains 1% and sends the remainder to your wallet." },
           ]}
         />
       </main>

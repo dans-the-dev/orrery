@@ -13,11 +13,11 @@ import { FlowStrip, type FlowNode } from "../motion/Flow";
 
 /** Each ORRY page's object and its mechanism, words only. */
 const PAGE_ART: Record<string, { art?: string; flow?: { nodes: FlowNode[]; accent: string; label: string } }> = {
-  "/earn": { art: "orry-earn", flow: { nodes: ["ETH or USDG with ORRY", "Pool", "Swap fees", "Earn share"], accent: "Earn share", label: "Deposits go into the pool, whose swap fees stream to Earn shares" } },
-  "/stake": { art: "orry-stake", flow: { nodes: ["ORRY", "Stake", "Pool fees and buybacks", "Rewards"], accent: "Rewards", label: "Staked ORRY receives pool fees and buybacks as rewards" } },
-  "/claim": { art: "orry-claim", flow: { nodes: [["Earn fees", "Stake rewards"], "Claim", "Your wallet"], accent: "Claim", label: "Earn fees and stake rewards are claimed together to your wallet" } },
+  "/earn": { art: "orry-earn", flow: { nodes: ["ORRY paired with ETH or USDG", "Pool", "Swap fees", "Earn share"], accent: "Earn share", label: "A deposit joins the pool, and the pool's swap fees stream to each Earn share" } },
+  "/stake": { art: "orry-stake", flow: { nodes: ["ORRY", "Stake", "Fees plus buybacks", "Rewards"], accent: "Rewards", label: "Pool fees and buybacks flow to staked ORRY as rewards" } },
+  "/claim": { art: "orry-claim", flow: { nodes: [["Earn fees", "Stake rewards"], "Claim", "Wallet"], accent: "Claim", label: "One claim moves Earn fees and Stake rewards to the wallet together" } },
   "/leaderboard": { art: "orry-leaderboard" },
-  "/burn": { art: "orry-burn", flow: { nodes: [["ORRY paid at checkout", "Burn share of fees"], "Burned"], accent: "Burned", label: "ORRY paid at checkout and the burn share of the protocol fees are burned" } },
+  "/burn": { art: "orry-burn", flow: { nodes: [["ORRY spent at checkout", "Fee portion set to burn"], "Burned"], accent: "Burned", label: "Checkout ORRY and the burn portion of protocol fees leave supply for good" } },
 };
 
 /** Second row of navigation across the ORRY pages. Held pages stay listed, marked "Coming soon". */
@@ -54,7 +54,7 @@ export function OrryHead({ kicker, title, lead, reading }: { kicker?: string; ti
           {lead ? <div className="page-head-lead">{lead}</div> : null}
         </div>
         {reading ? <div className="rc-reading">{reading}</div> : null}
-        {art ? <img className="rc-head-art" src={`/art/${art}.webp`} alt="" aria-hidden="true" width={600} height={600} /> : null}
+        {art ? <img className="rc-head-art" src={`/art/${art}.svg`} alt="" aria-hidden="true" width={600} height={600} /> : null}
       </header>
       {page?.flow ? <FlowStrip className="rc-flow" nodes={page.flow.nodes} accent={page.flow.accent} label={page.flow.label} /> : null}
     </>

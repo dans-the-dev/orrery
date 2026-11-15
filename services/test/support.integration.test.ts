@@ -162,7 +162,7 @@ describe("automatic replies", () => {
     const [row] = await sql`select status, decided_by, sent_id from support_items where source_id = 'a1'`;
     expect(row).toMatchObject({ status: "sent", decided_by: "auto" });
     const queuePost = calls.filter((c) => c.method === "POST" && c.path === `/channels/${QUEUE}/messages`).at(-1)!.body as { content: string };
-    expect(queuePost.content).toContain("Sent automatically");
+    expect(queuePost.content).toContain("Auto-sent");
   });
 
   it("keeps a question that needs the owner waiting, and pings the owner once per 15 minutes", async () => {

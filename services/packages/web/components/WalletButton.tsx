@@ -48,7 +48,7 @@ export function WalletButton() {
       await connectAsync({ connector: c, chainId: activeChain.id });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setNotice(/reject|denied/i.test(msg) ? "Connection request closed." : "The wallet did not connect. Try again.");
+      setNotice(/reject|denied/i.test(msg) ? "Request dismissed in the wallet." : "The wallet stayed disconnected. Try again.");
     }
   }
 
@@ -63,7 +63,7 @@ export function WalletButton() {
   if (connection.isConnected && connection.address) {
     if (connection.chainId !== activeChain.id) {
       return (
-        <button className="wallet warn" type="button" onClick={() => switchChainAsync({ chainId: activeChain.id }).catch(() => setNotice("Switch to " + activeChain.name + " in your wallet."))}>
+        <button className="wallet warn" type="button" onClick={() => switchChainAsync({ chainId: activeChain.id }).catch(() => setNotice("Pick " + activeChain.name + " in the wallet to continue."))}>
           Switch to {activeChain.name}
         </button>
       );
@@ -100,14 +100,14 @@ export function WalletButton() {
         }}
         aria-expanded={open}
       >
-        {isPending ? "Confirm in your wallet" : "Connect wallet"}
+        {isPending ? "Approve in your wallet" : "Connect wallet"}
       </button>
       {open && (
         <div className="wallet-menu" role="menu">
           {options.length === 0 ? (
             <>
-              <p>No wallet in this browser. On a phone, open this page in the browser built into your wallet app.</p>
-              <a href={WALLET_DIRECTORY_URL} target="_blank" rel="noreferrer">Find a wallet</a>
+              <p>This browser holds no wallet yet. On a phone, load this page inside your wallet app&apos;s own browser.</p>
+              <a href={WALLET_DIRECTORY_URL} target="_blank" rel="noreferrer">Browse wallets</a>
             </>
           ) : (
             options.map((c) => (

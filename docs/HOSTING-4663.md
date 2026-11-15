@@ -1,5 +1,10 @@
 # Hosting Orrery on 4663
 
+> **Orrery note (2026-11-15):** this document records Runcore's own run, from the codebase Orrery was copied from,
+> with the names switched to Orrery's by the rename pass. Orrery itself has no deployment, keys, X or Discord account
+> yet; addresses, ids and dates below are Runcore's and serve only as a worked example of the procedure.
+
+
 Internal runbook. Prepared 2026-11-09; nothing is running yet. Services go up only when the owner says deploy, after
 `deploy-4663.ts` (and later `deploy-orry-4663.ts`) have written `deployments/4663.json` and `deployments/orry-4663.json`.
 

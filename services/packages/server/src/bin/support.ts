@@ -1,5 +1,5 @@
 /**
- * Support process: drafts replies to public Discord questions and @OrreryHQ mentions on X. Answers from the docs and
+ * Support process: drafts replies to public Discord questions and the Orrery X account mentions on X. Answers from the docs and
  * greetings are sent at once within a daily cap (ORRERY_SUPPORT_AUTO, ..._AUTO_MAX_DAY, ..._AUTO_MAX_AUTHOR_HOUR); the
  * rest wait in the private #reply-queue room until an Admin or Core Team member reacts ✅. Needs
  * ORRERY_DISCORD_TOKEN_FILE, ORRERY_DISCORD_GUILD, ORRERY_DATABASE_URL and ORRERY_ANTHROPIC_KEY_FILE; X is optional
@@ -64,7 +64,7 @@ const describeRooms = () => {
     .filter(([id, c]) => (c.type === 0 || c.type === 15) && !ignored(id))
     .map(([, c]) => `#${c.name}${c.type === 15 ? " (forum)" : ""}${c.topic ? `: ${c.topic.replace(/\s+/g, " ").slice(0, 160)}` : ""}`)
     .sort();
-  rooms = list.length ? `# Discord rooms (public)\nForums replace tickets: questions and problems go in #help, suggestions in #ideas, bugs in #bug-reports.\n${list.join("\n")}` : "";
+  rooms = list.length ? `# Public Discord rooms\nThere are no tickets: questions and problems belong in the #help forum, suggestions in #ideas, bug reports in #bug-reports.\n${list.join("\n")}` : "";
 };
 const channelName = (id: string) => channels.get(id)?.name ?? id;
 const ignored = (id: string): boolean => {

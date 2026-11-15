@@ -72,7 +72,7 @@ export function ContractAddress() {
           {short}
         </span>
       )}
-      <button type="button" onClick={copy} aria-label={copied ? "Copied" : "Copy the ORRY contract address"} title={copied ? "Copied" : "Copy"}>
+      <button type="button" onClick={copy} aria-label={copied ? "Copied" : "Copy ORRY's contract address"} title={copied ? "Copied" : "Copy"}>
         {copied ? (
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20 6 9 17l-5-5" />
@@ -84,7 +84,7 @@ export function ContractAddress() {
           </svg>
         )}
       </button>
-      <span className="sr-only" aria-live="polite">{copied ? "Contract address copied" : ""}</span>
+      <span className="sr-only" aria-live="polite">{copied ? "Address copied to clipboard" : ""}</span>
     </div>
     {venues.map((v) => (
       <a key={v.url} className="lp-trade" href={v.url} target="_blank" rel="noreferrer">

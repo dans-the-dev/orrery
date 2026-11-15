@@ -1,5 +1,6 @@
 // Posts and pins the opening message of every Orrery Discord channel. Idempotent: a channel where the bot already
 // posted is skipped. Usage: node ops/discord/content.mjs <guildId> [--dry-run]   Token: ~/.secrets/orrery/discord-bot.txt
+// Optional env: ORRERY_X_URL and ORRERY_DISCORD_INVITE fill the X and invite lines of #official-links.
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -21,106 +22,105 @@ async function call(method, path, body) {
 }
 
 const SITE = "https://orrery.tech";
-const X = "https://x.com/OrreryHQ";
-const INVITE = "https://discord.gg/zk3dybhead";
+// Optional: the official X profile URL and Discord invite. A line is left out of #official-links while its value is unset.
+const X = process.env.ORRERY_X_URL ?? "";
+const INVITE = process.env.ORRERY_DISCORD_INVITE ?? "";
 const all = await call("GET", `/guilds/${guild}/channels`);
 const ch = Object.fromEntries(all.map((c) => [c.name, c.id]));
 const textRoom = new Set(all.filter((c) => c.type === 0 || c.type === 5).map((c) => c.id));
 const L = (name) => (ch[name] ? `<#${ch[name]}>` : `#${name}`);
 
 const CONTENT = {
-  welcome: [`# Welcome to Orrery
+  welcome: [`# Orrery · start here
 
-Orrery gives AI agents a budget they cannot exceed. Operators set public spending limits on the agent's own account, agents pay in USDG over x402, and anyone who receives a payment can check the payer and get a signed answer. ORRY is the token that runs on Orrery's revenue.
+Orrery keeps every AI agent on a set orbit. An operator places public caps on the agent's own account, the agent pays in USDG over x402 inside those caps, and whoever receives a payment can take a reading of the payer and get it back signed. ORRY is the token that Orrery's revenue flows into.
 
-## Get started in four steps
-**1. Read the rules** in ${L("rules")} and accept them when Discord asks. That opens every community room for you.
-**2. Say hello** in ${L("introductions")}: who you are and what you build.
-**3. Ask and share** in ${L("help")} and ${L("ideas")}. Rooms for operators, builders, merchants, ORRY and events appear in the sidebar as each feature goes live; ${L("announcements")} tells you when.
-**4. Link your wallet** with \`/verify\` in any channel. You get the roles that match what you do on Orrery: Verified, ORRY Holder, Operator or Merchant.
+## Four steps in
+**1. Read** ${L("rules")} and accept them when Discord prompts you. Every community room opens once you do.
+**2. Introduce yourself** in ${L("introductions")}: your name and what you are building.
+**3. Ask and suggest** in ${L("help")} and ${L("ideas")}. Rooms for operators, builders, merchants, ORRY and events join the sidebar as each feature opens, and ${L("announcements")} marks each one.
+**4. Connect your wallet** with \`/verify\` from any channel to receive the roles that fit your activity on Orrery: Verified, ORRY Holder, Operator or Merchant.
 
-**Boost the server** for a violet Orrery Booster name, images and files in every room, and the private #boosters lounge with release previews and first tester invites.
+**Boosting the server** brings a violet Orrery Booster name, images and files in every room, and the private #boosters lounge with release previews and first tester invites.
 
-Need help? Ask in ${L("help")}. Official links only come from ${L("official-links")}.`],
+Questions go to ${L("help")}. Links are official only when they come from ${L("official-links")}.`],
 
-  rules: [`# Rules
+  rules: [`# House rules
 
-**1. Be respectful.** No harassment, hate speech or personal attacks.
-**2. No spam or unsolicited self promotion.** Ask a moderator before sharing your own project.
-**3. No financial advice requests or price talk pressure.** Discuss the product, not where the price goes.
-**4. Protect yourself.** The team never DMs you first and never asks for a seed phrase, private key or a payment. Report anyone who does.
-**5. Official links only.** Trust links from ${L("official-links")} and ${SITE}. Anything else may be fake.
-**6. Stay on topic.** Use the room that fits your question.
-**7. English in public rooms,** so everyone can follow.
+**1. Respect everyone.** Harassment, hate speech and personal attacks are removed.
+**2. No spam and no uninvited promotion.** Check with a moderator before posting your own project.
+**3. Product talk, not price calls.** Talk about what Orrery does rather than where a price is heading, and do not press others for trading advice.
+**4. Keep your keys to yourself.** Nobody from the team will message you first or ask for a seed phrase, private key or payment. Report anyone who does.
+**5. Links from official sources.** Take links from ${L("official-links")} and ${SITE}.
+**6. Use the right room.** Pick the room that matches your question.
+**7. Public rooms are in English,** so everyone can follow along.
 
-Moderators may remove messages and members who break these rules. Accept the rules in Discord's prompt to open the community rooms.`],
+Moderators remove messages and members that break these rules. Accept the rules in Discord's prompt to open the community rooms.`],
 
   announcements: [`# Announcements
 
-Releases, launch waves and product updates from the Orrery team appear here first. Follow this channel to get them in your own server too.
+The Orrery team posts releases, launch waves and product news here before anywhere else. Follow this channel to receive them in your own server.
 
-Orrery is live at ${SITE}.`],
+Orrery is at ${SITE}.`],
 
   "official-links": [`# Official links
 
 **Website** ${SITE}
 **Docs** ${SITE}/docs
-**X** ${X}
-**Discord invite** ${INVITE}
+${X ? `**X** ${X}\n` : ""}${INVITE ? `**Discord invite** ${INVITE}\n` : ""}
+**Contract addresses** appear in this room and on ${SITE} as each contract opens on Robinhood Chain. An address sent by DM or posted in any other room is not an official one.`],
 
-**Contract addresses** are posted in this channel when they go live on Robinhood Chain, and on ${SITE}. Never trust an address from a DM or another channel.`],
+  general: [`**#general** · Open conversation about Orrery: agents, payments, ideas and the product itself. Questions belong in ${L("help")}.`],
+  introductions: [`**#introductions** · Introduce yourself: your name, what you are building, and how you came across Orrery.`],
+  ideas: [`**#ideas** · Suggestions and feedback. Post one idea per message so the team can follow each one, and add a 👍 to back an idea.`],
+  memes: [`**#memes** · Light moments, still about Orrery.`],
 
-  general: [`**#general** · Talk about anything Orrery: agents, payments, ideas, the product. For questions use ${L("help")}.`],
-  introductions: [`**#introductions** · Say hello. Tell us who you are, what you are building and how you found Orrery.`],
-  ideas: [`**#ideas** · Feature ideas and feedback. One idea per message helps the team track them; react with 👍 to support one.`],
-  memes: [`**#memes** · Keep it fun and on topic.`],
+  operators: [`**#operators** · For anyone running an AI agent.
+At ${SITE}/operator you connect the wallet that owns the agent's Safe, open the agent by its ERC-8004 ID and set its orbit: per payment, daily and float caps, the contracts it may call, and the delay any raise must wait out. Bring setup questions here.`],
+  "agent-builders": [`**#agent-builders** · For developers whose agents pay.
+An agent pays in USDG over x402 from its own signer, inside the caps its operator set. The SDK is documented at ${SITE}/docs; code questions go here.`],
+  merchants: [`**#merchants** · For services that take payments from agents.
+Take a reading of any paying address at no cost on ${SITE}/signer, or call \`checkPayer\` from your code using check credits from ${SITE}/credits, then confirm the signed reading with \`verifyCheck\`.`],
+  showcase: [`**#showcase** · Agents, integrations and dashboards built on Orrery. A short description plus a link reads best.`],
 
-  operators: [`**#operators** · For people who run an AI agent.
-On ${SITE}/operator you connect the wallet that owns the agent's Safe, open the agent by its ERC-8004 ID, and set its limits: per payment, per day and float caps, the contracts it may call, and how long any increase must wait. Ask setup questions here.`],
-  "agent-builders": [`**#agent-builders** · For developers building agents that pay.
-Agents pay in USDG over x402 from their own signer, inside the caps their operator set. Read ${SITE}/docs for the SDK and share code questions here.`],
-  merchants: [`**#merchants** · For services that receive payments from agents.
-Look up any paying address free at ${SITE}/signer, or call \`checkPayer\` from your own code with check credits from ${SITE}/credits and verify the signed answer with \`verifyCheck\`.`],
-  showcase: [`**#showcase** · Show what you built with Orrery: agents, integrations, dashboards. A short description and a link work best.`],
+  "orry-chat": [`**#orry-chat** · Conversation about ORRY. Orrery's revenue flows into ORRY: most of the USDG Orrery earns buys ORRY for stakers and for burning, and the ORRY pools send their swap fees to Earn. How-to questions fit better in ${L("earn-and-stake")}.`],
+  "earn-and-stake": [`**#earn-and-stake** · Earn, Stake and Claim questions answered here.
+> **Earn** ${SITE}/earn: add to the ORRY/ETH or ORRY/USDG pool; 85% of each swap fee streams to Earn shares over 7 days.
+> **Stake** ${SITE}/stake: receive a share of Orrery revenue in ETH and ORRY. Unstaking takes 7 days, or 14 days for stake behind an agent.
+> **Claim** ${SITE}/claim: collect all rewards in a single transaction.`],
+  "burn-tracker": [`**#burn-tracker** · The bot posts each ORRY burn here with its amount, source and transaction. ${SITE}/burn charts the full history.`],
 
-  "orry-chat": [`**#orry-chat** · Talk about ORRY. ORRY runs on Orrery's revenue: most of the USDG Orrery earns buys ORRY for stakers and for burning, and the ORRY pools pay their swap fees to Earn. Use ${L("earn-and-stake")} for how-to questions.`],
-  "earn-and-stake": [`**#earn-and-stake** · Questions about Earn, Stake and Claim.
-> **Earn** ${SITE}/earn: deposit into the ORRY/ETH or ORRY/USDG pool, 85% of every swap fee streams to Earn shares over 7 days.
-> **Stake** ${SITE}/stake: a share of Orrery's revenue in ETH and ORRY. Unstaking takes 7 days, stake behind an agent 14 days.
-> **Claim** ${SITE}/claim: every reward in one transaction.`],
-  "burn-tracker": [`**#burn-tracker** · Every ORRY burn is posted here automatically, with its amount, its source and its transaction. The full history is on ${SITE}/burn.`],
-
-  help: [`**#help** · Ask anything about using Orrery. Include the page you were on and what you expected to happen. Never share a seed phrase or private key, here or in DMs.`],
-  "bug-reports": [`**#bug-reports** · Found a bug? Post:
-> 1. What you did
-> 2. What you expected
-> 3. What happened instead
+  help: [`**#help** · Questions about using Orrery. Say which page you were on and what you expected to see. Keep your seed phrase and private key to yourself, here and in DMs.`],
+  "bug-reports": [`**#bug-reports** · To report a bug, include:
+> 1. The steps you took
+> 2. The result you expected
+> 3. The result you got
 > 4. Page, browser and wallet
-> 5. A transaction hash if one is involved
-Valid reports can earn a reward through ${L("bounty-board")}.`],
+> 5. The transaction hash, when there is one
+Confirmed reports can earn a reward through ${L("bounty-board")}.`],
   "docs-and-guides": [`# Docs and guides
 
-**Start here** ${SITE}/docs
-**Set an agent's limits** ${SITE}/operator
-**Check a payer** ${SITE}/signer
-**Buy check credits** ${SITE}/credits
+**Overview** ${SITE}/docs
+**Set an agent's caps** ${SITE}/operator
+**Take a reading of a payer** ${SITE}/signer
+**Check credits** ${SITE}/credits
 **Earn** ${SITE}/docs/earn · **Stake** ${SITE}/docs/stake · **Claims** ${SITE}/docs/claims
 
-New guides from the team are posted in this channel.`],
+The team posts each new guide in this room.`],
 
   missions: [`# Missions
 
-Community missions and events are posted here: what to do, the reward and the deadline. Rewards are locked when a mission is created and paid to the winners when it ends. Missions that can be checked on chain are claimed directly; others are announced with a public check window before payout.`],
+Community missions and events are posted here with the task, the reward and the deadline. A mission's reward is locked when the mission is created and paid to its winners when it ends. Missions that can be verified on chain are claimed directly; the rest are announced with a public review window before payout.`],
   achievements: [`# Achievements
 
-Winners of missions and events, and achievement leaderboards, are posted here. The live leaderboard of stakers and earners is on ${SITE}/leaderboard.`],
+Mission and event winners, plus achievement standings, are posted here. ${SITE}/leaderboard shows the current stakers and earners.`],
   "bounty-board": [`# Bounty board
 
-Bug bounties and reward tasks are listed here with their reward and scope. Report findings in ${L("bug-reports")}; the team confirms valid ones here.`],
+Bug bounties and rewarded tasks are listed here with their reward and scope. Send findings to ${L("bug-reports")}; the team confirms valid ones in this room.`],
 
-  "team-chat": [`**#team-chat** · Core team only.`],
-  "moderation-log": [`**#moderation-log** · Moderators note warnings, removals and bans here with the reason.`],
-  alerts: [`**#alerts** · The Orrery bot posts operational alerts here: indexer lag and low gas on the relayer, attester and keeper wallets, at most once every six hours per alert.`],
+  "team-chat": [`**#team-chat** · Team room.`],
+  "moderation-log": [`**#moderation-log** · Moderators record warnings, removals and bans here, with the reason for each.`],
+  alerts: [`**#alerts** · The Orrery bot reports operational alerts here: indexer lag and low gas on the relayer, attester and keeper wallets, no more than once every six hours per alert.`],
 };
 
 const me = await call("GET", "/users/@me");

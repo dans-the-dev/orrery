@@ -36,7 +36,7 @@ const price = (v: string | bigint, decimals: number) => {
 const label = (m: PredictMarketView) => m.label.replace(/\s*\/\s*USD$/i, "");
 const STATUS: Record<PredictMarketView["status"], string> = {
   open: "Open",
-  locked: "Staking closed",
+  locked: "Stakes closed",
   closed: "Settling",
   yes: "Settled YES",
   no: "Settled NO",
@@ -89,24 +89,24 @@ function StakeDesk({ m, now }: { m: PredictMarketView; now: number }) {
     const a = parseAmount(amt, USDG_DECIMALS);
     if (!address || !a || !usdgAddr) return;
     await tx.run("Stake", async ({ send, step }) => {
-      step("Approve USDG for this market in your wallet.");
+      step("Approve the USDG spend for this market in your wallet.");
       await send({ address: usdgAddr, abi: erc20 as Abi, functionName: "approve", args: [m.market as Address, a] });
-      step("Confirm the stake in your wallet.");
+      step("Sign the stake transaction in your wallet.");
       await send({ address: m.market as Address, abi: marketAbi, functionName: "stake", args: [side === "yes", a] });
       setAmt("");
-      return `Staked ${usdg(a)} USDG on ${side.toUpperCase()}.`;
+      return `Staked: ${usdg(a)} USDG on the ${side.toUpperCase()} side.`;
     });
   }
   return (
-    <section className="rc-desk r2-desk" aria-label="Stake on this market">
+    <section className="rc-desk r2-desk" aria-label="Stake desk">
       <h2 className="r2-desk-title">
         {label(m)} above {price(m.strike, m.decimals)} USD at {utc(m.closeTime)}
       </h2>
       <Split yes={BigInt(m.yesPool)} no={BigInt(m.noPool)} />
       {open ? (
         <div className="rc-desk-body">
-          <Segmented label="Side" value={side} onChange={setSide} options={[{ id: "yes", label: "YES, above" }, { id: "no", label: "NO, at or below" }]} />
-          <AmountField id="predict-amt" label="USDG to stake" unit="USDG" value={amt} onChange={setAmt} max={bal !== undefined ? usdg(bal as bigint) : undefined} onMax={() => bal !== undefined && setAmt(formatUnits(bal as bigint, USDG_DECIMALS))} hint={`Staking closes in ${span(m.lockTime - now)}`} />
+          <Segmented label="Side" value={side} onChange={setSide} options={[{ id: "yes", label: "YES, above" }, { id: "no", label: "NO, at or under" }]} />
+          <AmountField id="predict-amt" label="Stake amount, USDG" unit="USDG" value={amt} onChange={setAmt} max={bal !== undefined ? usdg(bal as bigint) : undefined} onMax={() => bal !== undefined && setAmt(formatUnits(bal as bigint, USDG_DECIMALS))} hint={`Stakes close in ${span(m.lockTime - now)}`} />
           {ready ? (
             <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !parseAmount(amt, USDG_DECIMALS)} onClick={() => void stake()}>
               {tx.busy ? "Staking…" : `Stake on ${side.toUpperCase()}`}
@@ -117,7 +117,7 @@ function StakeDesk({ m, now }: { m: PredictMarketView; now: number }) {
           <NoticeLine notice={tx.notice} />
         </div>
       ) : (
-        <p className="rc-muted">{m.status === "locked" ? `Staking closed. The market closes in ${span(m.closeTime - now)}.` : m.status === "closed" ? "The close has passed. Settlement uses the first Chainlink price published after it." : STATUS[m.status]}</p>
+        <p className="rc-muted">{m.status === "locked" ? `Stakes are closed. The market reaches its close in ${span(m.closeTime - now)}.` : m.status === "closed" ? "The close time is behind us. The first Chainlink price published after it decides the result." : STATUS[m.status]}</p>
       )}
     </section>
   );
@@ -134,11 +134,11 @@ export function Positions({ markets }: { markets: PredictMarketView[] }) {
   async function claim(market: string) {
     await tx.run("Claim", async ({ send, step }) => {
       if (inOrry && ORRY.token) {
-        step("Approve ORRY for the fee in your wallet.");
+        step("Approve the ORRY fee spend in your wallet.");
         await send({ address: ORRY.token, abi: erc20 as Abi, functionName: "approve", args: [market as Address, 2n ** 256n - 1n] });
       }
       await send({ address: market as Address, abi: marketAbi, functionName: "claim", args: [inOrry] });
-      return "Paid to your wallet.";
+      return "Payout sent to your wallet.";
     });
   }
   return (
@@ -146,7 +146,7 @@ export function Positions({ markets }: { markets: PredictMarketView[] }) {
       <div className="rc-panel-head">
         <h2>Your positions</h2>
         <label className="r2-check">
-          <input type="checkbox" checked={inOrry} onChange={(e) => setInOrry(e.target.checked)} /> Pay the fee in ORRY, 25% off
+          <input type="checkbox" checked={inOrry} onChange={(e) => setInOrry(e.target.checked)} /> Settle the fee in ORRY for 25% less
         </label>
       </div>
       <table className="rc-table">
@@ -230,17 +230,17 @@ function CreateMarket() {
     const close = BigInt(Math.floor(Date.now() / 1000) + hours * 3600 + 120);
     await tx.run("Create market", async ({ send, step, ensureAllowance }) => {
       if (fee && fee > 0n) await ensureAllowance(address, FACTORY, fee + fee / 50n, step);
-      step("Confirm the new market in your wallet.");
+      step("Sign the new market transaction in your wallet.");
       await send({ address: FACTORY, abi: factoryAbi, functionName: "create", args: [chosen.feed, s, close] });
       setStrike("");
-      return `Market created: ${chosen.name} above ${strike} USD at ${utc(Number(close))}.`;
+      return `Market opened: ${chosen.name} above ${strike} USD, closing ${utc(Number(close))}.`;
     });
   }
   return (
-    <section className="rc-panel" aria-label="Open a market">
+    <section className="rc-panel" aria-label="Start a new market">
       <div className="rc-panel-head">
-        <h2>Open a market</h2>
-        <p>Pick a listed price feed, a strike and a close. Anyone can stake on it until 30 minutes before the close.</p>
+        <h2>Start a new market</h2>
+        <p>Choose a listed price feed, a strike price and a close time. Stakes stay open to everyone until 30 minutes before that close.</p>
       </div>
       <div className="r2-create">
         <label>
@@ -266,10 +266,10 @@ function CreateMarket() {
           </select>
         </label>
       </div>
-      {fee && fee > 0n ? <p className="rc-muted">Opening a market burns {orry(fee)} ORRY.</p> : null}
+      {fee && fee > 0n ? <p className="rc-muted">Starting a market burns {orry(fee)} ORRY.</p> : null}
       {ready ? (
         <button className="secondary" type="button" disabled={Boolean(tx.busy) || !chosen || !parseAmount(strike, chosen?.decimals ?? 8)} onClick={() => void create()}>
-          {tx.busy ? "Opening…" : "Open the market"}
+          {tx.busy ? "Starting…" : "Start the market"}
         </button>
       ) : null}
       <NoticeLine notice={tx.notice} />
@@ -292,14 +292,14 @@ export function PredictView() {
   return (
     <>
       <OrryHead
-        title="Call where a price closes."
-        lead={<p>Stake USDG on YES or NO for a stock or ETH price at a set time. Chainlink settles it at the first price published after the close, and the winning side shares the pool.</p>}
+        title="Say where a price will close."
+        lead={<p>Put USDG on YES or NO for a stock or ETH price at a chosen time. The first Chainlink price published after the close settles it, and the side that called it right splits the pool.</p>}
         reading={<Reading markets={q.data ? markets : undefined} now={now} />}
       />
       <div className="rc-grid">
         <section className="rc-panel r2-markets" aria-label="Markets">
           {markets.length === 0 ? (
-            <p className="rc-muted">{q.isLoading ? "Reading the markets…" : "No market is open yet. Open the first one below."}</p>
+            <p className="rc-muted">{q.isLoading ? "Loading markets…" : "No markets are taking stakes yet. Start the first one below."}</p>
           ) : (
             <table className="rc-table">
               <thead>

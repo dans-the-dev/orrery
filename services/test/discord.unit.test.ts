@@ -48,7 +48,7 @@ describe("Discord interactions signature", () => {
   it("rejects malformed addresses without reading the chain", async () => {
     const d = { webUrl: "https://orrery.tech" } as DiscordConfig;
     const r = (await handleInteraction({} as Config, {} as Chain, {} as Sql, d, { type: 2, data: { name: "payer", options: [{ name: "address", value: "nope" }] } })) as { data: { content: string; flags: number } };
-    expect(r.data.content).toBe("Pass a 0x address.");
+    expect(r.data.content).toBe("Expected a 0x address.");
     expect(r.data.flags).toBe(64);
   });
 });
@@ -71,8 +71,8 @@ describe("roles", () => {
 describe("notifier messages", () => {
   it("formats burns, releases and alerts", () => {
     expect(formatOrry("1234500000000000000000")).toBe("1,234.5");
-    expect(burnMessage({ amount: "2000000000000000000", source: "2", tx: "0xabc" }, "https://x")).toBe("🔥 2 ORRY burned · check packs paid in ORRY\nhttps://x/tx/0xabc");
-    expect(burnMessage({ amount: "89720000000000000000", source: "5", tx: "0xdef" }, "https://x")).toBe("🔥 89.72 ORRY burned · market orders, sealing fee\nhttps://x/tx/0xdef");
+    expect(burnMessage({ amount: "2000000000000000000", source: "2", tx: "0xabc" }, "https://x")).toBe("🔥 2 ORRY burned · ORRY check pack purchase\nhttps://x/tx/0xabc");
+    expect(burnMessage({ amount: "89720000000000000000", source: "5", tx: "0xdef" }, "https://x")).toBe("🔥 89.72 ORRY burned · market order sealing fee\nhttps://x/tx/0xdef");
     expect(releaseMessage("earn", "https://orrery.tech")).toContain("https://orrery.tech/earn");
     const a = alertsFor({ lag: { lag: 900n }, orryLag: { lag: 5n }, orryOn: true, maxLag: 600n, confirmations: 10, balances: [{ name: "keeper", address: "0x1", eth: 0.0005, minEth: 0.001 }, { name: "relayer", address: "0x2", eth: 1, minEth: 0.0001 }] });
     expect(a.map((x) => x.key)).toEqual(["indexer-lag", "low-gas-keeper"]);
@@ -116,7 +116,7 @@ describe("release rooms and cards", () => {
   it("/announce refuses members without Admin or Core Team", async () => {
     const api = { roles: async () => [{ id: "adm", name: "Admin" }, { id: "core", name: "Core Team" }] } as unknown as DiscordApi;
     const r = (await handleInteraction({} as Config, {} as Chain, {} as Sql, {} as DiscordConfig, { type: 2, data: { name: "announce", options: [{ name: "feature", value: "earn" }] }, member: { user: { id: "1" }, roles: ["x"] } }, api)) as { data: { content: string } };
-    expect(r.data.content).toBe("Only Admin and Core Team can approve announcements.");
+    expect(r.data.content).toBe("Announcements need approval from an Admin or Core Team member.");
   });
 });
 
@@ -212,9 +212,9 @@ describe("booster gamification", () => {
 
   it("says how many boosts the next level needs", async () => {
     const { boostProgressMessage } = await import("@orrery/server");
-    expect(boostProgressMessage(1, 0)).toContain("1 more boost reach Level 1");
-    expect(boostProgressMessage(9, 2)).toContain("5 more boosts reach Level 3, which unlocks a custom server link");
-    expect(boostProgressMessage(14, 3)).toContain("Level 3 is unlocked");
+    expect(boostProgressMessage(1, 0)).toContain("Level 1 is 1 boost away");
+    expect(boostProgressMessage(9, 2)).toContain("Level 3 is 5 boosts away and brings a custom invite link");
+    expect(boostProgressMessage(14, 3)).toContain("Level 3 reached");
   });
 
   it("moves a booster up a tier and removes tiers when the boost ends", async () => {
@@ -292,7 +292,7 @@ describe("role order and welcomes", () => {
     await welcomeNewMembers(sql, api, "G", now);
     expect(posts.length).toBe(1);
     expect(posts[0]).toContain("<@b>");
-    expect(posts[0]).toContain("never DMs you first");
+    expect(posts[0]).toContain("Nobody from the team will message you first");
     await welcomeNewMembers(sql, api, "G", now);
     expect(posts.length).toBe(1);
   });
@@ -326,10 +326,10 @@ describe("Discord test mode (development network on the community server)", () =
 
   it("answers commands only in the test channel", async () => {
     const outside = (await handleInteraction(cfg, {} as Chain, {} as Sql, d, cmd("ann"), api)) as { data: { content: string; flags: number } };
-    expect(outside.data.content).toMatch(/answer in #dev-lab/);
+    expect(outside.data.content).toMatch(/in #dev-lab/);
     expect(outside.data.flags).toBe(64);
     const inside = (await handleInteraction(cfg, {} as Chain, {} as Sql, d, cmd("lab"), api)) as { data: { content: string } };
-    expect(inside.data.content).toMatch(/ORRY stats appear here/);
+    expect(inside.data.content).toMatch(/ORRY figures show here/);
   });
 
   it("an approved announcement goes to the test channel, never to #announcements", async () => {

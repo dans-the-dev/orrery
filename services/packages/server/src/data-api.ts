@@ -63,10 +63,10 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
     try {
       open = await isOpen(feature);
     } catch {
-      return reply.code(503).send({ error: "Try again in a moment." });
+      return reply.code(503).send({ error: "Retry in a few seconds." });
     }
     if (!open) return reply.callNotFound();
-    if (!limit(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!limit(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   const network = caip2(cfg.chainId);
   const signer = dataSignerAddress(cfg);
@@ -108,7 +108,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
     return {
       x402Version: X402_VERSION,
       error,
-      resource: { url, description: `Orrery Data: ${d!.packCalls} calls`, mimeType: "application/json" },
+      resource: { url, description: `Orrery Data pack · ${d!.packCalls} calls`, mimeType: "application/json" },
       accepts,
     };
   }
@@ -121,7 +121,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
     try {
       payload = decodeHeader<PublicPaymentPayload>(header);
     } catch {
-      return reply.code(400).send({ error: "The payment header could not be read. Send base64 JSON." });
+      return reply.code(400).send({ error: "Payment header is not valid base64 JSON." });
     }
     const out = await settlePack(cfg, chain, sql, payload, await orryPackOpen(cfg, isOpen));
     if (!out.ok) {
@@ -131,7 +131,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
         .code(status)
         .header(HEADER_REQUIRED, encodeHeader(await paymentRequired(url, out.reason)))
         .header(HEADER_RESPONSE, encodeHeader(settlement))
-        .send({ error: status === 202 ? "The payment is still settling. Send the same request again in a moment." : `The payment was not accepted (${out.reason}).` });
+        .send({ error: status === 202 ? "Payment awaiting confirmation. Repeat this exact request in a few seconds." : `Payment refused (${out.reason}).` });
     }
     reply.header(HEADER_RESPONSE, encodeHeader({ success: true, transaction: out.txHash, network, payer: out.payer } satisfies SettlementResponse));
     // api_keys references credit_accounts: a buyer of data alone gets an account row (no credits) so its key can be issued
@@ -159,7 +159,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
 
   app.get("/v1/data/account", { preHandler: gate("data") }, async (req, reply) => {
     const address = await addressForKey(sql, bearer(req));
-    if (!address) return reply.code(401).send({ error: "Send your Orrery API key as a Bearer token." });
+    if (!address) return reply.code(401).send({ error: "Missing Orrery API key. Use an Authorization: Bearer header." });
     const calls = await dataCallsOf(sql, address);
     return { address, calls: calls.toString(), packCalls: d.packCalls, low: calls * 5n < BigInt(d.packCalls) };
   });
@@ -170,7 +170,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
     const url = `${cfg.publicUrl}/v1/data/packs`;
     const paid = await payFromHeader(req, reply, url);
     if (paid === null) {
-      return reply.code(402).header(HEADER_REQUIRED, encodeHeader(await paymentRequired(url, `${HEADER_SIGNATURE} header is required`))).send({});
+      return reply.code(402).header(HEADER_REQUIRED, encodeHeader(await paymentRequired(url, `Attach the ${HEADER_SIGNATURE} header to pay`))).send({});
     }
     if (reply.sent) return reply;
     const p = paid as Exclude<typeof paid, FastifyReply>;
@@ -181,7 +181,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
 
   app.get<{ Params: { id: string } }>("/v1/data/datasets/:id", { preHandler: gate("data", allowData) }, async (req, reply) => {
     const id = req.params.id as DatasetId;
-    if (!(DATA_DATASETS as readonly string[]).includes(id)) return reply.code(404).send({ error: `Unknown dataset. Use one of: ${DATA_DATASETS.join(", ")}.` });
+    if (!(DATA_DATASETS as readonly string[]).includes(id)) return reply.code(404).send({ error: `No such dataset. Available: ${DATA_DATASETS.join(", ")}.` });
     const q = parseDatasetQuery(cfg, id, (req.query ?? {}) as Record<string, unknown>);
     if ("error" in q) return reply.code(400).send({ error: q.error });
     const url = `${cfg.publicUrl}${req.url}`;
@@ -191,7 +191,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
     if (!address) {
       const paid = await payFromHeader(req, reply, url);
       if (paid === null) {
-        return reply.code(402).header(HEADER_REQUIRED, encodeHeader(await paymentRequired(url, "Send your Orrery API key, or pay for a data pack"))).send({});
+        return reply.code(402).header(HEADER_REQUIRED, encodeHeader(await paymentRequired(url, "An Orrery API key or a data pack payment is required"))).send({});
       }
       if (reply.sent) return reply;
       const p = paid as Exclude<typeof paid, FastifyReply>;
@@ -209,7 +209,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
     // the call is spent only for an answer, and no answer goes out without a call (DA-7)
     const left = await spendDataCall(sql, address);
     if (left === null) {
-      return reply.code(402).header(HEADER_REQUIRED, encodeHeader(await paymentRequired(url, "No data calls left. Buy a pack."))).send({ error: "No data calls left. Buy a pack." });
+      return reply.code(402).header(HEADER_REQUIRED, encodeHeader(await paymentRequired(url, "Data calls used up. A new pack adds more."))).send({ error: "Data calls used up. A new pack adds more." });
     }
     try {
       const signed = await signDataResponse(cfg, { dataset: id, view: q.view, query: { ...q.filters, limit: q.limit, before: q.before }, records: result.records, asOfBlock: result.asOfBlock, next: result.next });
@@ -276,10 +276,10 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
   );
 
   app.get<{ Params: { address: string } }>("/v1/data/providers/:address", { preHandler: gate("data-providers") }, async (req, reply) => {
-    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
     const [row] = await sql<Parameters<typeof providerView>[0][]>`select provider, splitter, endpoint, name, description, price_usdg::text as price_usdg,
       listed_block::text as listed_block, listed_tx, listed_at, updated_at from data_providers where provider = ${lower(req.params.address)}`;
-    if (!row) return reply.code(404).send({ error: "This address has no listing." });
+    if (!row) return reply.code(404).send({ error: "No provider listing exists for this address." });
     return providerView(row);
   });
 
@@ -309,7 +309,7 @@ export function registerDataRoutes(app: FastifyInstance, cfg: Config, chain: Cha
         ? [{ x402Version: 2, scheme: "exact", network, asset: getAddress(cfg.orry.token), extra: { assetTransferMethod: "permit2", proxy: f.permit2Proxy, permit2: f.permit2 } }]
         : []),
     ],
-    payTo: "Each provider's own Orrery payment address: GET /v1/data/providers/<address>",
+    payTo: "Per provider Orrery payment address, listed at GET /v1/data/providers/<address>",
     feeBps: 100,
   }));
 

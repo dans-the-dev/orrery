@@ -88,7 +88,7 @@ export class ShieldedWallet {
   }
 
   private insert(commitment: bigint, leafIndex: number): void {
-    if (leafIndex !== this.tree.size) throw new Error(`event gap: expected leaf ${this.tree.size}, got ${leafIndex}`);
+    if (leafIndex !== this.tree.size) throw new Error(`Notes arrived out of order: leaf ${this.tree.size} was expected, ${leafIndex} came in.`);
     this.tree.insert(commitment);
   }
 

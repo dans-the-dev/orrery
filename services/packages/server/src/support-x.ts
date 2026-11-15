@@ -2,7 +2,7 @@ import { createHmac, randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 /**
- * X API v2 for @OrreryHQ's mentions and replies, signed with OAuth 1.0a user context (one account, no token refresh).
+ * X API v2 for the Orrery X account's mentions and replies, signed with OAuth 1.0a user context (one account, no token refresh).
  * Pay-per-use billing: reading the account's own mentions and posting a reply are the only calls made.
  */
 

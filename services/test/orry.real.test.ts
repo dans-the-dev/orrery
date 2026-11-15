@@ -440,7 +440,7 @@ describe("quotes the API signs, accepted by the real treasury", () => {
     expect((await s.pub.waitForTransactionReceipt({ hash })).status).toBe("success");
     expect(supply - (await orrySupply())).toBe(BigInt(q.quote.orryAmount));
     await expect(carol.sendTransaction({ to: s.treasury, data: orryCalls.burnForCredits(q), chain: foundry, account: carol.account })).rejects.toThrow();
-    expect((await verifyQuote(s.pub, s.treasury, q)).reason).toBe("quote already used");
+    expect((await verifyQuote(s.pub, s.treasury, q)).reason).toBe("quote already redeemed");
 
     await catchUp();
     const [acct] = await sql`select credits::text from credit_accounts where address = ${carol.account.address.toLowerCase()}`;

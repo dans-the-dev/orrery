@@ -25,12 +25,12 @@ export function getProver(): Promise<TransactProver> {
 
 /** Every shield event from the API, in chain order (never held by the release switch). */
 export async function loadShieldEvents(): Promise<PoolEvent[]> {
-  if (!API_URL) throw new Error("The Orrery API is not configured in this build.");
+  if (!API_URL) throw new Error("This build has no Orrery API address set.");
   const out: PoolEvent[] = [];
   let after: string | null = null;
   for (let page = 0; page < 10_000; page++) {
     const r = await fetch(`${API_URL}/v1/r2/shield/events${after ? `?after=${encodeURIComponent(after)}` : ""}`, { cache: "no-store" });
-    if (!r.ok) throw new Error(`Could not read the shield's notes (${r.status}).`);
+    if (!r.ok) throw new Error(`Could not load the shield notes (status ${r.status}).`);
     const body = (await r.json()) as ShieldEventsResponse;
     out.push(...body.events.map((e) => eventFromJson(e as Record<string, unknown>)));
     after = body.cursor;

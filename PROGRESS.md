@@ -1,5 +1,18 @@
 # Progress
 
+## 2026-11-15 (Orrery)
+
+- Orrery created from Runcore at faed73d: same functions, new name, token ORRY, contracts renamed, copy rewritten,
+  Observatory theme. Runcore's launch history (`docs/launch/`), brand assets, deployments and addresses were left out.
+- Before a live run: register orrery.tech, create the X and Discord accounts (set `NEXT_PUBLIC_X_HANDLE` and the
+  Discord invite), make new keys in `~/.secrets/orrery/`, deploy with `services/scripts/deploy-4663.ts`, then copy
+  the addresses into `services/packages/sdk/src/quick.ts` and `services/packages/mcp/src/config.ts`.
+- Fork tests under `contracts/test/**/fork` still read Runcore's live 4663 contracts as fixtures; they need Orrery's
+  own addresses once it is deployed.
+
+The entries below are Runcore's history, kept for the decisions behind the code. The rename pass switched the
+names in them to Orrery's; every deployment, account and post they mention belongs to Runcore.
+
 ## 2026-11-06
 
 - Folder created with the owner's research brief (`00-source/`), translated to English.

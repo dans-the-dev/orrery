@@ -45,7 +45,7 @@ import { releasesFor } from "./releases.js";
  * reads "missed" while its reveal is still on its way to the confirmation depth. Countdowns use the chain's latest time.
  */
 
-const READ_FAILED = "Could not read the chain right now. Try again shortly.";
+const READ_FAILED = "Chain read failed. Retry in a few seconds.";
 
 const commitmentInputs = getAbiItem({ abi: iSealedBatchMarketAbi, name: "commitmentFor" }).inputs;
 /** keccak256(abi.encode(batch, account, order, salt)), as the market's `commitmentFor` (same as the SDK's). */
@@ -199,7 +199,7 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
       return reply.code(503).send({ error: READ_FAILED });
     }
     if (!ok) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   async function guarded<T>(reply: FastifyReply, fn: () => Promise<T>) {
     try {
@@ -363,7 +363,7 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
 
   app.get<{ Params: { market: string } }>("/v1/markets/:market", { preHandler: gate }, async (req, reply) => {
     const m = await marketRow(req.params.market).catch(() => undefined);
-    if (!m) return reply.code(404).send({ error: "No market at that address." });
+    if (!m) return reply.code(404).send({ error: "No market exists at this address." });
     return guarded(reply, () =>
       cache(`market:${m.market}`, async (): Promise<MarketResponse> => {
         const now = await chainTime();
@@ -376,7 +376,7 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
   // ---------------------------------------------------------------- fee tiers (L2, thresholds in USD)
   app.get<{ Querystring: { account?: string } }>("/v1/markets/fee-tiers", { preHandler: gate }, async (req, reply) => {
     const raw = req.query.account;
-    if (raw !== undefined && !isAddress(raw)) return reply.code(400).send({ error: "Pass account as a 0x address." });
+    if (raw !== undefined && !isAddress(raw)) return reply.code(400).send({ error: "account expects a 0x address." });
     const account = raw === undefined ? null : getAddress(raw);
     return guarded(reply, () =>
       cache(`tiers:${account?.toLowerCase() ?? ""}`, async (): Promise<FeeTiersResponse> => {
@@ -411,11 +411,11 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
     { preHandler: gate },
     async (req, reply) => {
       const limit = req.query.limit === undefined ? 20 : Number(req.query.limit);
-      if (!Number.isInteger(limit) || limit < 1 || limit > 100) return reply.code(400).send({ error: "Pass a limit from 1 to 100." });
+      if (!Number.isInteger(limit) || limit < 1 || limit > 100) return reply.code(400).send({ error: "limit must be between 1 and 100." });
       const before = req.query.before;
-      if (before !== undefined && !/^\d{1,30}$/.test(before)) return reply.code(400).send({ error: "Pass before as a batch number." });
+      if (before !== undefined && !/^\d{1,30}$/.test(before)) return reply.code(400).send({ error: "before expects a batch number." });
       const m = await marketRow(req.params.market).catch(() => undefined);
-      if (!m) return reply.code(404).send({ error: "No market at that address." });
+      if (!m) return reply.code(404).send({ error: "No market exists at this address." });
       return guarded(reply, () =>
         cache(`batches:${m.market}:${limit}:${before ?? ""}`, async (): Promise<BatchesResponse> => {
           const at = (await indexedTime()) ?? 0;
@@ -428,9 +428,9 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
   );
 
   app.get<{ Params: { market: string; batch: string } }>("/v1/markets/:market/batches/:batch", { preHandler: gate }, async (req, reply) => {
-    if (!/^\d{1,30}$/.test(req.params.batch)) return reply.code(400).send({ error: "Pass a batch number." });
+    if (!/^\d{1,30}$/.test(req.params.batch)) return reply.code(400).send({ error: "batch must be a whole number." });
     const m = await marketRow(req.params.market).catch(() => undefined);
-    if (!m) return reply.code(404).send({ error: "No market at that address." });
+    if (!m) return reply.code(404).send({ error: "No market exists at this address." });
     const batch = req.params.batch.replace(/^0+(?=\d)/, "");
     return guarded(reply, () =>
       cache(`batch:${m.market}:${batch}`, async (): Promise<BatchView> => {
@@ -455,11 +455,11 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
     "/v1/markets/accounts/:address/orders",
     { preHandler: gate },
     async (req, reply) => {
-      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
       const limit = req.query.limit === undefined ? 50 : Number(req.query.limit);
-      if (!Number.isInteger(limit) || limit < 1 || limit > 200) return reply.code(400).send({ error: "Pass a limit from 1 to 200." });
+      if (!Number.isInteger(limit) || limit < 1 || limit > 200) return reply.code(400).send({ error: "limit must be between 1 and 200." });
       const before = req.query.before;
-      if (before !== undefined && !/^\d{1,20}$/.test(before)) return reply.code(400).send({ error: "Pass before as a block number." });
+      if (before !== undefined && !/^\d{1,20}$/.test(before)) return reply.code(400).send({ error: "before expects a block number." });
       const address = getAddress(req.params.address);
       return guarded(reply, () =>
         cache(`orders:${address.toLowerCase()}:${limit}:${before ?? ""}`, async (): Promise<WalletOrdersResponse> => {
@@ -513,14 +513,14 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
       return reply.code(503).send({ error: READ_FAILED });
     }
     if (!ok) return reply.callNotFound();
-    if (!allowRelay(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!allowRelay(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
-  const uint = z.string().regex(/^\d{1,78}$/, "a decimal string");
+  const uint = z.string().regex(/^\d{1,78}$/, "expects digits only");
   const relayBody = z
     .object({
-      market: z.string().refine((v) => isAddress(v), "not an address"),
+      market: z.string().refine((v) => isAddress(v), "expects a 0x address"),
       batch: z.string().regex(/^\d{1,30}$/),
-      account: z.string().refine((v) => isAddress(v), "not an address"),
+      account: z.string().refine((v) => isAddress(v), "expects a 0x address"),
       order: z
         .object({ sellAsset: z.boolean(), amountIn: uint, limitPrice: uint, mode: z.enum(["limit", "swap"]), payFeeInOrry: z.boolean() })
         .strict(),
@@ -547,18 +547,18 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
 
   app.post("/v1/markets/relay/reveals", { preHandler: relayGate }, async (req, reply) => {
     const parsed = relayBody.safeParse(req.body);
-    if (!parsed.success) return reply.code(400).send({ error: "Send market, batch, account, order and salt." });
+    if (!parsed.success) return reply.code(400).send({ error: "Required fields: market, batch, account, order, salt." });
     const body = parsed.data;
     const m = await marketRow(body.market).catch(() => undefined);
-    if (!m) return reply.code(404).send({ error: "No market at that address." });
+    if (!m) return reply.code(404).send({ error: "No market exists at this address." });
     const batch = body.batch.replace(/^0+(?=\d)/, "");
     const order = { ...body.order, amountIn: BigInt(body.order.amountIn), limitPrice: BigInt(body.order.limitPrice) };
-    if (order.amountIn === 0n) return reply.code(400).send({ error: "The order needs an amount." });
+    if (order.amountIn === 0n) return reply.code(400).send({ error: "Set an amount above 0 for the order." });
     const account = getAddress(body.account);
     try {
       const now = await chainTime();
       const w = windows(m, BigInt(batch));
-      if (now >= w.revealEndsAt) return reply.code(409).send({ error: "This batch's reveal window has closed." });
+      if (now >= w.revealEndsAt) return reply.code(409).send({ error: "The reveal period for this batch has ended." });
       const onChain = (await chain.public.readContract({
         address: getAddress(m.market),
         abi: iSealedBatchMarketAbi,
@@ -567,7 +567,7 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
       })) as Hex;
       const mine = orderCommitmentOf(BigInt(batch), account, order, body.salt as Hex);
       if (onChain.toLowerCase() !== mine.toLowerCase()) {
-        return reply.code(400).send({ error: "That order and salt do not match this account's commitment in this batch." });
+        return reply.code(400).send({ error: "Order and salt disagree with the commitment this account made in this batch." });
       }
     } catch {
       return reply.code(503).send({ error: READ_FAILED });
@@ -582,11 +582,11 @@ export function registerMarketRoutes(app: FastifyInstance, cfg: Config, chain: C
     "/v1/markets/relay/reveals/:market/:batch/:account",
     { preHandler: relayGate },
     async (req, reply) => {
-      if (!/^\d{1,30}$/.test(req.params.batch) || !isAddress(req.params.account)) return reply.code(400).send({ error: "Pass a batch number and a 0x address." });
+      if (!/^\d{1,30}$/.test(req.params.batch) || !isAddress(req.params.account)) return reply.code(400).send({ error: "Expected a whole batch number and a 0x account address." });
       const m = await marketRow(req.params.market).catch(() => undefined);
-      if (!m) return reply.code(404).send({ error: "No market at that address." });
+      if (!m) return reply.code(404).send({ error: "No market exists at this address." });
       const view = await relayView(m, req.params.batch.replace(/^0+(?=\d)/, ""), req.params.account);
-      if (!view) return reply.code(404).send({ error: "Nothing queued for that order." });
+      if (!view) return reply.code(404).send({ error: "No queued reveal exists for this order." });
       return view;
     },
   );

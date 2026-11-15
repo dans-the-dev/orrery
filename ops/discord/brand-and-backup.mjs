@@ -20,5 +20,5 @@ console.log(`icon set: ${g.icon ? "yes" : "no"}`);
 const templates = await call("GET", `/guilds/${G}/templates`);
 const t = templates[0]
   ? await call("PUT", `/guilds/${G}/templates/${templates[0].code}`)
-  : await call("POST", `/guilds/${G}/templates`, { name: "Orrery", description: "Orrery server structure: rooms, roles and permissions." });
+  : await call("POST", `/guilds/${G}/templates`, { name: "Orrery", description: "Orrery Discord layout: rooms, roles and permissions." });
 console.log(`template ${templates[0] ? "synced" : "created"}: https://discord.new/${t.code}`);

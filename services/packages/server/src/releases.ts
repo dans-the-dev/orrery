@@ -106,7 +106,7 @@ export function releasesFor(sql: Sql, seed: ReleaseSeed, cacheMs: number): Relea
 /** GET /v1/releases: public, never held, rate-limited per IP, cached as the rows are. */
 export function registerReleaseRoutes(app: FastifyInstance, releases: Releases, allowPublic: (ip: string) => boolean): void {
   const limit = async (req: FastifyRequest, reply: FastifyReply) => {
-    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   app.get("/v1/releases", { preHandler: limit }, async (_req, reply) => {
     try {
@@ -117,7 +117,7 @@ export function registerReleaseRoutes(app: FastifyInstance, releases: Releases, 
       };
       return body;
     } catch {
-      return reply.code(503).send({ error: "Could not read the release schedule right now. Try again shortly." });
+      return reply.code(503).send({ error: "Release schedule read failed. Retry in a few seconds." });
     }
   });
 }

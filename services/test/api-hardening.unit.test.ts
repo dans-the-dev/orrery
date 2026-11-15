@@ -38,7 +38,7 @@ describe("API errors never carry internal text", () => {
     expect(res.statusCode).toBe(503);
     expect(res.body).not.toContain("SECRETKEY123");
     expect(res.body).not.toContain("rpc.example.org");
-    expect(res.json()).toEqual({ error: "The chain read did not finish. Try again shortly." });
+    expect(res.json()).toEqual({ error: "Chain read failed. Retry in a few seconds." });
   });
 
   it("an unhandled error answers 500 with a fixed message", async () => {
@@ -47,14 +47,14 @@ describe("API errors never carry internal text", () => {
     expect(res.statusCode).toBe(500);
     expect(res.body).not.toContain("dbpassword");
     expect(res.body).not.toContain("postgres://");
-    expect(res.json()).toEqual({ error: "Something went wrong on our side. Try again shortly." });
+    expect(res.json()).toEqual({ error: "Unexpected server error. Please retry in a few seconds." });
   });
 
   it("a malformed body answers 400 with our own words", async () => {
     const app = buildApi(cfg(), failingChain, failingSql);
     const res = await app.inject({ method: "POST", url: "/v1/keys/rotate", headers: { "content-type": "application/json" }, payload: "{" });
     expect(res.statusCode).toBe(400);
-    expect(res.json()).toEqual({ error: "The request could not be read. Check it and send it again." });
+    expect(res.json()).toEqual({ error: "Malformed request. Fix the fields and resend." });
   });
 });
 

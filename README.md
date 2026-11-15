@@ -4,9 +4,13 @@ Know Your Agent infrastructure for the AI agent economy: an agent wallet with a 
 allowlists, scoped session keys, revocation) on top of ERC-8004 identity and x402 payments, plus a developer SDK.
 Verifiable performance tracking and controlled agent-to-agent copy come in later phases.
 
-Status (2026-11-06): analysis done, core decisions made (Q1 to Q6, integration pass I1 to I7). Wedge: provable
-policy and liveness for ERC-8004 agents. Chain: Robinhood Chain 4663 first. Wallet: own ERC-7579 policy module. Revenue:
-paid checks over x402 plus a one-time verification fee in USDG. SDK: TypeScript. Name: Orrery, domain orrery.tech (Q7); folder still `orrery`. Contract spec and invariants written (Q8: agent pays x402 from a capped float wallet). Services spec and handoff brief written (Q9: checks sold as prepaid credit packs). Contracts built and tested locally (`contracts/README.md`); services and SDK built and tested locally (`services/README.md`); design direction 03 Current Limit chosen. Open: hosting, final prices, treasury wallet, X handle registration. Nothing deployed, no keys.
+Status (2026-11-15): created as a rebrand of Runcore (`../kya-protocol`, commit faed73d) with the same functions:
+contracts, services, SDK, MCP server, web app and ops copied, every name, identifier and token ticker renamed
+(Runcore to Orrery, RCORE to ORRY, Kya* contracts to Orrery*), user-facing copy rewritten, and a new visual direction
+(Observatory, `design/README.md`). Fresh git history. Nothing deployed: `deployments/` is empty, the SDK and MCP have no
+default contract addresses, and no keys exist yet (`~/.secrets/orrery/` when they are made). Domain orrery.tech
+(not registered), no X or Discord account yet. The planning documents below are carried over from Runcore and keep
+their original decision history.
 
 ## Files
 

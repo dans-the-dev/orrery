@@ -69,17 +69,19 @@ const staff = ["Admin", "Core Team", "Moderator"].map((n) => role(n)?.id).filter
 const alert = { type: 2, metadata: { channel_id: ch("moderation-log") } };
 const block = (msg) => ({ type: 1, metadata: { custom_message: msg } });
 const existing = await call("GET", `/guilds/${G}/auto-moderation/rules`);
+// Optional env: ORRERY_X_URL and ORRERY_DISCORD_INVITE add the official X profile and invite to the link allowlist.
+const OFFICIAL_EXTRA = [process.env.ORRERY_X_URL, process.env.ORRERY_DISCORD_INVITE].filter(Boolean).map((u) => u.replace(/^https?:\/\//, "").replace(/\/$/, ""));
 const RULES = [
   { name: "Scam phrases", event_type: 1, trigger_type: 1, trigger_metadata: { keyword_filter: [
       "*seed phrase*", "*recovery phrase*", "*secret phrase*", "*private key*", "*validate your wallet*", "*wallet validation*", "*sync your wallet*",
       "*rectify*", "*claim your airdrop*", "*airdrop claim*", "*free mint*", "*mint is live*", "*open a ticket*", "*support ticket*", "*raise a ticket*",
       "*dm me*", "*dm for*", "*message me privately*", "*free nitro*", "*discord nitro*", "*steamcommunity*", "*wallet connect*", "*walletconnect*",
       "*double your*", "*guaranteed profit*", "*investment plan*",
-    ] }, actions: [block("Blocked to protect members: the team never asks for keys, phrases or DMs. Ask in #help instead."), alert] },
+    ] }, actions: [block("Message held. The team never asks for keys, recovery phrases or DMs. Post your question in #help."), alert] },
   { name: "Links outside the allowlist", event_type: 1, trigger_type: 1, trigger_metadata: {
       regex_patterns: ["(?i)(https?://|www\\.|discord\\.gg/|discord\\.com/invite/)\\S+"],
-      allow_list: ["orrery.tech", "x.com/OrreryHQ", "twitter.com/OrreryHQ", "discord.gg/zk3dybhead", "robinhoodchain.blockscout.com", "github.com"],
-    }, actions: [block("Links are limited to official Orrery sites. Share other links with a moderator first."), alert] },
+      allow_list: ["orrery.tech", "robinhoodchain.blockscout.com", "github.com", ...OFFICIAL_EXTRA],
+    }, actions: [block("Only official Orrery links post here. Ask a moderator to share any other link."), alert] },
   { name: "Impersonating names", event_type: 2, trigger_type: 6, trigger_metadata: { keyword_filter: [
       "*admin*", "*moderator*", "*support*", "*helpdesk*", "*orrery team*", "*orrery official*", "*official orrery*", "*core team*",
     ] }, actions: [{ type: 4 }, alert] },

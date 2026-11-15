@@ -373,8 +373,12 @@ async function check() {
   log(`releases: ${open.length ? `open ${open.join(", ")}` : "all held"}`);
   if (!FORK) {
     const home = await get("https://orrery.tech/");
-    const x = /href="https:\/\/x\.com\/OrreryHQ"/.test(home) && /twitter:site" content="@OrreryHQ"/.test(home);
-    log(`X gate on orrery.tech: ${x ? "pass" : "FAIL"}`);
+    // The X handle comes from NEXT_PUBLIC_X_HANDLE (web/components/social.ts); no handle means the site shows no X link.
+    const handle = (process.env.NEXT_PUBLIC_X_HANDLE ?? "").replace(/^@/, "");
+    if (handle) {
+      const x = home.includes(`href="https://x.com/${handle}"`) && home.includes(`twitter:site" content="@${handle}"`);
+      log(`X gate on orrery.tech: ${x ? "pass" : "FAIL"}`);
+    } else log("X gate on orrery.tech: skipped (NEXT_PUBLIC_X_HANDLE not set)");
   }
 }
 

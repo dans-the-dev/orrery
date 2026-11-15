@@ -19,17 +19,17 @@ async function call(method, path, body) {
 const tag = (name, emoji, moderated = false) => ({ name, moderated, emoji_name: emoji });
 const FORUMS = {
   help: {
-    topic: "One question per post. Say what you tried and the page you were on. Never share a seed phrase or private key. A moderator marks the post Solved.",
+    topic: "Open one post per question, with what you tried and the page you were on. Keep your seed phrase and private key to yourself. A moderator tags the post Solved once answered.",
     tags: [tag("Question", "❓"), tag("Operator", "🛠️"), tag("Merchant", "🧾"), tag("ORRY", "🪙"), tag("Wallet", "👛"), tag("Solved", "✅", true)],
     reaction: null,
   },
   "bug-reports": {
-    topic: "One bug per post: what you did, what you expected, what happened, page, browser and wallet, and a transaction hash if one is involved. Valid reports can earn a bounty.",
+    topic: "Open one post per bug: the steps you took, the result you expected, the result you got, page, browser and wallet, plus the transaction hash when there is one. Confirmed reports can earn a bounty.",
     tags: [tag("Web", "🖥️"), tag("Contracts", "📜"), tag("API", "🔌"), tag("Discord", "💬"), tag("Confirmed", "🔎", true), tag("Fixed", "✅", true)],
     reaction: null,
   },
   ideas: {
-    topic: "One idea per post. React with 👍 to support an idea; the team marks the ones it plans and ships.",
+    topic: "Open one post per idea and add a 👍 to back the ones you like. The team tags ideas as they are planned and shipped.",
     tags: [tag("Product", "💡"), tag("ORRY", "🪙"), tag("Community", "🤝"), tag("Planned", "🗓️", true), tag("Shipped", "🚀", true)],
     reaction: "👍",
   },

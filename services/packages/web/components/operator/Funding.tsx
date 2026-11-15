@@ -53,21 +53,21 @@ export function Funding({
     if (!pub || !ADDRESSES.usdg || !usdgAmount) return;
     const hash = await writeContractAsync({ address: ADDRESSES.usdg, abi: erc20Abi, functionName: "transfer", args: [account, usdgAmount] });
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transfer reverted.");
+    if (r.status !== "success") throw new Error("The chain reverted the transfer.");
     void accountUsdg.refetch();
   }
   async function sendGas() {
     if (!pub || !ethAmount) return;
     const hash = await sendTransactionAsync({ to: signer, value: ethAmount });
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transfer reverted.");
+    if (r.status !== "success") throw new Error("The chain reverted the transfer.");
     void signerEth.refetch();
   }
 
   return (
     <div className="editor-section">
-      <div className="row-heading"><h3>Fund the agent</h3></div>
-      <p style={{ marginTop: 8 }}>The agent draws USDG from the account, inside its caps, and pays for its own transactions with ETH on the signer.</p>
+      <div className="row-heading"><h3>Funds for the agent</h3></div>
+      <p style={{ marginTop: 8 }}>Payments come out of the account's USDG, always within the caps. The signer spends its own ETH on gas.</p>
       <div className="fund-rows">
         <div className="fund-row">
           <div>

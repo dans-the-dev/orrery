@@ -3,7 +3,7 @@ import { TemplatesView } from "@/components/community/TemplatesView";
 import { CommunityGate } from "@/components/community/shell";
 import { ComingSoon, OrryHead } from "@/components/orry/parts";
 
-export const metadata = { title: "Orrery · Templates", description: "Policy templates for agent spending limits, written by operators and sold for ORRY." };
+export const metadata = { title: "Orrery · Templates", description: "Ready-made agent policies, written by operators and bought with ORRY." };
 
 export default function TemplatesPage() {
   return (
@@ -12,19 +12,19 @@ export default function TemplatesPage() {
         feature="template-market"
         held={
           <>
-            <OrryHead title="Spending policies, written by operators." lead={<p>Policy templates for agent spending limits, priced in USD and paid in ORRY.</p>} />
-            <ComingSoon title="The template market opens soon." text="Listed templates, their prices and the listing form appear on this page when the market opens." />
+            <OrryHead title="Orbits other operators have plotted." lead={<p>Agent policy templates with a USD price, paid for in ORRY.</p>} />
+            <ComingSoon title="The template market starts soon." text="Templates for sale, their prices and the form to list your own show here once the market starts." />
           </>
         }
       >
         <TemplatesView />
       </CommunityGate>
       <PageGuide
-        audience={"Operators who want a tested policy, and operators who write good ones."}
+        audience={"Operators looking for a proven policy, and operators with one worth selling."}
         steps={[
-          { title: "List", text: "Set a USD price, paste the policy JSON and give the address where the file lives. Its hash is recorded with the listing." },
-          { title: "Buy", text: "Pay the price in ORRY. Part of it is burned and the rest goes to the creator, and the licence stays with your wallet." },
-          { title: "Apply", text: "Check the file against its hash, then use it as the policy of your agent." },
+          { title: "List", text: "Pick a USD price, paste the policy JSON and point to where the file is hosted. The listing records the file's hash." },
+          { title: "Buy", text: "Pay in ORRY. One part is burned, the remainder goes to the author, and your wallet keeps the licence." },
+          { title: "Apply", text: "Compare the file with its recorded hash, then set it as your agent's policy." },
         ]}
       />
     </>

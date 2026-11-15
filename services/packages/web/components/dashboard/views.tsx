@@ -87,13 +87,13 @@ export function OverviewView() {
       <div className="cp-grid">
         <CreditsSummary />
 
-        <Panel title="Agent limits" action={deployed ? { href: `${D}/agents`, label: agent ? "Manage" : "Set up" } : undefined} soon={!deployed}>
+        <Panel title="Agent caps" action={deployed ? { href: `${D}/agents`, label: agent ? "Manage" : "Set up" } : undefined} soon={!deployed}>
           {!deployed ? (
-            <SoonBody text="Agent limits for this wallet appear here when the Orrery contracts open." />
+            <SoonBody text="Once the Orrery contracts are deployed on this network, this wallet's agent caps show here." />
           ) : !signer ? (
             <Loading />
           ) : !agent ? (
-            <Empty text="No agent set up from this wallet yet." action={{ href: `${D}/agents`, label: "Set limits" }} />
+            <Empty text="This wallet has not set up an agent yet." action={{ href: `${D}/agents`, label: "Set caps" }} />
           ) : (
             <Rows
               rows={[
@@ -108,14 +108,14 @@ export function OverviewView() {
 
         <Panel title="Positions" action={stakeOn || earnOn ? { href: `${D}/positions`, label: "View" } : undefined} soon={!(releases.isLive("stake") || releases.isLive("earn"))}>
           {!(stakeOn || earnOn) ? (
-            <SoonBody text="Stake, Earn shares and rewards appear here when ORRY opens." />
+            <SoonBody text="Your stake, Earn shares and rewards show here once ORRY launches." />
           ) : me.rewardsEth === undefined && !earnLoaded ? (
             <Loading />
           ) : (
             <Rows
               rows={[
-                ...(stakeOn ? ([["Active stake", `${orry(me.stakeActive ?? 0n)} ORRY`], ["Rewards to claim", `${eth(me.rewardsEth ?? 0n)} ETH · ${orry(me.rewardsOrry ?? 0n)} ORRY`]] as [string, string][]) : []),
-                ...(earnOn ? ([["Earn pools", held.length ? `${held.length} with a deposit or fees` : "No deposit"]] as [string, string][]) : []),
+                ...(stakeOn ? ([["Active stake", `${orry(me.stakeActive ?? 0n)} ORRY`], ["Claimable rewards", `${eth(me.rewardsEth ?? 0n)} ETH · ${orry(me.rewardsOrry ?? 0n)} ORRY`]] as [string, string][]) : []),
+                ...(earnOn ? ([["Earn pools", held.length ? `${held.length} holding a deposit or fees` : "No deposit"]] as [string, string][]) : []),
               ]}
             />
           )}
@@ -123,14 +123,14 @@ export function OverviewView() {
 
         <Panel title="Merchant" action={ORRY.splitterFactory && releases.isLive("facilitator") ? { href: `${D}/merchant`, label: "View" } : undefined} soon={!releases.isLive("facilitator")}>
           {!releases.isLive("facilitator") ? (
-            <SoonBody text="Your payment address for agent payments appears here when merchant payments open." />
+            <SoonBody text="Once merchant payments go live, the address agents pay you at shows here." />
           ) : !merchant.data ? (
             <Loading />
           ) : (
             <Rows
               rows={[
                 ["Payment address", <span key="p" className="mono">{short(merchant.data.splitter)}</span>],
-                ["Status", merchant.data.created ? "Ready for payments" : "Not set up yet"],
+                ["Status", merchant.data.created ? "Taking payments" : "Not created"],
                 ["Payments, 30 days", merchant.data.settled30d.reduce((n, s) => n + s.payments, 0).toString()],
               ]}
             />
@@ -139,13 +139,13 @@ export function OverviewView() {
 
         <Panel title="Recent orders" action={ORRY.marketFactory ? { href: `${D}/orders`, label: "View all" } : undefined} soon={!(releases.isLive("stocks") || releases.isLive("swap") || releases.isLive("darkpool"))}>
           {!ORRY.marketFactory ? (
-            <SoonBody text="Your sealed orders appear here when the markets open." />
+            <SoonBody text="Once the markets go live, your sealed orders show here." />
           ) : orders.isLoading ? (
             <Loading />
           ) : orders.isError ? (
-            <Empty text="Your orders appear here in a moment." />
+            <Empty text="Your orders show up in a moment." />
           ) : !(orders.data ?? []).length ? (
-            <Empty text="No orders from this wallet yet." />
+            <Empty text="This wallet has placed no orders yet." />
           ) : (
             <OrdersTable rows={(orders.data ?? []).slice(0, 5)} compact />
           )}
@@ -169,7 +169,7 @@ export function AgentsView() {
   if (!deployed) {
     return (
       <Panel title="Signer record" soon>
-        <SoonBody text="Agent limits for this wallet appear here when the Orrery contracts open." />
+        <SoonBody text="Once the Orrery contracts are deployed on this network, this wallet's agent caps show here." />
       </Panel>
     );
   }
@@ -179,7 +179,7 @@ export function AgentsView() {
     <div className="cp-stack">
       <OperatorWorkspace />
       {isSigner && view ? (
-      <Panel title="This wallet as a signer">
+      <Panel title="This wallet signs for an agent">
         {isLoading ? (
           <Loading lines={4} />
         ) : (
@@ -189,7 +189,7 @@ export function AgentsView() {
                 ["Agent", `#${view.agentId.toString()}`],
                 ["Session", STATUS[view.status] ?? "Unknown"],
                 ["Account", <span key="a" className="mono">{view.account}</span>],
-                ["Limits", view.pendingReadyAt > 0n ? `Increase ready in ${duration(Number(view.pendingReadyAt) - now)}` : `Increases wait ${duration(view.increaseDelay)}`],
+                ["Limits", view.pendingReadyAt > 0n ? `Higher caps apply in ${duration(Number(view.pendingReadyAt) - now)}` : `Any raise waits ${duration(view.increaseDelay)}`],
               ]}
             />
             <div className="cp-table-wrap">
@@ -226,9 +226,9 @@ export function AgentsView() {
                 </tbody>
               </table>
             </div>
-            <h3 className="cp-sub">Allowed calls</h3>
+            <h3 className="cp-sub">Allowed targets</h3>
             {view.targets.length === 0 ? (
-              <p className="cp-note">None. This signer can only top up its float.</p>
+              <p className="cp-note">None. The signer may only refill its float.</p>
             ) : (
               <ul className="cp-list">
                 {view.targets.map((t) => (
@@ -240,7 +240,7 @@ export function AgentsView() {
               </ul>
             )}
             <p className="cp-note">
-              <Link href={`/signer/${address}`}>Public record of this signer</Link>
+              <Link href={`/signer/${address}`}>Open this signer's public record</Link>
             </p>
           </>
         )}
@@ -249,13 +249,13 @@ export function AgentsView() {
 
       {/* While staking is held, the workspace above already carries its "Coming soon" note; one is enough. */}
       {stakeOn ? (
-      <Panel title="Stake behind agents" soon={!stakeOn} action={stakeOn ? { href: "/stake", label: "Manage stake" } : undefined}>
+      <Panel title="Your agent stakes" soon={!stakeOn} action={stakeOn ? { href: "/stake", label: "Manage stake" } : undefined}>
         {!stakeOn ? (
-          <SoonBody text="Stake behind an agent appears here when staking opens." />
+          <SoonBody text="Once staking goes live, stake you place behind agents shows here." />
         ) : account.isLoading ? (
           <Loading />
         ) : stakes.length === 0 ? (
-          <Empty text="No stake behind an agent from this wallet." />
+          <Empty text="This wallet backs no agent with stake." />
         ) : (
           <div className="cp-table-wrap">
             <table className="cp-table">
@@ -296,7 +296,7 @@ export function MerchantView() {
   if (!on) {
     return (
       <Panel title="Payment address" soon>
-        <SoonBody text="Your payment address, its balances and your public profile appear here when merchant payments open." />
+        <SoonBody text="Once merchant payments go live, your payment address, its balances and your public profile show here." />
       </Panel>
     );
   }
@@ -311,7 +311,7 @@ export function MerchantView() {
           <Profile view={me.data} onSaved={() => void me.refetch()} />
         </Panel>
       ) : null}
-      <Panel title="Take payments in your API">
+      <Panel title="Accept agent payments in your API">
         <Integration payTo={me.data.splitter} />
       </Panel>
     </div>
@@ -336,7 +336,7 @@ export function PositionsView() {
   if (!stakeOn && !earnOn) {
     return (
       <Panel title="Positions" soon>
-        <SoonBody text="Stake, Earn shares and rewards appear here when ORRY opens." />
+        <SoonBody text="Your stake, Earn shares and rewards show here once ORRY launches." />
       </Panel>
     );
   }
@@ -345,16 +345,16 @@ export function PositionsView() {
       await send({ address: ORRY.claimAll as Address, abi: iClaimAllAbi as Abi, functionName: "claimAll" });
       void sim.refetch();
       earn.refetch();
-      return "Every fee and reward is in your wallet.";
+      return "All fees and rewards are now in your wallet.";
     });
   }
   return (
     <div className="cp-stack">
-      <Panel title="Ready to claim">
+      <Panel title="Claimable now">
         {paid === undefined ? (
           <Loading lines={2} />
         ) : paid.length === 0 ? (
-          <Empty text="Nothing is ready to claim right now. Fees and rewards stream in over time." />
+          <Empty text="Nothing to claim yet. Fees and rewards accrue as time passes." />
         ) : (
           <div className="cp-claim">
             <ul className="cp-assets">
@@ -391,7 +391,7 @@ export function PositionsView() {
             {!earn.loaded ? (
               <Loading />
             ) : held.length === 0 ? (
-              <Empty text="No Earn deposit from this wallet." action={{ href: "/earn", label: "Open Earn" }} />
+              <Empty text="This wallet holds no Earn deposit." action={{ href: "/earn", label: "Open Earn" }} />
             ) : (
               <div className="cp-table-wrap">
                 <table className="cp-table">
@@ -399,7 +399,7 @@ export function PositionsView() {
                     <tr>
                       <th>Pool</th>
                       <th>Unlocks</th>
-                      <th>Fees to claim</th>
+                      <th>Claimable fees</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -466,7 +466,7 @@ export function OrdersView() {
   if (!on) {
     return (
       <Panel title="Orders" soon>
-        <SoonBody text="Your sealed orders appear here when the markets open." />
+        <SoonBody text="Once the markets go live, your sealed orders show here." />
       </Panel>
     );
   }
@@ -475,9 +475,9 @@ export function OrdersView() {
       {orders.isLoading ? (
         <Loading lines={5} />
       ) : orders.isError ? (
-        <Empty text="Your orders appear here in a moment." />
+        <Empty text="Your orders show up in a moment." />
       ) : !(orders.data ?? []).length ? (
-        <Empty text="No orders from this wallet yet." action={open ? { href: "/stocks", label: "Open Markets" } : undefined} />
+        <Empty text="This wallet has placed no orders yet." action={open ? { href: "/stocks", label: "Open Markets" } : undefined} />
       ) : (
         <OrdersTable rows={orders.data ?? []} />
       )}

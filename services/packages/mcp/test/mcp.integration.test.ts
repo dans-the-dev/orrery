@@ -125,7 +125,7 @@ describe("@orrery/mcp", () => {
         "orrery_verify_check",
       ].sort(),
     );
-    for (const t of tools) expect(t.description, t.name).toMatch(/^(Free|Costs)/);
+    for (const t of tools) expect(t.description, t.name).toMatch(/^(No charge|Costs|Uses one|Gas only)/);
   });
 
   it("refuses a session key file others can read", () => {

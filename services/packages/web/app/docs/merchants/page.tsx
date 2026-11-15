@@ -2,56 +2,56 @@ import { DocsShell } from "@/components/orry/docsShell";
 import { FeatureGate } from "@/components/orry/gate";
 import { ComingSoon } from "@/components/orry/parts";
 
-export const metadata = { title: "Orrery · Merchants guide", description: "How merchant payments work: payment addresses, x402 settlement in USDG and ORRY, the fee, forwarding and the directory." };
+export const metadata = { title: "Orrery · Guide for merchants", description: "The merchant payments guide: your payment address, x402 settlement in USDG or ORRY, forwarding, the fee and the directory." };
 
 export default function MerchantsDocs() {
   return (
-    <DocsShell kicker="Guide" title="Merchants" lead={<p>Sell API calls, data or tools to agents and get paid over x402 in USDG or ORRY.</p>}>
-      <FeatureGate feature="facilitator" held={<ComingSoon title="The merchants guide opens with merchant payments." text="This guide appears here when merchant payments open." />}>
+    <DocsShell kicker="Guide" title="Merchants" lead={<p>Charge agents for API calls, data or tools, and collect over x402 in USDG or ORRY.</p>}>
+      <FeatureGate feature="facilitator" held={<ComingSoon title="The merchants guide arrives with merchant payments." text="This guide shows here once merchant payments start." />}>
         <>
-          <h2>Your payment address</h2>
+          <h2>The address you are paid at</h2>
           <p>
-            Each merchant wallet has one payment address, made by Orrery&apos;s splitter factory. The address is fixed by your wallet address, so it is
-            known before it exists, and the Merchants page shows it as soon as you connect. One transaction sets it up. Use it as the <code>payTo</code>{" "}
-            of every x402 price you publish; the facilitator settles only to payment addresses made by the factory.
+            Orrery&apos;s splitter factory gives every merchant wallet exactly one payment address. Your wallet address determines it, so it can be
+            computed before it is deployed, and the Merchants page displays it the moment you connect. Deploying it takes one transaction. Put it in
+            the <code>payTo</code> of each x402 price you publish. The facilitator settles to factory payment addresses and nowhere else.
           </p>
 
-          <h2>How a payment settles</h2>
+          <h2>The path of a payment</h2>
           <p>
-            In USDG the payer signs an EIP-3009 authorization for the exact amount to your payment address, and the facilitator sends it on chain. ORRY
-            has no EIP-3009, so ORRY payments go through Permit2: the payer approves Permit2 once, then signs one message per payment that names the
-            amount and your payment address. Orrery&apos;s x402 proxy moves the ORRY only to the address named in that message.
+            For USDG, the payer signs an EIP-3009 authorization covering the exact amount to your payment address, and the facilitator submits it on
+            chain. ORRY lacks EIP-3009, so ORRY payments use Permit2 instead: the payer grants Permit2 an approval once, then signs a message for each
+            payment stating the amount and your payment address. Orrery&apos;s x402 proxy sends that ORRY to the address in the message and to no other.
           </p>
           <p>
-            Your server calls <code>POST /v1/x402/verify</code> before it serves the request and <code>POST /v1/x402/settle</code> to collect, as in the
-            x402 facilitator API. <code>GET /v1/x402/supported</code> lists the assets and their transfer methods.
-          </p>
-
-          <h2>The fee and forwarding</h2>
-          <p>
-            Payments wait at your payment address until they are forwarded to your wallet. Orrery&apos;s keeper forwards on its own, and anyone can call{" "}
-            <code>forward(token)</code> at any time, you included. On each forward Orrery keeps 0.2% of the amount. The fee in USDG goes to the
-            treasury; the fee in ORRY is burned and shows on the burn page. Other tokens forward whole.
-          </p>
-          <p>
-            ORRY staked by your wallet lowers the fee, using the same stake tiers as the markets. The Merchants page shows your stake and the fee it gives
-            you now.
+            Following the x402 facilitator API, your server calls <code>POST /v1/x402/verify</code> ahead of serving the request, then{" "}
+            <code>POST /v1/x402/settle</code> to collect. <code>GET /v1/x402/supported</code> returns each asset with its transfer method.
           </p>
 
-          <h2>Profile and directory</h2>
+          <h2>Forwarding, and the fee</h2>
           <p>
-            Your merchant record can carry a name, a link and a short description. Saving it signs a message with your wallet and sends no transaction.
-            Merchants whose stake reaches the badge level appear in the directory on the Merchants page, largest stake first.
+            Funds sit at your payment address until a forward moves them on to your wallet. Orrery&apos;s keeper forwards by itself, and anyone, you
+            included, may call <code>forward(token)</code> whenever they like. Each forward keeps 0.2% of the amount for Orrery. A USDG fee goes to the
+            treasury, and an ORRY fee is burned and listed on the burn page. Any other token forwards in full.
+          </p>
+          <p>
+            Staking ORRY from your wallet brings the fee down, on the same stake tiers the markets use. The Merchants page displays your stake beside the
+            fee it currently earns you.
+          </p>
+
+          <h2>Your profile and the directory</h2>
+          <p>
+            A merchant record holds a name, a link and a brief description. Saving it is a wallet signature, with no transaction sent. Once a
+            merchant&apos;s stake reaches the badge level, the merchant is listed in the directory on the Merchants page, ordered by stake size.
           </p>
 
           <h2>API</h2>
           <table>
             <tbody>
-              <tr><td><code>GET /v1/merchants/:address</code></td><td>Payment address, setup state, fee discount, stake and 30 day volume of one merchant.</td></tr>
-              <tr><td><code>GET /v1/merchants</code></td><td>The directory.</td></tr>
-              <tr><td><code>GET /v1/x402/supported</code></td><td>Assets, networks and transfer methods the facilitator accepts.</td></tr>
-              <tr><td><code>POST /v1/x402/verify</code></td><td>Checks a payment before you serve the request.</td></tr>
-              <tr><td><code>POST /v1/x402/settle</code></td><td>Sends the payment on chain and returns the transaction.</td></tr>
+              <tr><td><code>GET /v1/merchants/:address</code></td><td>One merchant&apos;s payment address, setup state, fee discount, stake and volume over 30 days.</td></tr>
+              <tr><td><code>GET /v1/merchants</code></td><td>The merchant directory.</td></tr>
+              <tr><td><code>GET /v1/x402/supported</code></td><td>Every asset, network and transfer method the facilitator takes.</td></tr>
+              <tr><td><code>POST /v1/x402/verify</code></td><td>Confirms a payment ahead of serving the request.</td></tr>
+              <tr><td><code>POST /v1/x402/settle</code></td><td>Submits the payment on chain and returns its transaction.</td></tr>
             </tbody>
           </table>
         </>

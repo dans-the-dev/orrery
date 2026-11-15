@@ -66,7 +66,7 @@ const POOL_MANAGER_4663: Address = "0x8366a39CC670B4001A1121B8F6A443A643e40951";
 function optAddr(env: NodeJS.ProcessEnv, name: string): Address | null {
   const v = env[name];
   if (!v) return null;
-  if (!isAddress(v)) throw new Error(`${name} must be a 0x address`);
+  if (!isAddress(v)) throw new Error(`${name} expects a 0x address`);
   return v as Address;
 }
 

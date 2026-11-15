@@ -3,7 +3,7 @@ import { FeatureGate } from "@/components/orry/gate";
 import { R2Shell } from "@/components/r2/shell";
 import { ShieldExits, ShieldPage as ShieldLive } from "@/components/r2/ShieldGate";
 
-export const metadata = { title: "Orrery · Shield", description: "A private USDG balance: send and withdraw with a zero-knowledge proof." };
+export const metadata = { title: "Orrery · Shield", description: "Hold USDG out of public view, and move it with a zero-knowledge proof." };
 
 export default function ShieldPage() {
   return (
@@ -12,8 +12,8 @@ export default function ShieldPage() {
         feature="shield"
         held={
           <>
-            <OrryHead title="Keep your USDG balance private." lead={<p>Deposit USDG into a private balance, send it to another Shield account, and withdraw to any address with a zero-knowledge proof.</p>} />
-            <ComingSoon title="Shield opens soon." text="Deposits, private sends and withdrawals appear here when Shield opens." />
+            <OrryHead title="USDG, held out of view." lead={<p>Move USDG into a private balance, pass it to another Shield account, and take it out to any address. Each step carries a zero-knowledge proof.</p>} />
+            <ComingSoon title="Shield starts soon." text="Deposits, private transfers and withdrawals show here once Shield starts." />
             <ShieldExits />
           </>
         }

@@ -187,14 +187,14 @@ export function OperatorWorkspace() {
 
   async function run(label: string, fn: () => Promise<unknown>) {
     setBusy(true);
-    setNotice({ tone: "", text: `${label}: confirm in your wallet.` });
+    setNotice({ tone: "", text: `${label}: approve it in your wallet.` });
     try {
       await fn();
       setNotice({ tone: "ok", text: `${label}: done.` });
       await refetch();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "Request closed in the wallet." : `${label} did not go through. ${msg.split("\n")[0]?.slice(0, 160) ?? ""}` });
+      setNotice({ tone: "error", text: /reject|denied/i.test(msg) ? "The wallet closed the request." : `${label} was not completed. ${msg.split("\n")[0]?.slice(0, 160) ?? ""}` });
     } finally {
       setBusy(false);
     }
@@ -202,24 +202,24 @@ export function OperatorWorkspace() {
 
   /** Executes a call through the account: Safe 1-of-1 with the owner's pre-validated signature, or the dev account. */
   async function exec(to: Address, data: Hex) {
-    if (!account || !owner || !pub) throw new Error("Connect the owner wallet.");
+    if (!account || !owner || !pub) throw new Error("Connect the wallet that owns this account.");
     let hash: Hex;
     if (kind === "safe") {
       return execSafe(account, to, data, 0);
     } else if (kind === "dev") {
       hash = await writeContractAsync({ address: account, abi: devAccountAbi, functionName: "execute", args: [to, 0n, data] });
-    } else throw new Error("This account is not a 1-of-1 Safe owned by the connected wallet.");
+    } else throw new Error("The connected wallet must be the only owner of this Safe.");
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transaction reverted.");
+    if (r.status !== "success") throw new Error("The chain reverted the transaction.");
   }
 
   /** A call from a 1-of-1 Safe with the owner's pre-validated signature. Operation 1 is a delegatecall (MultiSendCallOnly). */
   async function execSafe(safe: Address, to: Address, data: Hex, operation: 0 | 1) {
-    if (!owner || !pub) throw new Error("Connect the owner wallet.");
+    if (!owner || !pub) throw new Error("Connect the wallet that owns this account.");
     const sig = concat([`0x${owner.slice(2).padStart(64, "0")}`, `0x${"0".repeat(64)}`, "0x01"]);
     const hash = await writeContractAsync({ address: safe, abi: safeAbi, functionName: "execTransaction", args: [to, 0n, data, operation, 0n, 0n, 0n, ZERO_ADDRESS, ZERO_ADDRESS, sig] });
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transaction reverted.");
+    if (r.status !== "success") throw new Error("The chain reverted the transaction.");
   }
 
   /** Adapter enabled, account initialised and the policy module installed, in one confirmation. */
@@ -236,13 +236,13 @@ export function OperatorWorkspace() {
     const c = createSafeCall(STACK, owner, BigInt(Date.now()));
     const hash = await sendTransactionAsync({ to: c.to, data: c.data });
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transaction reverted.");
+    if (r.status !== "success") throw new Error("The chain reverted the transaction.");
     const safe = parseEventLogs({ abi: safeFactoryAbi, logs: r.logs, eventName: "ProxyCreation" })[0]?.args.proxy;
-    if (!safe) throw new Error("The new account did not show in the receipt.");
+    if (!safe) throw new Error("The receipt holds no new Safe address.");
     // Shown and remembered before the second confirmation, so a closed wallet prompt leaves an account to finish.
     setAccountIn(safe);
     remember(CHAIN_ID, owner, { account: safe });
-    setNotice({ tone: "", text: "Account created. Confirm once more to set it up for Orrery." });
+    setNotice({ tone: "", text: "Safe created. One more confirmation readies it for Orrery." });
     await prepareAccount(safe);
   }
 
@@ -251,9 +251,9 @@ export function OperatorWorkspace() {
     if (!owner || !pub || !ADDRESSES.registry) return;
     const hash = await writeContractAsync({ address: ADDRESSES.registry, abi: identityRegistryAbi, functionName: "register", args: [""] });
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transaction reverted.");
+    if (r.status !== "success") throw new Error("The chain reverted the transaction.");
     const id = parseEventLogs({ abi: identityRegistryAbi, logs: r.logs, eventName: "Registered" })[0]?.args.agentId;
-    if (id === undefined) throw new Error("The new agent did not show in the receipt.");
+    if (id === undefined) throw new Error("The receipt holds no new agent ID.");
     setAgentIn(id.toString());
     remember(CHAIN_ID, owner, { agentId: id.toString() });
   }
@@ -346,24 +346,24 @@ export function OperatorWorkspace() {
   return (
     <div className="op-workspace">
         {!deployed ? (
-          <div className="panel"><h2>The operator view opens soon</h2><p>Sessions can be opened here once the contracts are live on this network.</p></div>
+          <div className="panel"><h2>Agent setup arrives here soon</h2><p>Once the Orrery contracts are deployed on this network, you set each agent's orbit from this page.</p></div>
         ) : (
           <div className="stack">
             <div>
             <section className="panel">
-              <h2>Open an agent</h2>
+              <h2>Account and agent</h2>
               <div className="form-grid two">
                 <div className="field-with-action">
-                  <label className="field">Account<input value={accountIn} onChange={(e) => setAccountIn(e.target.value.trim())} placeholder="0x… your Safe" spellCheck={false} /><small>{!owner ? "Connect the owner wallet." : needsPrepare ? "Safe owned by this wallet. One confirmation sets it up for Orrery." : kind === "safe" ? "Safe, 1-of-1, owned by this wallet." : kind === "dev" ? "Local development account." : kind === "unsupported" ? "Needs a 1-of-1 Safe owned by the connected wallet." : STACK ? "No account yet? Create one here in two confirmations." : ""}</small></label>
-                  {STACK && !account ? <button className="secondary" type="button" disabled={!online || busy} onClick={() => void run("Create account", createAccount)}>Create my account</button> : null}
-                  {needsPrepare && account ? <button className="secondary" type="button" disabled={!online || busy} onClick={() => void run("Account setup", () => prepareAccount(account))}>Finish account setup</button> : null}
+                  <label className="field">Account<input value={accountIn} onChange={(e) => setAccountIn(e.target.value.trim())} placeholder="0x… Safe address" spellCheck={false} /><small>{!owner ? "Connect the wallet that owns this account." : needsPrepare ? "This wallet owns the Safe. Confirm once more to ready it for Orrery." : kind === "safe" ? "A 1-of-1 Safe, and this wallet is its owner." : kind === "dev" ? "Development account on this network." : kind === "unsupported" ? "Use a 1-of-1 Safe whose owner is the connected wallet." : STACK ? "New here? Two confirmations create a Safe for you." : ""}</small></label>
+                  {STACK && !account ? <button className="secondary" type="button" disabled={!online || busy} onClick={() => void run("New Safe", createAccount)}>Create a Safe</button> : null}
+                  {needsPrepare && account ? <button className="secondary" type="button" disabled={!online || busy} onClick={() => void run("Safe setup", () => prepareAccount(account))}>Complete the Safe setup</button> : null}
                 </div>
                 <div className="field-with-action">
-                  <label className="field">Agent ID (ERC-8004)<input value={agentIn} onChange={(e) => setAgentIn(e.target.value.trim())} placeholder="1" inputMode="numeric" /><small>{agentId === undefined && ADDRESSES.registry ? "No agent identity yet? Register one here in one confirmation." : ""}</small></label>
-                  {agentId === undefined && ADDRESSES.registry && CHAIN_ID !== 31337 ? <button className="secondary" type="button" disabled={!online || busy} onClick={() => void run("Register agent", registerAgent)}>Register a new agent</button> : null}
+                  <label className="field">ERC-8004 agent ID<input value={agentIn} onChange={(e) => setAgentIn(e.target.value.trim())} placeholder="1" inputMode="numeric" /><small>{agentId === undefined && ADDRESSES.registry ? "No ERC-8004 identity yet? One confirmation registers it." : ""}</small></label>
+                  {agentId === undefined && ADDRESSES.registry && CHAIN_ID !== 31337 ? <button className="secondary" type="button" disabled={!online || busy} onClick={() => void run("Register agent", registerAgent)}>Register an identity</button> : null}
                 </div>
               </div>
-              {!owner ? <p className="muted-line">Connect a wallet on {activeChain.name} to start.</p> : null}
+              {!owner ? <p className="muted-line">To begin, connect a wallet on {activeChain.name}.</p> : null}
               {notice && !(account && agentId !== undefined && view) ? <div className={`notice ${notice.tone}`} role="status">{notice.text}</div> : null}
             </section>
             </div>
@@ -371,13 +371,13 @@ export function OperatorWorkspace() {
             {account && agentId !== undefined && view ? (
               <section className="editor">
                 <div className="editor-head">
-                  <div><p className="section-kicker">Agent #{agentId.toString()} / policy</p><h2>Spending authority</h2></div>
+                  <div><p className="section-kicker">Agent #{agentId.toString()} · policy</p><h2>Payment orbit</h2></div>
                   <StatusPill status={view.status} />
                 </div>
                 <ol className="setup-steps">
                   <li data-done={view.installed}>
                     <span className="setup-mark" aria-hidden="true">{view.installed ? "✓" : "1"}</span>
-                    <div><strong>Policy module</strong><p>{view.installed ? "Installed on this account." : "The account enforces the limits through this module."}</p></div>
+                    <div><strong>Policy module</strong><p>{view.installed ? "Active on this account." : "This module holds every payment to the caps you set."}</p></div>
                     {!view.installed ? (
                       <button className="secondary" type="button" disabled={!ready || busy}
                         onClick={() => run("Install module", () => (needsPrepare ? prepareAccount(account) : exec(account, encodeFunctionData({ abi: install7579, functionName: "installModule", args: [2n, ADDRESSES.module!, "0x"] }))))}>Install module</button>
@@ -385,16 +385,16 @@ export function OperatorWorkspace() {
                   </li>
                   <li data-done={view.bound}>
                     <span className="setup-mark" aria-hidden="true">{view.bound ? "✓" : "2"}</span>
-                    <div><strong>Identity</strong><p>{view.bound ? `Agent #${agentId.toString()} pays from this account.` : "One signature and one confirmation tie the agent to this account."}</p></div>
+                    <div><strong>Identity</strong><p>{view.bound ? `This account pays for agent #${agentId.toString()}.` : "Bind the agent to this account with one signature and one confirmation."}</p></div>
                     {!view.bound ? <button className="secondary" type="button" disabled={!ready || busy || !view.installed} onClick={() => run("Bind identity", bindIdentity)}>Bind identity</button> : null}
                   </li>
                   <li data-done={Boolean(hasSession && view.status !== 3)}>
                     <span className="setup-mark" aria-hidden="true">{hasSession && view.status !== 3 ? "✓" : "3"}</span>
-                    <div><strong>Session</strong><p>{hasSession && view.status !== 3 ? `Signer ${short(view.signer)} pays inside the limits below.` : "Create the signer and set the limits below, then open the session."}</p></div>
+                    <div><strong>Session</strong><p>{hasSession && view.status !== 3 ? `Signer ${short(view.signer)} pays within the orbit below.` : "Add a signer, set its caps below, then open the session."}</p></div>
                   </li>
                   <li data-done={view.verified} data-optional="true">
                     <span className="setup-mark" aria-hidden="true">{view.verified ? "✓" : "+"}</span>
-                    <div><strong>Verification</strong><p>{view.verified ? "Paid. Checks of this agent show it as verified." : `Optional. A one-time fee${fee !== undefined ? ` of ${usdg(fee)} USDG` : ""} marks the agent as verified in every check.`}</p></div>
+                    <div><strong>Verification</strong><p>{view.verified ? "Paid. Each check of this agent now reads verified." : `Optional. Pay a one-time fee${fee !== undefined ? ` of ${usdg(fee)} USDG` : ""} and every check shows the agent as verified.`}</p></div>
                     {!view.verified ? <button className="secondary" type="button" disabled={!ready || busy} onClick={() => run("Verification", payVerification)}>Pay verification</button> : null}
                     {!view.verified ? <VerifyWithOrryLink agentId={agentId} /> : null}
                   </li>
@@ -404,7 +404,7 @@ export function OperatorWorkspace() {
                   <div className="spend-panel">
                     <div><span>Spent today</span><strong>{usdg(c.spentToday)} <small>/ {usdg(c.perDay)} USDG</small></strong></div>
                     <div className="spend-track"><i style={{ width: `${c.perDay > 0n ? Math.min(100, Number((c.spentToday * 100n) / c.perDay)) : 0}%` }} /></div>
-                    <p>{usdg(c.perDay > c.spentToday ? c.perDay - c.spentToday : 0n)} USDG available today · signer {short(view.signer)}</p>
+                    <p>{usdg(c.perDay > c.spentToday ? c.perDay - c.spentToday : 0n)} USDG left today · signer {short(view.signer)}</p>
                   </div>
                 ) : null}
 
@@ -412,37 +412,37 @@ export function OperatorWorkspace() {
                   <div className="editor-section">
                     <div className="row-heading">
                       <h3>Agent signer</h3>
-                      <div className="seg" role="group" aria-label="Where the signer comes from">
-                        <button type="button" aria-pressed={signerMode === "create"} onClick={() => setSignerMode("create")}>Create it here</button>
-                        <button type="button" aria-pressed={signerMode === "paste"} onClick={() => setSignerMode("paste")}>The agent has one</button>
+                      <div className="seg" role="group" aria-label="Signer source">
+                        <button type="button" aria-pressed={signerMode === "create"} onClick={() => setSignerMode("create")}>Make one here</button>
+                        <button type="button" aria-pressed={signerMode === "paste"} onClick={() => setSignerMode("paste")}>Use the agent's own</button>
                       </div>
                     </div>
                     {signerMode === "create" ? (
                       <>
-                        <p style={{ marginTop: 8 }}>The agent pays with its own key, inside the limits below. The key is made in this browser tab and goes only into the file you save.</p>
+                        <p style={{ marginTop: 8 }}>The agent signs payments with its own key, within the caps below. This tab generates the key, and it leaves only in the file you save.</p>
                         {!signerKey ? (
                           <div className="row" style={{ marginTop: 14 }}>
-                            <button className="secondary" type="button" onClick={createSigner}>Create the signer</button>
+                            <button className="secondary" type="button" onClick={createSigner}>Generate a signer</button>
                           </div>
                         ) : (
                           <div style={{ marginTop: 14 }}>
                             <div className="key-box">Signer {madeSigner?.address}</div>
                             <div className="row" style={{ marginTop: 12 }}>
-                              <button className="secondary" type="button" onClick={downloadKey}>Download the key file</button>
-                              <button className="quiet-button" type="button" onClick={() => void copyKey()}>{copied ? "Copied" : "Copy as text"}</button>
-                              <button className="quiet-button" type="button" onClick={createSigner}>Make another</button>
+                              <button className="secondary" type="button" onClick={downloadKey}>Save the key file</button>
+                              <button className="quiet-button" type="button" onClick={() => void copyKey()}>{copied ? "Copied" : "Copy to clipboard"}</button>
+                              <button className="quiet-button" type="button" onClick={createSigner}>Generate again</button>
                             </div>
-                            <label className="check-line"><input type="checkbox" checked={stored} onChange={(e) => setStored(e.target.checked)} />The key file is saved. It is shown only in this tab.</label>
-                            <p className="muted-line">Give the file to the agent. The SDK reads it as environment variables. <a href="/docs">Agent setup</a></p>
+                            <label className="check-line"><input type="checkbox" checked={stored} onChange={(e) => setStored(e.target.checked)} />I saved the key file. This tab is the only place it appears.</label>
+                            <p className="muted-line">Hand the file to the agent; the SDK loads it as environment variables. <a href="/docs">Agent setup</a></p>
                           </div>
                         )}
                       </>
                     ) : (
                       <>
-                        <p style={{ marginTop: 8 }}>The agent generates its signer and signs the consent with the SDK (`signSessionConsent`). Paste both here.</p>
+                        <p style={{ marginTop: 8 }}>The agent creates its own signer and signs its consent with `signSessionConsent` from the SDK. Paste the address and the signature here.</p>
                         <div className="form-grid two" style={{ marginTop: 14 }}>
                           <label className="field">Signer address<input value={signer} onChange={(e) => setSigner(e.target.value.trim())} placeholder="0x…" spellCheck={false} /></label>
-                          <label className="field">Signer consent<input value={consent} onChange={(e) => setConsent(e.target.value.trim())} placeholder="0x… 65-byte signature" spellCheck={false} /></label>
+                          <label className="field">Signer consent<input value={consent} onChange={(e) => setConsent(e.target.value.trim())} placeholder="0x… signature, 65 bytes" spellCheck={false} /></label>
                         </div>
                       </>
                     )}
@@ -451,8 +451,8 @@ export function OperatorWorkspace() {
 
                 <div className="editor-section">
                   <div className="row-heading">
-                    <h3>Token caps</h3>
-                    <div className="seg" role="group" aria-label="Starting limits">
+                    <h3>Caps per token</h3>
+                    <div className="seg" role="group" aria-label="Preset caps">
                       {LIMIT_PRESETS.map((p) => (
                         <button key={p.id} type="button" aria-pressed={Number(perTx) === Number(p.perTx) && Number(perDay) === Number(p.perDay) && Number(floatMax) === Number(p.floatMax)}
                           onClick={() => { setPerTx(p.perTx); setPerDay(p.perDay); setFloatMax(p.floatMax); }}>{p.label}</button>
@@ -467,9 +467,9 @@ export function OperatorWorkspace() {
                   </div>
                 </div>
                 <details className="editor-section editor-more" open={targets.trim() !== "" ? true : undefined}>
-                  <summary><h3>Allowed calls</h3><span>{targets.trim() === "" ? "None. The agent pays over x402 from its float." : "Custom"}</span></summary>
-                  <p style={{ marginTop: 8 }}>Leave this empty for an agent that pays over x402. Add a line for each contract function the signer may call through the account.</p>
-                  <label className="field" style={{ marginTop: 12 }}>One per line: target address and 4-byte selector<textarea value={targets} onChange={(e) => setTargets(e.target.value)} placeholder="0x… 0x12345678" spellCheck={false} /></label>
+                  <summary><h3>Allowed targets</h3><span>{targets.trim() === "" ? "None. Payments go over x402 from the float." : "Custom"}</span></summary>
+                  <p style={{ marginTop: 8 }}>An agent that pays over x402 needs none. Otherwise, name each contract function the signer may call through the account.</p>
+                  <label className="field" style={{ marginTop: 12 }}>Target address and 4-byte selector, one line each<textarea value={targets} onChange={(e) => setTargets(e.target.value)} placeholder="0x… 0x12345678" spellCheck={false} /></label>
                 </details>
                 <div className="editor-section editor-two">
                   <label>Policy expiry<input type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} /></label>
@@ -481,7 +481,7 @@ export function OperatorWorkspace() {
                 {view.pendingReadyAt > 0n ? (
                   <div className="pending">
                     <div className="pending-symbol">⏳</div>
-                    <div><strong>Increase pending</strong><p>{pendingLeft > 0 ? <>Ready in <span id="countdown">{duration(pendingLeft)}</span>.</> : "Ready to apply."}</p></div>
+                    <div><strong>Increase pending</strong><p>{pendingLeft > 0 ? <>Ready in <span id="countdown">{duration(pendingLeft)}</span>.</> : "It can be applied now."}</p></div>
                     <button className="quiet-button" type="button" disabled={!ready || busy || pendingLeft > 0} onClick={() => run("Apply increase", () => exec(ADDRESSES.module!, operatorCalls.applyIncrease(agentId)))}>Apply</button>
                     <button className="quiet-button" type="button" disabled={!ready || busy} onClick={() => run("Cancel increase", () => exec(ADDRESSES.module!, operatorCalls.cancelIncrease(agentId)))}>Cancel</button>
                   </div>
@@ -495,8 +495,8 @@ export function OperatorWorkspace() {
                   ) : (
                     <>
                       <button className="primary" type="button" disabled={!ready || busy || !policy || unchanged}
-                        onClick={() => run(isDecrease ? "Lower limits" : "Propose increase", () => exec(ADDRESSES.module!, isDecrease ? operatorCalls.decreasePolicy(agentId, policy!) : operatorCalls.proposeIncrease(agentId, policy!)))}>
-                        {unchanged ? "No changes" : isDecrease ? "Lower limits now" : `Propose increase (waits ${duration(Math.max(3600, view.increaseDelay))})`}
+                        onClick={() => run(isDecrease ? "Lower caps" : "Higher caps", () => exec(ADDRESSES.module!, isDecrease ? operatorCalls.decreasePolicy(agentId, policy!) : operatorCalls.proposeIncrease(agentId, policy!)))}>
+                        {unchanged ? "No changes" : isDecrease ? "Lower the caps now" : `Propose higher caps · ready after ${duration(Math.max(3600, view.increaseDelay))}`}
                       </button>
                       {view.status === 1 ? <button className="secondary" type="button" disabled={!ready || busy} onClick={() => run("Pause", () => exec(ADDRESSES.module!, operatorCalls.pause(agentId)))}>Pause agent</button> : null}
                       {view.status === 2 ? <button className="secondary" type="button" disabled={!ready || busy} onClick={() => run("Resume", () => exec(ADDRESSES.module!, operatorCalls.unpause(agentId)))}>Resume agent</button> : null}

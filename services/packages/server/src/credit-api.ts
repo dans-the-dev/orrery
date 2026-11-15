@@ -68,13 +68,13 @@ export function registerCreditRoutes(app: FastifyInstance, cfg: Config, chain: C
     try {
       open = await releases.isOpen(feature);
     } catch {
-      return reply.code(503).send({ error: "Try again in a moment." });
+      return reply.code(503).send({ error: "Retry in a few seconds." });
     }
     if (!open) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   const limited = async (req: FastifyRequest, reply: FastifyReply) => {
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   const cache = new Map<string, { at: number; value: unknown }>();
   async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
@@ -163,7 +163,7 @@ export function registerCreditRoutes(app: FastifyInstance, cfg: Config, chain: C
     );
 
     app.get<{ Params: { epoch: string } }>("/v1/attesters/epochs/:epoch", { preHandler: gate("attesters") }, async (req, reply) => {
-      if (!/^\d{1,9}$/.test(req.params.epoch)) return reply.code(400).send({ error: "Pass an epoch number." });
+      if (!/^\d{1,9}$/.test(req.params.epoch)) return reply.code(400).send({ error: "epoch must be a whole number." });
       const e = BigInt(req.params.epoch);
       return cached(`epoch:${e}`, async (): Promise<AttesterEpochResponse> => {
         const info = await registryInfo();
@@ -197,9 +197,9 @@ export function registerCreditRoutes(app: FastifyInstance, cfg: Config, chain: C
     });
 
     app.get<{ Params: { address: string } }>("/v1/attesters/:address", { preHandler: gate("attesters") }, async (req, reply) => {
-      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
       const a = await attesterAccount(getAddress(req.params.address));
-      if (!a.staker && a.claimable.length === 0) return reply.code(404).send({ error: "This address has no attester stake." });
+      if (!a.staker && a.claimable.length === 0) return reply.code(404).send({ error: "No attester stake is recorded for this address." });
       return a;
     });
   }
@@ -284,14 +284,14 @@ export function registerCreditRoutes(app: FastifyInstance, cfg: Config, chain: C
     );
 
     app.get<{ Params: { address: string } }>("/v1/credit/pools/:address", { preHandler: gate("credit") }, async (req, reply) => {
-      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
       const [row] = await sql<{ pool: string; pool_index: number; params: Record<string, unknown> }[]>`select pool, pool_index, params from credit_pools where pool = ${lower(req.params.address)}`;
-      if (!row) return reply.code(404).send({ error: "No pool at that address." });
+      if (!row) return reply.code(404).send({ error: "No credit pool exists at this address." });
       return cached(`pool:${row.pool}`, () => poolView(row.pool as Address, row.pool_index, row.params));
     });
 
     app.get<{ Params: { agentId: string } }>("/v1/credit/lines/:agentId", { preHandler: gate("credit-bond") }, async (req, reply) => {
-      if (!/^\d{1,30}$/.test(req.params.agentId)) return reply.code(400).send({ error: "Pass an agent id." });
+      if (!/^\d{1,30}$/.test(req.params.agentId)) return reply.code(400).send({ error: "agentId must be a numeric agent id." });
       const id = BigInt(req.params.agentId);
       return cached(`lines:${id}`, async (): Promise<CreditLinesResponse> => {
         const rows = await sql<{ pool: string }[]>`select pool from credit_lines where agent_id = ${id.toString()} order by opened_block`;
@@ -301,7 +301,7 @@ export function registerCreditRoutes(app: FastifyInstance, cfg: Config, chain: C
 
     // never held: a wallet's own lender positions and attester stake
     app.get<{ Params: { address: string } }>("/v1/credit/accounts/:address", { preHandler: limited }, async (req, reply): Promise<CreditAccountResponse | void> => {
-      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+      if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
       const address = getAddress(req.params.address);
       const pools = await sql<{ pool: string }[]>`select pool from credit_lenders where lender = ${lower(address)} order by pool`;
       const positions = await Promise.all(

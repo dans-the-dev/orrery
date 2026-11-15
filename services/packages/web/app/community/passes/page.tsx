@@ -3,7 +3,7 @@ import { PassesView } from "@/components/community/PassesView";
 import { CommunityGate } from "@/components/community/shell";
 import { ComingSoon, OrryHead } from "@/components/orry/parts";
 
-export const metadata = { title: "Orrery · Passes", description: "Day and week passes paid in ORRY, for your wallet or as a gift. Every ORRY paid is burned." };
+export const metadata = { title: "Orrery · Passes", description: "Buy day or week passes with ORRY, for your own wallet or for someone else. All ORRY spent on passes is burned." };
 
 export default function PassesPage() {
   return (
@@ -12,19 +12,19 @@ export default function PassesPage() {
         feature="passes"
         held={
           <>
-            <OrryHead title="Day and week passes, paid in ORRY." lead={<p>Pass time for your wallet or for another one. Every ORRY paid for a pass is burned.</p>} />
-            <ComingSoon title="Passes open soon." text="Day and week passes, their live price in ORRY and your pass time appear on this page when passes open." />
+            <OrryHead title="Pass time, bought with ORRY." lead={<p>Add pass time to your wallet or to someone else&apos;s. All ORRY spent on a pass is burned.</p>} />
+            <ComingSoon title="Passes start soon." text="Day and week passes, their current ORRY price and the pass time you hold show here once passes start." />
           </>
         }
       >
         <PassesView />
       </CommunityGate>
       <PageGuide
-        audience={"Wallets that want pass time, and anyone who wants to give it."}
+        audience={"Wallets that want pass time, and anyone buying it for another wallet."}
         steps={[
-          { title: "Pick a pass", text: "A day pass or a week pass, up to 52 in one purchase." },
-          { title: "Choose the wallet", text: "Your own, or any other wallet as a gift." },
-          { title: "Pay in ORRY", text: "The price is set in USD and paid in ORRY at the live price. The ORRY is burned." },
+          { title: "Choose a pass", text: "Day or week, with as many as 52 in a single purchase." },
+          { title: "Name the wallet", text: "Yours, or any other address you want to give it to." },
+          { title: "Pay with ORRY", text: "Priced in USD, settled in ORRY at the current rate. That ORRY is then burned." },
         ]}
       />
     </>

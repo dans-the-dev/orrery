@@ -1,5 +1,10 @@
 # ORRY on 4663: deployment runbook and dry-run evidence
 
+> **Orrery note (2026-11-15):** this document records Runcore's own run, from the codebase Orrery was copied from,
+> with the names switched to Orrery's by the rename pass. Orrery itself has no deployment, keys, X or Discord account
+> yet; addresses, ids and dates below are Runcore's and serve only as a worked example of the procedure.
+
+
 Internal engineering document. Status on 2026-11-08: the script is written and dry-run on a fork of 4663 with a real
 Pons V2 launch. A live run, spending funds and merging into `build/v1` each wait for the owner's word; a live run also
 waits for the owner's typed CONFIRM.

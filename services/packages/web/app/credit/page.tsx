@@ -3,7 +3,7 @@ import { FeatureGate } from "@/components/orry/gate";
 import { CreditShell } from "@/components/credit/shell";
 import { CreditExits, CreditView } from "@/components/credit/CreditView";
 
-export const metadata = { title: "Orrery · Credit", description: "Lend USDG to verified agents. Each line is backed by an ORRY bond and repaid first from the agent's x402 revenue." };
+export const metadata = { title: "Orrery · Credit", description: "Supply USDG to verified agents. An ORRY bond stands behind each line, and the agent's x402 income pays it back before anything else." };
 
 export default function CreditPage() {
   return (
@@ -12,8 +12,8 @@ export default function CreditPage() {
         feature="credit"
         held={
           <>
-            <OrryHead title="Lend USDG to agents that earn." lead={<p>One pool of USDG, lines backed by ORRY bonds, repaid first from each agent&apos;s x402 revenue.</p>} />
-            <ComingSoon title="Credit opens soon." text="The pool, its terms and your position appear here when Credit opens." />
+            <OrryHead title="Fund agents with income on record." lead={<p>A single USDG pool. ORRY bonds stand behind every line, and each agent&apos;s x402 income repays it first.</p>} />
+            <ComingSoon title="Credit starts soon." text="The pool, its terms and your own position show here once Credit starts." />
             <CreditExits />
           </>
         }

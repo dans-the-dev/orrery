@@ -4,7 +4,7 @@ import { FeatureGate } from "@/components/orry/gate";
 import { ComingSoon, OrryHead } from "@/components/orry/parts";
 import { OrryShell } from "@/components/orry/shell";
 
-export const metadata = { title: "Orrery · Burn", description: "Every ORRY burn, by source, with its transaction." };
+export const metadata = { title: "Orrery · Burn", description: "Each ORRY burn on record, grouped by source and linked to its transaction." };
 
 export default function BurnPage() {
   return (
@@ -13,19 +13,19 @@ export default function BurnPage() {
         feature="burn"
         held={
         <>
-          <OrryHead title="Where burned ORRY comes from." lead={<p>ORRY paid for checks and verifications is burned, and so is the burn share of the protocol&apos;s fees.</p>} />
-          <ComingSoon title="The burn record opens soon." text="Every burn, by source and with its transaction, appears on this page when it opens." />
+          <OrryHead title="Every burn, traced to its source." lead={<p>ORRY spent on checks and verifications is burned, along with the burn share of protocol fees.</p>} />
+          <ComingSoon title="The burn record starts soon." text="Each burn, grouped by source and linked to its transaction, shows here once the record starts." />
         </>
         }
       >
         <BurnView />
       </FeatureGate>
       <PageGuide
-        audience={"Anyone tracking ORRY supply."}
+        audience={"Anyone following the ORRY supply."}
         steps={[
-          { title: "Use the product", text: "Credit packs and agent verifications paid in ORRY are burned in the same transaction." },
-          { title: "Distribute runs", text: "Half of the protocol's share of pool fees, and half of the ORRY bought with revenue, is burned each run." },
-          { title: "Verify it", text: "Every row links to its transaction, so the total can be checked on the chain." },
+          { title: "Product use", text: "When a credit pack or agent verification is paid in ORRY, that ORRY burns inside the same transaction." },
+          { title: "Each Distribute", text: "Every run burns half of the protocol's cut of pool fees and half of the ORRY bought with revenue." },
+          { title: "Check the total", text: "Each row points to its transaction, so anyone can add up the total on chain." },
         ]}
       />
     </OrryShell>

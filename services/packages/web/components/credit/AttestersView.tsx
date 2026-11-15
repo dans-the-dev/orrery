@@ -21,12 +21,12 @@ function Reading({ a }: { a?: AttestersResponse }) {
     <div className="rc-card">
       <p className="rc-card-title">{a ? `Week ${a.epoch + 1}` : "This week"}</p>
       <p className="rc-big">
-        <Fig v={a ? usd(a.epochPool) : undefined} unit="USDG for attesters" />
+        <Fig v={a ? usd(a.epochPool) : undefined} unit="USDG to attesters" />
       </p>
       <dl className="rc-rows">
-        <Row label="Active">{a ? `${a.attesters.filter((x) => x.active).length} of ${a.maxActive}` : "…"}</Row>
+        <Row label="Active">{a ? a.attesters.filter((x) => x.active).length : "…"}</Row>
         <Row label="Agents checked">{a ? a.totalResults : "…"}</Row>
-        <Row label="Next set">{a ? utc(a.epochEndsAt) : "…"}</Row>
+        <Row label="Set changes">{a ? utc(a.epochEndsAt) : "…"}</Row>
       </dl>
     </div>
   );
@@ -51,22 +51,22 @@ function StakeDesk({ a }: { a: AttestersResponse }) {
     if (!address || !amtWei) return;
     await tx.run("Stake", async ({ send, step, ensureAllowance }) => {
       await ensureAllowance(address, reg, amtWei, step);
-      step("Confirm the stake in your wallet.");
+      step("Sign the stake in your wallet.");
       await send({ address: reg, abi: REG, functionName: "stake", args: [amtWei, first ? probe : "0x0000000000000000000000000000000000000000"] });
       setAmt("");
-      return `${orry(amtWei)} ORRY staked as an attester.`;
+      return `Attester stake on record · ${orry(amtWei)} ORRY.`;
     });
   }
   async function leave() {
     await tx.run("Leave", async ({ send }) => {
       await send({ address: reg, abi: REG, functionName: "requestUnlock" });
-      return `Your stake returns after ${days(a.unlockDelay)}.`;
+      return `Exit on record. The stake becomes withdrawable in ${days(a.unlockDelay)}.`;
     });
   }
   async function withdraw() {
     await tx.run("Withdraw stake", async ({ send }) => {
       await send({ address: reg, abi: REG, functionName: "withdraw" });
-      return "Your ORRY is back in your wallet.";
+      return "The ORRY went back to your wallet.";
     });
   }
 
@@ -74,7 +74,7 @@ function StakeDesk({ a }: { a: AttestersResponse }) {
     <section className="rc-desk" aria-label="Attester stake">
       {me?.unlockAt ? (
         <div className="rc-desk-body">
-          <p className="rc-muted">{me.unlockAt > now ? `Your ${whole(me.amount)} ORRY returns from ${utc(me.unlockAt)}.` : `Your ${whole(me.amount)} ORRY is ready.`}</p>
+          <p className="rc-muted">{me.unlockAt > now ? `${whole(me.amount)} ORRY becomes withdrawable on ${utc(me.unlockAt)}.` : `${whole(me.amount)} ORRY can be withdrawn now.`}</p>
           {me.unlockAt <= now ? (
             <button className="primary rc-go" type="button" disabled={Boolean(tx.busy)} onClick={() => void withdraw()}>
               Withdraw stake
@@ -83,19 +83,19 @@ function StakeDesk({ a }: { a: AttestersResponse }) {
         </div>
       ) : (
         <>
-          <Segmented label="Attester actions" value={mode} onChange={setMode} options={[{ id: "stake", label: first ? "Become an attester" : "Add stake" }, ...(me ? [{ id: "leave" as const, label: "Leave" }] : [])]} />
+          <Segmented label="Attester actions" value={mode} onChange={setMode} options={[{ id: "stake", label: first ? "Join as attester" : "Add stake" }, ...(me ? [{ id: "leave" as const, label: "Leave" }] : [])]} />
           {mode === "stake" ? (
             <div className="rc-desk-body">
-              <AmountField id="at-amt" label="ORRY to stake" unit="ORRY" value={amt} onChange={setAmt} hint={first ? `At least ${whole(a.minStake)} ORRY` : `Staked now ${whole(me!.amount)} ORRY`} />
+              <AmountField id="at-amt" label="Amount to stake" unit="ORRY" value={amt} onChange={setAmt} hint={first ? `Minimum ${whole(a.minStake)} ORRY` : `Current stake · ${whole(me!.amount)} ORRY`} />
               {first ? (
                 <label className="cr-field">
-                  <span>Probe key: the address your prober signs results with</span>
+                  <span>Probe key · the address that signs your probe results</span>
                   <input value={probe} placeholder="0x…" spellCheck={false} onChange={(e) => setProbe(e.target.value.trim())} />
                 </label>
               ) : null}
               {ready ? (
                 <button className="primary rc-go" type="button" disabled={Boolean(tx.busy) || !okFirst || !ORRY.token} onClick={() => void stake()}>
-                  {tx.busy ? "Waiting for the wallet…" : "Stake ORRY"}
+                  {tx.busy ? "Check your wallet…" : "Stake ORRY"}
                 </button>
               ) : (
                 <WalletButton />
@@ -103,7 +103,7 @@ function StakeDesk({ a }: { a: AttestersResponse }) {
             </div>
           ) : (
             <div className="rc-desk-body">
-              <p className="rc-muted">You leave the active set now and your ORRY returns {days(a.unlockDelay)} later.</p>
+              <p className="rc-muted">Leaving takes you out of the active set right away. The ORRY becomes withdrawable {days(a.unlockDelay)} after.</p>
               <button className="primary rc-go" type="button" disabled={Boolean(tx.busy)} onClick={() => void leave()}>
                 Leave
               </button>
@@ -138,7 +138,7 @@ export function Claims() {
             onClick={() =>
               void tx.run("Claim", async ({ send }) => {
                 await send({ address: ORRY.attesterSplitter as Address, abi: SPL, functionName: "claim", args: [BigInt(c.epoch)] });
-                return "USDG in your wallet.";
+                return "The USDG went to your wallet.";
               })
             }
           >
@@ -157,11 +157,11 @@ export function AttestersView() {
   return (
     <>
       <OrryHead
-        title="Sign agent results on Orrery's record."
+        title="Observe agents and sign the readings."
         lead={
           <p>
-            Lock {a ? whole(a.minStake) : "1,000,000"} ORRY and name a probe key. Each week the {a?.maxActive ?? 20} largest stakes probe agents and post what they find, and
-            share {a ? bps(a.shareBps) : "30%"} of the verification fees by the agents each one checked.
+            Stake {a ? whole(a.minStake) : "1,000,000"} ORRY and register a probe key. Every week the {a?.maxActive ?? 20} largest stakes form the set that probes agents and
+            publishes signed results. The set splits {a ? bps(a.shareBps) : "30%"} of verification fees, weighted by the agents each attester checked.
           </p>
         }
         reading={<Reading a={a} />}
@@ -169,12 +169,12 @@ export function AttestersView() {
       {a ? (
         <div className="rc-grid">
           <StakeDesk a={a} />
-          <section className="rc-panel" aria-label="This week's attesters">
+          <section className="rc-panel" aria-label="Current attester set">
             <div className="rc-panel-head">
-              <h2>This week&apos;s set</h2>
+              <h2>Current set</h2>
             </div>
             {a.attesters.length === 0 ? (
-              <p className="rc-muted">The first stakes appear here.</p>
+              <p className="rc-muted">Attester stakes are listed here once placed.</p>
             ) : (
               <div className="rc-table-wrap">
                 <table className="rc-table">
@@ -216,7 +216,7 @@ export function AttesterExits() {
   if (!address || !ORRY.attesterRegistry || (!me && !(acct.data?.attester?.claimable.length ?? 0))) return null;
   const reg = ORRY.attesterRegistry as Address;
   return (
-    <section className="rc-desk" aria-label="Your attester stake">
+    <section className="rc-desk" aria-label="Attester stake position">
       <div className="rc-desk-body">
         {me ? (
           <div className="cr-claim">
@@ -232,7 +232,7 @@ export function AttesterExits() {
                 Withdraw
               </button>
             ) : (
-              <span className="rc-muted">Returns from {utc(me.unlockAt)}</span>
+              <span className="rc-muted">Withdrawable on {utc(me.unlockAt)}</span>
             )}
           </div>
         ) : null}

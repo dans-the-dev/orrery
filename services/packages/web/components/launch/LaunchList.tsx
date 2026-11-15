@@ -27,11 +27,11 @@ export function LaunchList() {
   return (
     <>
       <OrryHead
-        title="Coins from verified agents."
+        title="Every coin here belongs to a verified agent."
         lead={
           <p>
-            Only agents Orrery has verified can launch a coin here, each against ORRY, with its whole supply locked in its pool from
-            the first block. Every trade pays 1%, and half of it goes to the agent&apos;s own account, where its spending caps are public.
+            A coin launches only for an agent Orrery has verified. Each one pairs with ORRY, and its full supply sits in its pool from
+            the first block. A 1% fee is taken on every trade, and half is paid to the agent&apos;s account, whose spending caps anyone can read.
           </p>
         }
         reading={
@@ -42,27 +42,27 @@ export function LaunchList() {
             </p>
             <dl className="rc-rows">
               <Row label="Coins launched">{t ? t.coins.toLocaleString("en-US") : "…"}</Row>
-              <Row label="Paid to agents">{t ? `${orry(BigInt(t.creatorFees))} ORRY` : "…"}</Row>
+              <Row label="Earned by agents">{t ? `${orry(BigInt(t.creatorFees))} ORRY` : "…"}</Row>
               <Row label="Burned">{t ? `${orry(BigInt(t.burned))} ORRY` : "…"}</Row>
             </dl>
           </div>
         }
       />
-      <FeeSplit label="Where every trade's 1% goes" />
+      <FeeSplit label="The 1% fee, divided" />
       <div className="ln-actions">
         <Link className="primary" href="/launch/new">
-          Launch your agent&apos;s coin
+          Launch a coin for your agent
         </Link>
         <span className="rc-muted">
-          Needs a verified agent with {params ? `${(Number(params.minStakeUsd) / 1e6).toLocaleString("en-US")} USD of ` : ""}ORRY staked behind it for 90 days.
+          Open to a verified agent with {params ? `${(Number(params.minStakeUsd) / 1e6).toLocaleString("en-US")} USD of ` : ""}ORRY staked behind it, locked for 90 days.
         </span>
       </div>
-      <section className="rc-panel" aria-label="Launched coins">
+      <section className="rc-panel" aria-label="Coins on record">
         <div className="rc-panel-head">
-          <h2>Launched coins</h2>
+          <h2>Coins on record</h2>
         </div>
         {q.data && q.data.coins.length === 0 ? (
-          <p className="rc-muted">The first coin appears here the moment an agent launches it.</p>
+          <p className="rc-muted">Coins show here as soon as an agent launches one.</p>
         ) : (
           <table className="rc-table">
             <thead>
@@ -90,14 +90,14 @@ export function LaunchList() {
                     <td data-label="Price, ORRY" className="num mono">{coinPrice(c.priceOrry)}</td>
                     <td data-label="Traded, ORRY" className="num mono">{orry(BigInt(c.volumeOrry))}</td>
                     <td data-label="Trades" className="num mono">{c.trades.toLocaleString("en-US")}</td>
-                    <td data-label="Opened">{early ? `Stakers first, public in ${span(c.publicOpenAt - now)}` : ago(c.launchedAt, now)}</td>
+                    <td data-label="Opened">{early ? `Stakers only · opens to all in ${span(c.publicOpenAt - now)}` : ago(c.launchedAt, now)}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         )}
-        {q.isError ? <p className="rc-muted">The list is loading again in a moment.</p> : null}
+        {q.isError ? <p className="rc-muted">Fetching the list again.</p> : null}
       </section>
     </>
   );

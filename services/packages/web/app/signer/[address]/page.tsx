@@ -16,11 +16,11 @@ export default function SignerPage({ params }: { params: Promise<{ address: stri
     <div className="product-page circuit">
       <Nav />
       <main className="signer-main">
-        <PageHead kicker="Signer record" title={address} titleClass="mono" art="signer-lookup" />
-        {!isAddress(address) ? <div className="panel"><h2>That is not an address</h2><p>Check the address and try again.</p></div>
-          : !deployed ? <div className="panel"><h2>Lookups open soon</h2><p>Signer records appear here once the contracts are live on this network.</p></div>
-          : isLoading ? <div className="panel"><h2>Reading the chain</h2></div>
-          : error || !data ? <div className="panel"><h2>The read did not finish</h2><p>Refresh in a moment.</p></div>
+        <PageHead kicker="Signer reading" title={address} titleClass="mono" art="signer-lookup" />
+        {!isAddress(address) ? <div className="panel"><h2>This is not a valid address</h2><p>Look over the characters and paste it again.</p></div>
+          : !deployed ? <div className="panel"><h2>Readings start soon</h2><p>Signer readings show here as soon as the contracts go live on this network.</p></div>
+          : isLoading ? <div className="panel"><h2>Reading chain state</h2></div>
+          : error || !data ? <div className="panel"><h2>Reading incomplete</h2><p>Reload the page in a moment.</p></div>
           : <Record view={data} />}
       </main>
       <Footer />

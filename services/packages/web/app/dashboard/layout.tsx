@@ -4,7 +4,7 @@ import { ConsoleShell } from "@/components/dashboard/Shell";
 
 export const metadata: Metadata = {
   title: { default: "Orrery · Dashboard", template: "Orrery · %s" },
-  description: "Manage your wallet on Orrery: agent limits, your payment address, positions and orders.",
+  description: "Your Orrery console: the orbit of each agent, the address you get paid at, your positions and your open orders.",
 };
 
 /** The dashboard is its own app: no site nav or footer, its own sidebar and top bar. */

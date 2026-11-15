@@ -46,7 +46,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
     <div className="dsh-app">
       <aside className={`dsh-side${menuOpen ? " is-open" : ""}`} aria-label="Dashboard">
         <Link className="dsh-brand" href={DASHBOARD_HREF} aria-label="Orrery dashboard">
-          <img src="/art/mark.png" alt="" width={28} height={28} />
+          <img src="/art/mark.svg" alt="" width={28} height={28} />
           <span>orrery</span>
         </Link>
         <nav className="dsh-nav">
@@ -60,8 +60,8 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           <CommunitySideLink />
           <CreditSideLink />
         </nav>
-        <p className="dsh-group">More on Orrery</p>
-        <nav className="dsh-nav dsh-more" aria-label="More on Orrery">
+        <p className="dsh-group">Elsewhere in Orrery</p>
+        <nav className="dsh-nav dsh-more" aria-label="Elsewhere in Orrery">
           {MORE.map((m) => {
             const isHeld = releases.ready && !m.features.some((f) => releases.isLive(f));
             return (
@@ -77,11 +77,11 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           <Link href="/">orrery.tech</Link>
         </div>
       </aside>
-      {menuOpen ? <button type="button" className="dsh-scrim" aria-label="Close the menu" onClick={() => setMenuOpen(false)} /> : null}
+      {menuOpen ? <button type="button" className="dsh-scrim" aria-label="Close navigation" onClick={() => setMenuOpen(false)} /> : null}
 
       <div className="dsh-main">
         <header className="dsh-top">
-          <button type="button" className="dsh-menu" aria-label="Open the menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>
+          <button type="button" className="dsh-menu" aria-label="Open navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>
             <ConsoleIconSvg name="menu" />
           </button>
           <div className="dsh-title">
@@ -100,9 +100,9 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           ) : (
             <>
               <section className="dsh-connect">
-                <img src="/art/mark.png" alt="" width={44} height={44} />
-                <h2>Connect a wallet to open {section.href === DASHBOARD_HREF ? "your dashboard" : section.label}.</h2>
-                <p>{section.href === DASHBOARD_HREF ? "Agent limits, credits, your payment address, positions and orders, read from the chain for the wallet you connect." : section.lead}</p>
+                <img src="/art/mark.svg" alt="" width={44} height={44} />
+                <h2>Connect a wallet to view {section.href === DASHBOARD_HREF ? "your dashboard" : section.label}.</h2>
+                <p>{section.href === DASHBOARD_HREF ? "Your agents' caps, credits, payment address, positions and orders, all read from the chain for the connected wallet." : section.lead}</p>
                 <WalletButton />
               </section>
               {section.href === CREDITS_HREF ? <CreditsPrices /> : null}

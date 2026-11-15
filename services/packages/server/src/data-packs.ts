@@ -62,7 +62,7 @@ export type OrryQuote = { ok: true; requirement: DataPaymentRequirements } | { o
 export async function orryPackRequirement(cfg: Config, chain: Chain, sql: Sql): Promise<OrryQuote> {
   const d = cfg.data!;
   const price = await quotePrice(cfg, chain, sql).catch(() => null);
-  if (!price || !price.ok) return { ok: false, error: "ORRY prices are still being sampled. Pay in USDG, or try again in a few minutes." };
+  if (!price || !price.ok) return { ok: false, error: "ORRY price readings are still being sampled. USDG works now, or retry ORRY in a few minutes." };
   const usd = packUsdInOrry(cfg);
   const amount = orryForUsd(usd, price.ratio);
   const quoteId = toHex(randomBytes(32));

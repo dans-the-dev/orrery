@@ -45,7 +45,7 @@ const ANVIL_PUBLISHER: Hex = "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f6
 function optAddr(env: NodeJS.ProcessEnv, name: string): Address | null {
   const v = env[name];
   if (!v) return null;
-  if (!isAddress(v)) throw new Error(`${name} must be a 0x address`);
+  if (!isAddress(v)) throw new Error(`${name} expects a 0x address`);
   return v as Address;
 }
 

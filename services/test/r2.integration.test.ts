@@ -190,9 +190,9 @@ describe("limit orders", () => {
     expect((await app.inject({ method: "POST", url: "/v1/r2/limit-orders", payload: body })).statusCode).toBe(409);
     const wrong = await app.inject({ method: "POST", url: "/v1/r2/limit-orders", payload: { ...body, limitPrice: "1" } });
     expect(wrong.statusCode).toBe(400);
-    expect(wrong.json().error).toBe("The signature does not match the order.");
+    expect(wrong.json().error).toBe("Signature and order fields disagree.");
     const unlisted = await app.inject({ method: "POST", url: "/v1/r2/limit-orders", payload: { ...body, asset: s.usdg } });
-    expect(unlisted.json().error).toBe("That asset has no limit orders.");
+    expect(unlisted.json().error).toBe("Limit orders are not offered for this asset.");
     const late = await app.inject({ method: "POST", url: "/v1/r2/limit-orders", payload: { ...body, expiry: expiry + 40 * 86_400 } });
     expect(late.statusCode).toBe(400);
     expect((await app.inject({ method: "POST", url: "/v1/r2/limit-orders", payload: { ...body, tipBps: 500 } })).statusCode).toBe(400);

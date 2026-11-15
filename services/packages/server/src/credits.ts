@@ -131,7 +131,7 @@ export async function spendCredit(sql: Sql, address: Address): Promise<boolean> 
 export function rotationMessage(cfg: Config, address: Address, nonce: string, expiresAt: Date): string {
   const host = new URL(cfg.publicUrl).host;
   return [
-    `${host} asks you to rotate your Orrery API key.`,
+    `Replace the Orrery API key for this address at ${host}.`,
     `Address: ${getAddress(address)}`,
     `Chain ID: ${cfg.chainId}`,
     `Nonce: ${nonce}`,
@@ -177,8 +177,8 @@ export async function rotateKey(
 export function sessionMessage(cfg: Config, address: Address, nonce: string, expiresAt: Date): string {
   const host = new URL(cfg.publicUrl).host;
   return [
-    `${host} asks you to sign in to your Orrery dashboard.`,
-    "This reads your credits, purchases and usage. It does not spend credits, issue a key or move any funds.",
+    `Sign in to the Orrery dashboard at ${host}.`,
+    "This session can view credits, purchases and usage only. Signing spends no credits, issues no key and moves no funds.",
     `Address: ${getAddress(address)}`,
     `Chain ID: ${cfg.chainId}`,
     `Nonce: ${nonce}`,

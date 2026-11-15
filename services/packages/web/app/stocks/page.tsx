@@ -4,7 +4,7 @@ import { MarketsShell } from "@/components/markets/shell";
 import { StocksView } from "@/components/markets/views";
 import { FeatureGate } from "@/components/orry/gate";
 
-export const metadata = { title: "Orrery · Stocks", description: "Stock tokens on Robinhood Chain with live Chainlink prices, traded against USDG in sealed batches." };
+export const metadata = { title: "Orrery · Stocks", description: "Stock tokens on Robinhood Chain, priced live by Chainlink and traded for USDG in sealed batches." };
 
 export default function StocksPage() {
   return (
@@ -13,8 +13,8 @@ export default function StocksPage() {
         feature="stocks"
         held={
         <>
-          <OrryHead title="Stock tokens on Robinhood Chain." lead={<p>Live Chainlink prices, your holdings, and a sealed order for any listed stock.</p>} />
-          <ComingSoon title="Stocks open soon." text="The stock list, prices and the trade page for each stock appear here when Stocks opens." />
+          <OrryHead title="Equities, plotted on Robinhood Chain." lead={<p>Chainlink prices as they move, what you hold, and a sealed order ticket for every listed stock.</p>} />
+          <ComingSoon title="Stocks start soon." text="The list of stocks, their prices and a trade page for each one show here once Stocks starts." />
         </>
         }
       >

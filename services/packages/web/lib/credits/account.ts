@@ -83,7 +83,7 @@ export function useAccountSession(address: Address | undefined, signMessage: (me
       const signature = await signMessage(n.message);
       const r = await fetch(`${API_URL}/v1/account/session`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address, nonce: n.nonce, signature }) });
       const body = (await r.json()) as { token?: string; expiresAt?: string; error?: string };
-      if (!r.ok || !body.token || !body.expiresAt) throw new Error(body.error ?? "Sign in did not finish.");
+      if (!r.ok || !body.token || !body.expiresAt) throw new Error(body.error ?? "The sign in was not completed.");
       try {
         sessionStorage.setItem(storageKey(address), JSON.stringify({ token: body.token, expiresAt: body.expiresAt }));
       } catch {
@@ -92,7 +92,7 @@ export function useAccountSession(address: Address | undefined, signMessage: (me
       setToken(body.token);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setError(/reject|denied/i.test(msg) ? "Signature request closed." : msg || "Sign in did not finish.");
+      setError(/reject|denied/i.test(msg) ? "The signature request was dismissed." : msg || "The sign in was not completed.");
     } finally {
       setBusy(false);
     }
@@ -123,7 +123,7 @@ export function useAccount(token: string | null, onExpired: () => void) {
         onExpired();
         throw new Error("Signed out");
       }
-      if (!r.ok) throw new Error("Your credits did not load. Try again in a moment.");
+      if (!r.ok) throw new Error("The credit balance is still loading. Refresh shortly.");
       return (await r.json()) as AccountView;
     },
     enabled: Boolean(API_URL && token),
@@ -150,10 +150,10 @@ export async function buyCredits(opts: {
   const url = `${API_URL}/v1/credits${opts.product === "plan" ? "?product=plan" : ""}`;
   const first = await fetch(url, { method: "POST" });
   const header = first.headers.get(HEADER_REQUIRED);
-  if (first.status !== 402 || !header) throw new Error("The payment terms did not load. Try again.");
+  if (first.status !== 402 || !header) throw new Error("The payment terms did not arrive. Request them again.");
   const required = decodeHeader<PaymentRequired>(header);
   const req = required.accepts.find((a) => a.network === `eip155:${activeChain.id}`);
-  if (!req) throw new Error("No payment option for this network.");
+  if (!req) throw new Error("This network has no payment option listed.");
   const now = BigInt(Math.floor(Date.now() / 1000));
   const auth = {
     from: getAddress(opts.address),
@@ -183,10 +183,10 @@ export async function buyCredits(opts: {
       continue;
     }
     const body = (await r.json()) as { apiKey?: string; credits?: string; planUntil?: string | null; error?: string };
-    if (!r.ok) throw new Error(body.error ?? "The payment was not accepted.");
+    if (!r.ok) throw new Error(body.error ?? "The payment did not settle.");
     return { credits: body.credits ?? "0", planUntil: body.planUntil ?? null, apiKey: body.apiKey };
   }
-  throw new Error("Payment is still confirming. Refresh your balance in a moment.");
+  throw new Error("The payment is confirming. Refresh the balance shortly.");
 }
 
 /** The EIP-712 request the wallet signs for a USDG transfer authorization. */
@@ -203,6 +203,6 @@ export async function rotateApiKey(address: Address, signMessage: (message: stri
   const signature = await signMessage(n.message);
   const r = await fetch(`${API_URL}/v1/keys/rotate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address, nonce: n.nonce, signature }) });
   const body = (await r.json()) as { apiKey?: string; error?: string };
-  if (!r.ok || !body.apiKey) throw new Error(body.error ?? "The key was not issued.");
+  if (!r.ok || !body.apiKey) throw new Error(body.error ?? "No key came back. Request it again.");
   return body.apiKey;
 }

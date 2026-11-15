@@ -7,7 +7,7 @@ import { FeatureGate } from "@/components/orry/gate";
 export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }) {
   const { symbol } = await params;
   const s = decodeURIComponent(symbol).toUpperCase();
-  return { title: `Orrery · ${s}`, description: `Buy or sell ${s} for USDG in a sealed batch at the Chainlink price.` };
+  return { title: `Orrery · ${s}`, description: `Trade ${s} against USDG. Orders stay sealed until the batch clears at the Chainlink price.` };
 }
 
 export default async function StockPage({ params }: { params: Promise<{ symbol: string }> }) {
@@ -20,7 +20,7 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
         held={
         <>
           <OrryHead title={s.toUpperCase()} />
-          <ComingSoon title="Stocks open soon." text="Each stock's price, your holdings and its order form appear here when Stocks opens." />
+          <ComingSoon title="Stocks start soon." text="This stock's price, your holding and its order ticket show here once Stocks starts." />
         </>
         }
       >

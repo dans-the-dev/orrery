@@ -64,44 +64,44 @@ export const withErrors = (abi: Abi): Abi => [...abi, ...communityErrorsAbi];
 const until = (t: unknown) => Number(t ?? 0) - Math.floor(Date.now() / 1000);
 
 const ERRORS: Record<string, (a: readonly unknown[]) => string> = {
-  ZeroAddress: () => "Enter a wallet address.",
-  PriceNotReady: () => "The ORRY price is not ready yet. Try again in a moment.",
-  PriceAboveMax: () => "The ORRY price moved since the quote. Send it again at the new price.",
-  InexactTransfer: () => "The ORRY transfer did not match the amount.",
-  UnknownRoom: () => "That room was not found.",
-  BelowRoomStake: (a) => `This room is for wallets with ${usd(big(a[1]))} or more earning in Stake. Yours is ${usd(big(a[0]))}.`,
-  BadText: () => "The message is empty or longer than the room allows.",
-  UnknownMessage: () => "That message was not found.",
-  SelfTip: () => "Tips go to other people's messages.",
-  ZeroAmount: () => "Enter an amount above zero.",
-  BelowReportStake: () => "Reporting needs more ORRY earning in Stake.",
-  AlreadyReported: () => "You already reported this message.",
-  BadName: () => "Use 3 to 20 characters: a to z, 0 to 9 and underscore.",
-  NameTaken: () => "That name belongs to another wallet.",
-  SameName: () => "That is already your name.",
-  BadDays: () => "Boost between 1 and 30 days at a time.",
-  BadCount: () => "Buy between 1 and 52 passes at a time.",
-  BadPrice: () => "The price is outside the market's range.",
-  UnknownTemplate: () => "That template was not found.",
-  NotCreator: () => "Only the template's creator can change it.",
-  NotListed: () => "This template is not for sale right now.",
-  AlreadyLicensed: () => "This wallet already holds a licence for the template.",
-  OwnTemplate: () => "This template is yours.",
-  SelfReferral: () => "A wallet links to someone else's referral link.",
-  AlreadyLinked: () => "This wallet already has a referrer.",
-  BadStatus: () => "This event has no prize to claim.",
-  NotPayableYet: (a) => (until(a[0]) > 0 ? `This prize is claimable in ${span(until(a[0]))}.` : "This prize is claimable in a moment."),
-  NothingToClaim: () => "Nothing is waiting to claim here.",
-  WrongKind: () => "This achievement is claimed another way.",
-  PastDeadline: () => "This achievement has ended.",
-  AlreadyClaimed: () => "This wallet already claimed it.",
-  Full: () => "Every reward of this achievement has been claimed.",
-  ConditionNotMet: () => "This wallet does not meet the condition yet.",
-  NotClaimableYet: (a) => (until(a[0]) > 0 ? `Claimable in ${span(until(a[0]))}.` : "Claimable in a moment."),
-  NotOpen: () => "This month opens for claims soon.",
-  PeriodIsClosed: () => "The claim period for this month has ended.",
-  NotOpenable: (a) => `This month opens on ${utc(Number(a[0] ?? 0))}.`,
-  AlreadyOpened: () => "This month is already open.",
+  ZeroAddress: () => "A wallet address is required.",
+  PriceNotReady: () => "The ORRY price reading is still settling. Send it again shortly.",
+  PriceAboveMax: () => "The ORRY price changed after the quote was taken. Send again at the current price.",
+  InexactTransfer: () => "The ORRY received differs from the amount sent.",
+  UnknownRoom: () => "No room exists under that id.",
+  BelowRoomStake: (a) => `Entry needs ${usd(big(a[1]))} or more earning in Stake. This wallet has ${usd(big(a[0]))}.`,
+  BadText: () => "Messages must have text and fit the room's length.",
+  UnknownMessage: () => "No message exists under that id.",
+  SelfTip: () => "Your own messages cannot take a tip.",
+  ZeroAmount: () => "Amount must be greater than zero.",
+  BelowReportStake: () => "A report needs a larger ORRY balance earning in Stake.",
+  AlreadyReported: () => "This message already carries your report.",
+  BadName: () => "Names are 3 to 20 characters long, using a to z, 0 to 9 or underscore.",
+  NameTaken: () => "Another wallet holds that name.",
+  SameName: () => "This wallet already uses that name.",
+  BadDays: () => "A boost runs 1 to 30 days per purchase.",
+  BadCount: () => "Each purchase covers 1 to 52 passes.",
+  BadPrice: () => "The price sits outside the bounds this market accepts.",
+  UnknownTemplate: () => "No template exists under that id.",
+  NotCreator: () => "Changes to a template come from its creator's wallet.",
+  NotListed: () => "This template is off the shelf at the moment.",
+  AlreadyLicensed: () => "A licence for this template is already in this wallet.",
+  OwnTemplate: () => "You created this template, so it is already yours to use.",
+  SelfReferral: () => "Referral links work for other wallets, not the one that made them.",
+  AlreadyLinked: () => "A referrer is already on record for this wallet.",
+  BadStatus: () => "No prize is attached to this event.",
+  NotPayableYet: (a) => (until(a[0]) > 0 ? `The prize opens for claiming in ${span(until(a[0]))}.` : "The prize opens for claiming shortly."),
+  NothingToClaim: () => "No balance is waiting here.",
+  WrongKind: () => "This achievement has its own claim path.",
+  PastDeadline: () => "The window for this achievement is over.",
+  AlreadyClaimed: () => "A claim from this wallet is already on record.",
+  Full: () => "All rewards for this achievement have gone out.",
+  ConditionNotMet: () => "The condition for this wallet is not met yet.",
+  NotClaimableYet: (a) => (until(a[0]) > 0 ? `Opens for claiming in ${span(until(a[0]))}.` : "Opens for claiming shortly."),
+  NotOpen: () => "Claims for this month begin shortly.",
+  PeriodIsClosed: () => "Claims for this month are closed.",
+  NotOpenable: (a) => `Claims for this month begin on ${utc(Number(a[0] ?? 0))}.`,
+  AlreadyOpened: () => "Claims for this month are already running.",
 };
 
 function explainCommunity(e: unknown, fallback: string): string {
@@ -138,7 +138,7 @@ export function useCommunityTx() {
   const [notice, setNotice] = useState<Notice>(null);
 
   async function send(c: Call): Promise<Hex> {
-    if (!pub) throw new Error("No connection to the network.");
+    if (!pub) throw new Error("The network is out of reach. Check the connection and send again.");
     const call = { ...c, abi: withErrors(c.abi) };
     // Simulating first surfaces the contract's own error before the wallet opens.
     await pub.simulateContract({ ...call, account } as never).catch((e) => {
@@ -146,28 +146,28 @@ export function useCommunityTx() {
     });
     const hash = await writeContractAsync(call as never);
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transaction reverted.");
+    if (r.status !== "success") throw new Error("The transaction was reverted on chain.");
     return hash;
   }
 
   const run: Run = async (label, fn) => {
     setBusy(label);
-    setNotice({ tone: "", text: `${label}: confirm in your wallet.` });
+    setNotice({ tone: "", text: `${label}. Waiting for your wallet.` });
     const step = (t: string) => setNotice({ tone: "", text: t });
     const approve = async (token: Address, spender: Address, amount: bigint) => {
-      if (!pub || !account) throw new Error("Connect a wallet first.");
+      if (!pub || !account) throw new Error("A connected wallet is needed for this.");
       const current = await pub.readContract({ address: token, abi: erc20Abi, functionName: "allowance", args: [account, spender] });
       if (current >= amount) return;
-      step("Approve ORRY in your wallet.");
+      step("Your wallet asks you to approve ORRY first.");
       await send({ address: token, abi: erc20Abi as Abi, functionName: "approve", args: [spender, amount] });
     };
     try {
       const done = await fn({ send, step, approve });
-      setNotice({ tone: "ok", text: done || `${label}: done.` });
+      setNotice({ tone: "ok", text: done || `${label} is on record.` });
       await qc.invalidateQueries();
       return true;
     } catch (e) {
-      setNotice({ tone: "error", text: explainCommunity(e, `${label} did not go through.`) });
+      setNotice({ tone: "error", text: explainCommunity(e, `${label} was not completed.`) });
       return false;
     } finally {
       setBusy(null);

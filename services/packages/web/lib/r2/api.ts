@@ -25,7 +25,7 @@ export class R2ApiError extends Error {
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!API_URL) throw new R2ApiError(0, "The Orrery API is not configured in this build.");
+  if (!API_URL) throw new R2ApiError(0, "This build has no Orrery API address set.");
   const r = await fetch(`${API_URL}${path}`, { ...init, headers: { accept: "application/json", ...(init?.body ? { "content-type": "application/json" } : {}) } });
   const body = (await r.json().catch(() => ({}))) as T & { error?: string };
   if (!r.ok) throw new R2ApiError(r.status, body.error ?? `Request failed (${r.status}).`);

@@ -251,9 +251,9 @@ if (DRY) {
     const list = (await page.locator(".setup-steps li").evaluateAll((els) => els.map((e) => `${e.dataset.done === "true" ? "done" : "open"} ${e.querySelector("strong")?.textContent}`))).join(" | ");
     say(`dry run: the agent is open on the live page: ${list} · ${(await page.locator(".editor-head").innerText()).replace(/\s+/g, " ")}`);
   } else {
-    const create = page.getByRole("button", { name: /^Create my account$/ });
+    const create = page.getByRole("button", { name: /^Create a Safe$/ });
     await create.waitFor({ timeout: 60_000 });
-    say(`dry run: ${new URL(page.url()).pathname} is open, "Create my account" is ${(await create.isDisabled()) ? "disabled" : "ready"}`);
+    say(`dry run: ${new URL(page.url()).pathname} is open, "Create a Safe" is ${(await create.isDisabled()) ? "disabled" : "ready"}`);
   }
   say("dry run: nothing was signed or sent.");
   await finish(0);
@@ -273,21 +273,21 @@ if (!SIGN_ONLY) {
 async function creditsSignedOnly(payer, label) {
   await page.goto(`${SITE}/dashboard/credits`, { waitUntil: "load", timeout: 120_000 });
   await connect();
-  const signIn = page.getByRole("button", { name: "Sign in to view credits" });
+  const signIn = page.getByRole("button", { name: "Show my credits" });
   if (await signIn.isVisible().catch(() => false)) {
     await signIn.click();
-    await page.getByText("Included checks this month").waitFor({ timeout: 60_000 });
+    await page.getByText("This month's included checks").waitFor({ timeout: 60_000 });
   }
   await page.waitForTimeout(2000);
   say(`${label} signed in: ${(await page.locator(".cp-stats").innerText()).replace(/\s+/g, " ")}`);
-  await page.getByRole("button", { name: /^(Get my API key|Issue a new key)$/ }).click();
+  await page.getByRole("button", { name: /^(Issue my API key|Replace the key)$/ }).click();
   await page.locator(".cp-key code").first().waitFor({ timeout: 60_000 });
   const apiKey = (await page.locator(".cp-key code").first().innerText()).trim();
   writeFileSync(API_KEY_FILE, JSON.stringify({ address: owner, apiKey, issuedAt: new Date().toISOString() }), { mode: 0o600 });
   chmodSync(API_KEY_FILE, 0o600);
   say(`${label} API key issued and saved to ${API_KEY_FILE} (${apiKey.length} characters, not shown); snippet shown: ${await page.locator(".cp-snippet").isVisible()}`);
   await page.getByLabel("Paying address").fill(payer);
-  await page.getByRole("button", { name: "Run a signed check" }).click();
+  await page.getByRole("button", { name: "Send a signed check" }).click();
   const rows = page.locator(".cp-try ~ .cp-rows");
   await rows.waitFor({ timeout: 60_000 });
   const text = (await rows.innerText()).replace(/\s+/g, " ");
@@ -316,7 +316,7 @@ async function act(name, timeoutMs = 300_000) {
   const end = Date.now() + timeoutMs;
   while (Date.now() < end) {
     const n = await notice();
-    if (n !== before && /: done\.|did not go through|closed/.test(n)) return n;
+    if (n !== before && /: done\.|was not completed|closed/.test(n)) return n;
     await page.waitForTimeout(1000);
   }
   return `TIMEOUT, last notice: ${await notice()}`;
@@ -331,10 +331,10 @@ let account, agentId, env;
 if (!RESUME) {
   await page.goto(`${SITE}/dashboard/agents`, { waitUntil: "load", timeout: 120_000 });
   await connect();
-  await must("1 create account (2 transactions)", await act(/^Create my account$/));
-  account = getAddress(await page.getByPlaceholder("0x… your Safe").inputValue());
+  await must("1 create account (2 transactions)", await act(/^Create a Safe$/));
+  account = getAddress(await page.getByPlaceholder("0x… Safe address").inputValue());
   if (lc(account) !== state.safe) await fail("the page shows another account than the one created");
-  await must("2 register agent", await act(/^Register a new agent$/));
+  await must("2 register agent", await act(/^Register an identity$/));
   agentId = await page.getByPlaceholder("1", { exact: true }).inputValue();
   say(`   account ${account}, agent #${agentId}`);
   await page.locator(".editor").waitFor({ timeout: 60_000 });
@@ -342,15 +342,15 @@ if (!RESUME) {
   await must("3 bind identity", await act(/^Bind identity$/));
   await page.waitForTimeout(3000);
 
-  await page.getByRole("button", { name: "Create the signer" }).click();
+  await page.getByRole("button", { name: "Generate a signer" }).click();
   const dl = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download the key file" }).click();
+  await page.getByRole("button", { name: "Save the key file" }).click();
   await (await dl).saveAs(AGENT_ENV);
   chmodSync(AGENT_ENV, 0o600);
   env = Object.fromEntries(readFileSync(AGENT_ENV, "utf8").split("\n").filter((l) => l && !l.startsWith("#")).map((l) => l.split("=")));
   state.signer = lc(env.ORRERY_SIGNER_ADDRESS);
   say(`4 signer ${env.ORRERY_SIGNER_ADDRESS}; key file saved to ${AGENT_ENV} (mode 600)`);
-  await page.getByLabel(/The key file is saved/).check();
+  await page.getByLabel(/I saved the key file/).check();
   await page.getByRole("button", { name: "Small", exact: true }).click();
   const field = (l) => page.locator("label", { hasText: l }).locator("input").first();
   say(`   limits: per payment ${await field("Per payment").inputValue()}, per day ${await field("Per day").inputValue()}, float ${await field("Float ceiling").inputValue()}, expiry ${await field("Policy expiry").inputValue()}`);
@@ -414,12 +414,12 @@ if (!/Session Active/.test(checkText)) await fail("the signed check does not sho
 if (PACK) {
   state.allowTypedData = true;
   const before = await usdgOf(owner);
-  await page.getByRole("button", { name: `Buy for ${Number(formatUnits(packPrice, 6)).toLocaleString("en-US")} USDG`, exact: true }).click();
-  // the earlier "New key issued" note is cleared when the purchase starts; wait for the purchase's own outcome
+  await page.getByRole("button", { name: `Buy the pack, ${Number(formatUnits(packPrice, 6)).toLocaleString("en-US")} USDG`, exact: true }).click();
+  // the earlier "Key issued." note is cleared when the purchase starts; wait for the purchase's own outcome
   let text = "";
   for (let i = 0; i < 120; i++) {
     text = (await page.locator(".cp-note.is-ok, .cp-note.is-error").first().innerText().catch(() => "")).trim();
-    if (text && !/New key issued/.test(text)) break;
+    if (text && !/Key issued\./.test(text)) break;
     await page.waitForTimeout(1000);
   }
   say(`12 credit pack from the dashboard: ${text} (wallet USDG ${formatUnits(before, 6)} -> ${formatUnits(await usdgOf(owner), 6)})`);

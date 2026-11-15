@@ -40,7 +40,7 @@ function Distribute() {
   async function distribute() {
     await tx.run("Distribute", async ({ send }) => {
       await send({ address: ROUTER, abi: iOrryRewardsRouterAbi as Abi, functionName: "distribute" });
-      return "Distributed. Stakers' new rewards start streaming now.";
+      return "Distribution on record. The new rewards begin streaming to stakers.";
     });
   }
 
@@ -49,18 +49,18 @@ function Distribute() {
       <div className="rc-panel-head">
         <h2>Distribute</h2>
         <p>
-          The rewards router holds the protocol&apos;s share of pool fees and the ORRY bought with product revenue.
-          {bps !== undefined ? ` Distribute sends ${bps / 100}% of each asset to stakers and burns the rest.` : ""} Anyone can run it
+          The protocol share of pool fees, along with the ORRY bought from product revenue, collects in the rewards router.
+          {bps !== undefined ? ` Each distribution passes ${bps / 100}% of every asset to stakers and burns the remainder.` : ""} Any wallet may trigger it
           {consts.distributeInterval ? ` ${every(consts.distributeInterval)}` : ""}.
         </p>
       </div>
       <div className="rc-split">
         <dl className="rc-rows">
-          <Row label="Waiting in the router">
+          <Row label="Held by the router">
             {ethHeld.data && rcHeld !== undefined ? `${eth(ethHeld.data.value)} ETH + ${orry(rcHeld)} ORRY` : "…"}
           </Row>
-          <Row label="Last run">{last === undefined ? "…" : last === 0 ? "Not run yet" : utc(last)}</Row>
-          <Row label="Next run">{next === undefined ? "…" : waiting ? `In ${span(next - now)}` : "Available now"}</Row>
+          <Row label="Last run">{last === undefined ? "…" : last === 0 ? "No run so far" : utc(last)}</Row>
+          <Row label="Next run">{next === undefined ? "…" : waiting ? `In ${span(next - now)}` : "Ready"}</Row>
         </dl>
         <div className="rc-split-act">
           <button className="secondary" type="button" disabled={!ready || Boolean(tx.busy) || waiting || empty} onClick={() => void distribute()}>
@@ -111,7 +111,7 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
       await send({ address: ORRY.claimAll as Address, abi: iClaimAllAbi as Abi, functionName: "claimAll" });
       void sim.refetch();
       earn.refetch();
-      return "Every fee and reward is in your wallet.";
+      return "All fees and rewards went to your wallet.";
     });
   }
   const call = (label: string, address: Address, abi: Abi, functionName: string, args?: readonly unknown[], done?: string) =>
@@ -119,15 +119,15 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
       await send({ address, abi, functionName, args });
       void sim.refetch();
       earn.refetch();
-      return done ?? `${label}: done.`;
+      return done ?? `${label} is on record.`;
     });
 
   const holds = anyReady || leaving > 0n || agentsLeaving.length > 0 || held.length > 0;
-  if (exitOnly && !address) return <ExitConnect text="Connect a wallet to claim fees and rewards or withdraw." />;
+  if (exitOnly && !address) return <ExitConnect text="Connect the wallet that holds the position to collect fees, rewards or withdrawals." />;
   if (exitOnly && !tx.notice && (!loaded || !holds)) return null;
 
   const readyList = (
-    <ul className="rc-assets" aria-label="Ready to claim, per asset">
+    <ul className="rc-assets" aria-label="Claimable by asset">
       {(paid ?? []).map((p) => (
         <li key={p.asset}>
           <Fig v={loaded ? fig(p.amount, p.meta) : undefined} unit={p.meta?.symbol} />
@@ -139,14 +139,14 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
   return (
     <>
       {exitOnly ? null : <OrryHead
-        title="Every reward in one place."
-        lead={<p>Earn fees from every pool and stake rewards collect here. Claim them together with one transaction, or one at a time.</p>}
+        title="All your fees and rewards, on one chart."
+        lead={<p>Fees from each Earn pool and rewards from Stake are gathered on this page. Collect them in a single transaction, or item by item.</p>}
         reading={
           <div className="rc-card">
-            <p className="rc-card-title">Ready to claim</p>
+            <p className="rc-card-title">Claimable now</p>
             {!address ? (
               <>
-                <p className="rc-card-wait">Connect a wallet to see what is ready for you.</p>
+                <p className="rc-card-wait">Connect a wallet to see what it can collect.</p>
                 <WalletButton />
               </>
             ) : (
@@ -156,13 +156,13 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
                   {tx.busy === "Claim all" ? "Claiming…" : "Claim all"}
                 </button>
                 <dl className="rc-rows">
-                  <Row label="Earned all time" hint="Earn and Stake, claimed and pending">
+                  <Row label="Total earned" hint="Earn plus Stake, collected or pending">
                     {account.data
                       ? account.data.earnedAllTime.length
                         ? account.data.earnedAllTime.map((e) => `${amount(e.amount, { decimals: e.decimals, frac: assetFrac(e.symbol) })} ${e.symbol}`).join(" + ")
-                        : "Nothing yet"
+                        : "None so far"
                       : account.isError
-                        ? "Appears in a moment"
+                        ? "Loads in a moment"
                         : "…"}
                   </Row>
                 </dl>
@@ -173,15 +173,15 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
       />}
 
       {address ? (
-        <section className="rc-panel" aria-label="Claims and withdrawals">
+        <section className="rc-panel" aria-label="Pending payouts">
           <div className="rc-panel-head">
-            <h2>Claims and withdrawals</h2>
+            <h2>Pending payouts</h2>
           </div>
           <ul className="rc-claims">
             {exitOnly ? (
               <li>
                 <div>
-                  <strong>Everything ready</strong>
+                  <strong>All claimable</strong>
                   <span>{loaded ? (paid ?? []).map((p) => `${fig(p.amount, p.meta)} ${p.meta?.symbol}`).join(" + ") : "…"}</span>
                 </div>
                 <button className="primary" type="button" disabled={!ready || busy || !anyReady} onClick={() => void claimAll()}>
@@ -192,10 +192,10 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
             {held.map((p) => (
               <li key={`fees-${p.vault}`}>
                 <div>
-                  <strong>{`Earn fees, ORRY / ${p.quote.symbol}`}</strong>
+                  <strong>{`Earn fees · ORRY / ${p.quote.symbol}`}</strong>
                   <span>{p.feesQuote !== undefined ? `${fig(p.feesQuote, p.quote)} ${p.quote.symbol} + ${orry(p.feesOrry)} ORRY` : "…"}</span>
                 </div>
-                <button className="secondary" type="button" disabled={!ready || busy || !hasFees(p)} onClick={() => void call("Claim fees", p.vault, iEarnVaultAbi as Abi, "claimFees", undefined, `ORRY / ${p.quote.symbol} fees claimed to your wallet.`)}>
+                <button className="secondary" type="button" disabled={!ready || busy || !hasFees(p)} onClick={() => void call("Claim fees", p.vault, iEarnVaultAbi as Abi, "claimFees", undefined, `The ORRY / ${p.quote.symbol} fees went to your wallet.`)}>
                   Claim fees
                 </button>
               </li>
@@ -205,16 +205,16 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
                 <strong>Stake rewards</strong>
                 <span>{me.rewardsEth !== undefined ? `${eth(me.rewardsEth)} ETH + ${orry(me.rewardsOrry)} ORRY` : "…"}</span>
               </div>
-              <button className="secondary" type="button" disabled={!ready || busy || ((me.rewardsEth ?? 0n) === 0n && (me.rewardsOrry ?? 0n) === 0n)} onClick={() => void call("Claim rewards", ORRY.staking as Address, iOrryStakingAbi as Abi, "claimRewards", undefined, "Rewards claimed to your wallet.")}>
+              <button className="secondary" type="button" disabled={!ready || busy || ((me.rewardsEth ?? 0n) === 0n && (me.rewardsOrry ?? 0n) === 0n)} onClick={() => void call("Claim rewards", ORRY.staking as Address, iOrryStakingAbi as Abi, "claimRewards", undefined, "The rewards went to your wallet.")}>
                 Claim rewards
               </button>
             </li>
             <li>
               <div>
-                <strong>Plain stake leaving</strong>
-                <span>{leaving > 0n ? `${orry(leaving)} ORRY, ${stakeReady ? "ready now" : `ready in ${span(me.stakeReadyAt - now)}`}` : "Nothing leaving"}</span>
+                <strong>Plain stake on its way out</strong>
+                <span>{leaving > 0n ? `${orry(leaving)} ORRY · ${stakeReady ? "withdrawable" : `withdrawable in ${span(me.stakeReadyAt - now)}`}` : "No pending unstake"}</span>
               </div>
-              <button className="secondary" type="button" disabled={!ready || busy || !stakeReady} onClick={() => void call("Withdraw", ORRY.staking as Address, iOrryStakingAbi as Abi, "withdraw", undefined, "Withdrawn to your wallet.")}>
+              <button className="secondary" type="button" disabled={!ready || busy || !stakeReady} onClick={() => void call("Withdraw", ORRY.staking as Address, iOrryStakingAbi as Abi, "withdraw", undefined, "The ORRY went back to your wallet.")}>
                 Withdraw
               </button>
             </li>
@@ -223,10 +223,10 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
               return (
                 <li key={`${a.agentId}-${a.owner}`}>
                   <div>
-                    <strong>Agent #{a.agentId.toString()} stake leaving</strong>
-                    <span>{`${orry(a.leaving)} ORRY, ${r ? "ready now" : `ready in ${span(a.leavingAt - now)}`}`}</span>
+                    <strong>Agent #{a.agentId.toString()} stake on its way out</strong>
+                    <span>{`${orry(a.leaving)} ORRY · ${r ? "withdrawable" : `withdrawable in ${span(a.leavingAt - now)}`}`}</span>
                   </div>
-                  <button className="secondary" type="button" disabled={!ready || busy || !r} onClick={() => void call("Agent withdraw", ORRY.staking as Address, iOrryStakingAbi as Abi, "withdrawAgent", [a.agentId, a.owner], `Withdrawn from agent #${a.agentId} to your wallet.`)}>
+                  <button className="secondary" type="button" disabled={!ready || busy || !r} onClick={() => void call("Agent withdraw", ORRY.staking as Address, iOrryStakingAbi as Abi, "withdrawAgent", [a.agentId, a.owner], `The stake on agent #${a.agentId} went back to your wallet.`)}>
                     Withdraw
                   </button>
                 </li>
@@ -236,7 +236,7 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
               <li>
                 <div>
                   <strong>Earn positions</strong>
-                  <span>{earn.loaded ? "None yet" : "…"}</span>
+                  <span>{earn.loaded ? "None so far" : "…"}</span>
                 </div>
                 <Link className="secondary" href="/earn">Open Earn</Link>
               </li>
@@ -244,8 +244,8 @@ export function ClaimView({ exitOnly = false }: { exitOnly?: boolean }) {
             {held.map((p) => (
               <li key={`pos-${p.vault}`}>
                 <div>
-                  <strong>{`Earn position, ORRY / ${p.quote.symbol}`}</strong>
-                  <span>{p.shares === undefined ? "…" : p.shares === 0n ? "No share" : p.unlockAt > now ? `Withdraw opens in ${span(p.unlockAt - now)}` : "Withdraw open"}</span>
+                  <strong>{`Earn position · ORRY / ${p.quote.symbol}`}</strong>
+                  <span>{p.shares === undefined ? "…" : p.shares === 0n ? "No share" : p.unlockAt > now ? `Withdrawable in ${span(p.unlockAt - now)}` : "Withdrawable"}</span>
                 </div>
                 <Link className="secondary" href="/earn">Open Earn</Link>
               </li>

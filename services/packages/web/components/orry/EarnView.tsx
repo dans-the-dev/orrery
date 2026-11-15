@@ -35,17 +35,17 @@ export function EarnView({ exitOnly = false }: { exitOnly?: boolean }) {
   const { vaults, loaded } = useVaults();
   const stats = useEarnStats();
 
-  if (exitOnly && !connected) return <ExitConnect text="Connect a wallet to withdraw an Earn share or claim its fees." />;
+  if (exitOnly && !connected) return <ExitConnect text="Connect the wallet that holds the Earn share to withdraw it or collect its fees." />;
 
   return (
     <>
       {exitOnly ? null : (
         <OrryHead
-          title={<>Add ORRY with ETH or USDG.</>}
-          lead={<p>Each ORRY pool has its own Earn share. Your share earns from every swap in that pool, and fees arrive in ORRY and the pool&apos;s other token. Claim them whenever you like.</p>}
+          title={<>Pair ORRY with ETH or USDG.</>}
+          lead={<p>Every ORRY pool keeps a separate Earn share. A share takes its part of the fees from each swap in its pool, paid in ORRY and in the pool&apos;s second token, and you collect them at any time.</p>}
         />
       )}
-      {!exitOnly && loaded && vaults.length === 0 ? <p className="rc-muted">Earn pools appear here as each vault opens.</p> : null}
+      {!exitOnly && loaded && vaults.length === 0 ? <p className="rc-muted">Each pool is listed here as soon as its vault is live.</p> : null}
       {vaults.map((v) => (
         <EarnHubCard key={v.vault} info={v} hub={stats.data?.hubs.find((h) => h.quote.address.toLowerCase() === v.quote.address.toLowerCase())} exitOnly={exitOnly} />
       ))}
@@ -102,9 +102,9 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
 
   /** Deposit price bounds (review M-3): the pool price may sit at most BAND_BPS from its 30 minute mean, read now. */
   async function priceBounds() {
-    if (!pub || !hookAddr) throw new Error("The pool price did not load. Try again in a moment.");
+    if (!pub || !hookAddr) throw new Error("The pool price reading is still loading. Send it again shortly.");
     const [meanTick, window] = (await pub.readContract({ address: hookAddr as Address, abi: iOrreryHookAbi, functionName: "consult", args: [q.address, 1800] })) as readonly [number, number];
-    if (Number(window) < 60) throw new Error("This pool's price is still settling. Try again in a minute.");
+    if (Number(window) < 60) throw new Error("This pool needs more price history first. Send it again in a minute.");
     return depositPriceBounds(sqrtPriceAtTick(Number(meanTick)), BAND_BPS);
   }
 
@@ -140,7 +140,7 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
     if (q.isEth || amt === 0n || !pub) return;
     const current = await pub.readContract({ address: q.address, abi: erc20Abi, functionName: "allowance", args: [owner, vault] });
     if (current >= amt) return;
-    step(`Approve ${q.symbol} in your wallet.`);
+    step(`Your wallet asks you to approve ${q.symbol}.`);
     await send({ address: q.address, abi: erc20Abi as Abi, functionName: "approve", args: [vault, amt] });
   }
 
@@ -155,12 +155,12 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
       const value = q.isEth ? qx : 0n;
       const b = await priceBounds();
       const sim = await pub.simulateContract({ address: vault, abi: iEarnVaultAbi, functionName: "deposit", args: [qx, rx, 0n, b.min, b.max, deadline()], value, account: address });
-      step("Confirm the deposit in your wallet.");
+      step("Sign the deposit in your wallet.");
       await send({ address: vault, abi: vaultAbi, functionName: "deposit", args: [qx, rx, cut(sim.result, slip), b.min, b.max, deadline()], value });
       setQIn("");
       setRcIn("");
       void refetch();
-      return "Deposited. Your share starts earning from the next swap.";
+      return "Deposit on record. Fees reach your share from the next swap on.";
     });
   }
 
@@ -177,11 +177,11 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
       const value = fromQuote && q.isEth ? amt : 0n;
       const b = await priceBounds();
       const sim = await pub.simulateContract({ address: vault, abi: iEarnVaultAbi, functionName: "zapDeposit", args: [fromQuote, amt, minSwapOut, 0n, b.min, b.max, deadline()], value, account: address });
-      step("Confirm the deposit in your wallet.");
+      step("Sign the deposit in your wallet.");
       await send({ address: vault, abi: vaultAbi, functionName: "zapDeposit", args: [fromQuote, amt, minSwapOut, cut(sim.result, slip), b.min, b.max, deadline()], value });
       setZapIn("");
       void refetch();
-      return "Deposited. Your share starts earning from the next swap.";
+      return "Deposit on record. Fees reach your share from the next swap on.";
     });
   }
 
@@ -191,7 +191,7 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
       await send({ address: vault, abi: vaultAbi, functionName: "withdraw", args: [wdShares, cut(preview[0], slip), cut(preview[1], slip), deadline()] });
       setWdPct("");
       void refetch();
-      return `Withdrawn. ${q.symbol}, ORRY and your streamed fees are in your wallet.`;
+      return `Withdrawal settled. The ${q.symbol}, the ORRY and the fees streamed so far went to your wallet.`;
     });
   }
 
@@ -199,7 +199,7 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
     await tx.run("Claim fees", async ({ send }) => {
       await send({ address: vault, abi: vaultAbi, functionName: "claimFees" });
       void refetch();
-      return "Fees claimed to your wallet.";
+      return "The fees went to your wallet.";
     });
   }
 
@@ -231,18 +231,18 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
               <dd>{`${quoteFig(q, hub.tvl.quote)} ${q.symbol} + ${orry(hub.tvl.orry)} ORRY`}</dd>
             </div>
             <div>
-              <dt>Fees, last 7 days</dt>
+              <dt>Fees · 7 days</dt>
               <dd>{`${quoteFig(q, hub.fees7d.quote)} ${q.symbol} + ${orry(hub.fees7d.orry)} ORRY`}</dd>
             </div>
             {hub.notifiedAllTime > 0n ? (
               <div>
-                <dt>ORRY rewards added, last 7 days</dt>
+                <dt>ORRY rewards · 7 days</dt>
                 <dd>{`${orry(hub.notified7d)} ORRY`}</dd>
               </div>
             ) : null}
             <div>
               <dt>Pool price</dt>
-              <dd>{price ? `1 ${q.symbol} = ${orry(price)} ORRY` : "Opens with the pool"}</dd>
+              <dd>{price ? `1 ${q.symbol} = ${orry(price)} ORRY` : "Set at the first deposit"}</dd>
             </div>
           </dl>
         ) : null}
@@ -265,22 +265,22 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
             }
           />
 
-          {emptyPool && mode !== "withdraw" ? <p className="rc-desk-note">This pool opens for deposits once it holds its first liquidity.</p> : null}
+          {emptyPool && mode !== "withdraw" ? <p className="rc-desk-note">Deposits begin once the first liquidity is in the pool.</p> : null}
           {mode === "both" ? (
             <div className="rc-desk-body">
-              <p className="rc-desk-note">Add both sides at the pool price. Whatever the pool cannot take at that ratio comes back to you in the same transaction.</p>
-              <AmountField id={`earn-q-${vault}`} label={`${q.symbol}, up to`} unit={q.symbol} value={qIn} onChange={pairFromQuote} max={qMax} onMax={() => qSpendable !== undefined && pairFromQuote(toInput(qSpendable, q.decimals))} />
-              <AmountField id={`earn-r-${vault}`} label="ORRY, up to" unit="ORRY" value={rcIn} onChange={pairFromRc} max={rcMax} onMax={() => rcBal !== undefined && pairFromRc(toInput(rcBal))} />
+              <p className="rc-desk-note">Both tokens go in at the pool price. Any part that does not fit the ratio returns to you inside the same transaction.</p>
+              <AmountField id={`earn-q-${vault}`} label={`${q.symbol}, at most`} unit={q.symbol} value={qIn} onChange={pairFromQuote} max={qMax} onMax={() => qSpendable !== undefined && pairFromQuote(toInput(qSpendable, q.decimals))} />
+              <AmountField id={`earn-r-${vault}`} label="ORRY, at most" unit="ORRY" value={rcIn} onChange={pairFromRc} max={rcMax} onMax={() => rcBal !== undefined && pairFromRc(toInput(rcBal))} />
               <SlippagePicker value={slip} onChange={setSlip} />
               <button className="primary rc-go" type="button" disabled={!ready || busy || emptyPool || (qx === 0n && rx === 0n) || Boolean(shortBoth)} onClick={() => void deposit()}>
-                {shortBoth ? `Not enough ${shortBoth}` : tx.busy === "Deposit" ? "Depositing…" : "Deposit"}
+                {shortBoth ? `${shortBoth} balance too low` : tx.busy === "Deposit" ? "Depositing…" : "Deposit"}
               </button>
             </div>
           ) : null}
 
           {mode === "zap" ? (
             <div className="rc-desk-body">
-              <p className="rc-desk-note">Bring one token. About half is swapped in the pool and both halves go into your share.</p>
+              <p className="rc-desk-note">Start from a single token. Roughly half is swapped in the pool, then both halves join your share.</p>
               <Segmented label="Zap from" value={zapSide} onChange={(v) => { setZapSide(v); setZapIn(""); }} options={[{ id: "quote", label: `From ${q.symbol}` }, { id: "orry", label: "From ORRY" }]} />
               <AmountField
                 id={`earn-zap-${vault}`}
@@ -293,20 +293,20 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
                   if (zapSide === "quote" && qSpendable !== undefined) setZapIn(toInput(qSpendable, q.decimals));
                   if (zapSide === "orry" && rcBal !== undefined) setZapIn(toInput(rcBal));
                 }}
-                hint={!price && hub ? "Zaps open once the pool has a price." : undefined}
+                hint={!price && hub ? "A zap needs a pool price first." : undefined}
               />
               <SlippagePicker value={slip} onChange={setSlip} />
               <button className="primary rc-go" type="button" disabled={!ready || busy || emptyPool || zapAmt === 0n || !price || Boolean(shortZap)} onClick={() => void zap()}>
-                {shortZap ? `Not enough ${shortZap}` : tx.busy === "Zap deposit" ? "Depositing…" : "Zap deposit"}
+                {shortZap ? `${shortZap} balance too low` : tx.busy === "Zap deposit" ? "Depositing…" : "Zap deposit"}
               </button>
             </div>
           ) : null}
 
           {mode === "withdraw" ? (
             <div className="rc-desk-body">
-              <p className="rc-desk-note">Withdraw pays {q.symbol} and ORRY at the pool price, together with your streamed fees.</p>
+              <p className="rc-desk-note">A withdrawal returns {q.symbol} and ORRY at the pool price, plus the fees streamed to you.</p>
               <div className="rc-amount">
-                <label htmlFor={`earn-wd-${vault}`}>Share of your position</label>
+                <label htmlFor={`earn-wd-${vault}`}>Portion to withdraw</label>
                 <div className="rc-amount-box">
                   <input id={`earn-wd-${vault}`} inputMode="decimal" autoComplete="off" placeholder="0" value={wdPct} onChange={(e) => setWdPct(e.target.value.replace(/[^\d.]/g, ""))} />
                   <span className="rc-unit">%</span>
@@ -333,7 +333,7 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
 
           {!connected ? (
             <div className="rc-connect">
-              <p>Connect a wallet to deposit.</p>
+              <p>A connected wallet is needed to deposit.</p>
               <WalletButton />
             </div>
           ) : null}
@@ -343,19 +343,19 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
         <section className="rc-side" aria-label={`Your ${pairName(q)} share`}>
           <h3 className="rc-hub-sub">Your share</h3>
           {!address ? (
-            <p className="rc-muted">Your share, position and fees show here once a wallet is connected.</p>
+            <p className="rc-muted">Connect a wallet to see its share, position and fees in this pool.</p>
           ) : (
             <>
               <dl className="rc-rows">
-                <Row label="Share of the pool">
+                <Row label="Pool share">
                   <Fig v={shares === undefined ? undefined : shares === 0n ? "None yet" : totalShares ? pct(shares, totalShares) : "…"} />
                 </Row>
                 <Row label="Position now">{shares === 0n ? "None yet" : myPosition ? `${quoteFig(q, myPosition[0])} ${q.symbol} + ${orry(myPosition[1])} ORRY` : "…"}</Row>
-                <Row label="Withdraw">{shares === 0n ? "Nothing to withdraw" : locked ? `Opens in ${span(unlockAt - now)}` : "Open"}</Row>
+                <Row label="Withdraw">{shares === 0n ? "No position" : locked ? `Opens in ${span(unlockAt - now)}` : "Open"}</Row>
               </dl>
               <div className="rc-claim">
                 <div>
-                  <p className="rc-claim-label">Fees ready to claim</p>
+                  <p className="rc-claim-label">Fees to collect</p>
                   <p className="rc-claim-value">
                     <Fig v={fees ? quoteFig(q, fees[0]) : undefined} unit={q.symbol} />
                     <Fig v={fees ? orry(fees[1]) : undefined} unit="ORRY" />
@@ -370,11 +370,11 @@ function EarnHubCard({ info, hub, exitOnly }: { info: EarnVaultInfo; hub?: EarnH
           {exitOnly ? null : (
             <div className="rc-explain">
               <p>
-                This pool&apos;s Earn vault holds one full-range position. The swap fees it collects stream to shares over{" "}
-                {consts.earnStream ? period(consts.earnStream) : "the stream period"}, so every share earns for the time it is held.
-                {consts.depositLock ? ` A deposit can be withdrawn ${period(consts.depositLock)} after it lands.` : ""}
+                The Earn vault of this pool keeps a single full-range position. Swap fees it takes in are paid out to shares across{" "}
+                {consts.earnStream ? period(consts.earnStream) : "the streaming window"}, so a share earns in step with how long it stays in.
+                {consts.depositLock ? ` Each deposit becomes withdrawable ${period(consts.depositLock)} after it lands.` : ""}
               </p>
-              <Link className="lp-link" href="/docs/earn">Read the Earn guide</Link>
+              <Link className="lp-link" href="/docs/earn">How Earn works</Link>
             </div>
           )}
         </section>

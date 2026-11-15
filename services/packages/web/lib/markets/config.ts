@@ -13,6 +13,6 @@ export const SWAP_TOLERANCE_BPS = [50, 100, 200] as const;
 
 /** Burn sources added by the markets (spec 2.4): 5 commit fee, 6 trading fee paid in ORRY. */
 export const MARKET_BURN_SOURCES: Record<number, string> = {
-  5: "Market orders, sealing fee",
-  6: "Market trading fees paid in ORRY",
+  5: "Sealing fee on market orders",
+  6: "ORRY paid as market trading fee",
 };

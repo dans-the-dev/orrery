@@ -35,7 +35,7 @@ import { releasesFor } from "./releases.js";
  * database detail.
  */
 
-const READ_FAILED = "Could not read the chain right now. Try again shortly.";
+const READ_FAILED = "Chain read failed. Retry in a few seconds.";
 const E18 = 10n ** 18n;
 
 export function ttlCache(ms: number, max = 2_000) {
@@ -76,11 +76,11 @@ export function registerOrryRoutes(app: FastifyInstance, cfg: Config, chain: Cha
       return reply.code(503).send({ error: READ_FAILED });
     }
     if (!open) return reply.callNotFound();
-    if (!limit(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!limit(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
   const neverHeld = async (req: FastifyRequest, reply: FastifyReply) => {
     if (!cfg.orry) return reply.callNotFound();
-    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Too many requests. Try again in a minute." });
+    if (!deps.allowPublic(req.ip)) return reply.code(429).send({ error: "Rate limit reached. Wait a minute, then retry." });
   };
 
   async function guarded<T>(reply: FastifyReply, fn: () => Promise<T>) {
@@ -199,7 +199,7 @@ export function registerOrryRoutes(app: FastifyInstance, cfg: Config, chain: Cha
 
   // ---------------------------------------------------------------- one address (claim center)
   app.get<{ Params: { address: string } }>("/v1/orry/accounts/:address", { preHandler: neverHeld }, async (req, reply) => {
-    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Pass a 0x address." });
+    if (!isAddress(req.params.address)) return reply.code(400).send({ error: "Expected a 0x address." });
     const address = getAddress(req.params.address);
     return guarded(reply, () =>
       cache(`acct:${address.toLowerCase()}`, async (): Promise<OrryAccountResponse> => {
@@ -265,7 +265,7 @@ export function registerOrryRoutes(app: FastifyInstance, cfg: Config, chain: Cha
     const kind = req.query.kind ?? "stakers";
     if (kind !== "stakers" && kind !== "earners") return reply.code(400).send({ error: "Pass kind=stakers or kind=earners." });
     const limit = req.query.limit === undefined ? 50 : Number(req.query.limit);
-    if (!Number.isInteger(limit) || limit < 1 || limit > 100) return reply.code(400).send({ error: "Pass a limit from 1 to 100." });
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) return reply.code(400).send({ error: "limit must be between 1 and 100." });
     return guarded(reply, () =>
       cache(`lb:${kind}:${limit}`, async (): Promise<OrryLeaderboardResponse> => {
         if (kind === "stakers") {
@@ -311,7 +311,7 @@ export function registerOrryRoutes(app: FastifyInstance, cfg: Config, chain: Cha
   // ---------------------------------------------------------------- burns
   app.get<{ Querystring: { limit?: string } }>("/v1/orry/burns", { preHandler: gate("burn") }, async (req, reply) => {
     const limit = req.query.limit === undefined ? 50 : Number(req.query.limit);
-    if (!Number.isInteger(limit) || limit < 1 || limit > 200) return reply.code(400).send({ error: "Pass a limit from 1 to 200." });
+    if (!Number.isInteger(limit) || limit < 1 || limit > 200) return reply.code(400).send({ error: "limit must be between 1 and 200." });
     return guarded(reply, () =>
       cache(`burns:${limit}`, async (): Promise<OrryBurnsResponse> => {
         // A Burned event counts only with the source its emitter may use: router 1, treasury 2 or 3, buyback 4, and a
@@ -356,7 +356,7 @@ export function registerOrryRoutes(app: FastifyInstance, cfg: Config, chain: Cha
   });
 
   // ---------------------------------------------------------------- quotes (checkout)
-  const address = z.string().refine((v) => isAddress(v), "not an address");
+  const address = z.string().refine((v) => isAddress(v), "expects a 0x address");
   const creditsBody = z.object({ buyer: address, packs: z.number().int().min(1) }).strict();
   const verificationBody = z
     .object({ payer: address, agentId: z.union([z.string().regex(/^\d{1,78}$/), z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER)]) })

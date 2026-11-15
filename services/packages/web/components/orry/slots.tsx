@@ -11,7 +11,7 @@ export function OrryCheckoutSlot({ packSize, creditsPerCheck }: { packSize?: num
   const { ready, isLive } = useReleases();
   if (!ready) return null;
   if (isLive("checkout")) return <OrryCheckout packSize={packSize} creditsPerCheck={creditsPerCheck} />;
-  return <ComingSoon title="Pay for checks and verification with ORRY." text="ORRY checkout appears here when it opens. ORRY used here is burned." />;
+  return <ComingSoon title="Checks and verification, paid in ORRY." text="ORRY checkout is added to this page once it begins. Every ORRY spent on it is burned." />;
 }
 
 /** Operator page slot: the agent stake panel for the agent in view. */
@@ -22,7 +22,7 @@ export function AgentStakeSlot({ agentId }: { agentId: bigint }) {
   // Held: the stake form waits, but an existing stake behind this agent keeps its unstake and withdraw.
   return (
     <>
-      <ComingSoon title="Stake ORRY behind this agent." text="Merchants will see the amount in every check. Agent stake appears here when staking opens." />
+      <ComingSoon title="Put ORRY stake on this agent." text="Merchants see that stake in each check of the agent. The form is added here once agent stake begins." />
       <AgentStakePanel agentId={agentId} exitOnly />
     </>
   );
@@ -34,7 +34,7 @@ export function VerifyWithOrryLink({ agentId }: { agentId: bigint }) {
   if (!isLive("checkout")) return null;
   return (
     <Link className="secondary" href={`/credits?agent=${agentId.toString()}#orry`}>
-      Pay verification in ORRY
+      Verify in ORRY
     </Link>
   );
 }
@@ -45,9 +45,9 @@ export function PaygDocs() {
   if (!isLive("payg-checks") || !isLive("checkout")) return null;
   return (
     <p>
-      Single checks work the same way: ask for a quote with <code>{"{ buyer, checks }"}</code> and send it with <code>burnForCredits</code>, where{" "}
-      <code>packs</code> is the number of checks. Each check is priced at the same 625 credits per 1 USD of ORRY, and its credits reach your
-      address once the payment confirms.
+      Buying single checks follows the same path. Request a quote with <code>{"{ buyer, checks }"}</code>, then submit it through <code>burnForCredits</code> with{" "}
+      <code>packs</code> set to the number of checks. Pricing stays at 625 credits per 1 USD of ORRY, and the credits are added to your
+      address when the block confirms.
     </p>
   );
 }
@@ -56,9 +56,9 @@ export function PaygDocs() {
 export function OrryDocsLinks() {
   const { isLive } = useReleases();
   const guides = [
-    { href: "/docs/earn", label: "Earn", text: "Deposits, zaps, fee streams and withdrawals.", open: isLive("earn") },
-    { href: "/docs/stake", label: "Stake", text: "Rewards from Orrery's revenue, unstaking, and stake behind an agent.", open: isLive("stake") },
-    { href: "/docs/claims", label: "Claims and burns", text: "Claim all, Distribute, burns, the leaderboard and ORRY checkout.", open: isLive("claim") },
+    { href: "/docs/earn", label: "Earn", text: "How deposits, zaps, streamed fees and withdrawals work.", open: isLive("earn") },
+    { href: "/docs/stake", label: "Stake", text: "Revenue rewards, the unstake path and stake placed on an agent.", open: isLive("stake") },
+    { href: "/docs/claims", label: "Claims and burns", text: "Collecting everything at once, distribution, burns, rankings and the ORRY checkout.", open: isLive("claim") },
   ].filter((g) => g.open);
   if (guides.length === 0) return null;
   return (

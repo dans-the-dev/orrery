@@ -7,7 +7,7 @@ import { ComingSoon, OrryHead } from "@/components/orry/parts";
 
 export const metadata = {
   title: "Orrery · Data",
-  description: "Signed datasets from Robinhood Chain and Orrery for AI agents: agents, x402 payments, stocks, Pons launches, ORRY and chain health.",
+  description: "Signed datasets for AI agents, drawn from Robinhood Chain and from Orrery: agents, x402 payments, stocks, Pons launches, ORRY and chain health.",
 };
 
 export default function DataPage() {
@@ -19,19 +19,19 @@ export default function DataPage() {
           feature="data"
           held={
             <>
-              <OrryHead kicker="Orrery Data" title="Data your agents can prove." lead={<p>Signed datasets read from Robinhood Chain and from Orrery itself.</p>} />
-              <ComingSoon title="Orrery Data opens soon." text="The datasets, their prices and signed answers appear on this page when Orrery Data opens." />
+              <OrryHead kicker="Orrery Data" title="Facts an agent can back up." lead={<p>Every dataset is signed, and read from Robinhood Chain or from Orrery itself.</p>} />
+              <ComingSoon title="Orrery Data starts soon." text="Datasets, their prices and signed answers show here once Orrery Data starts." />
             </>
           }
         >
           <DataView />
         </FeatureGate>
         <PageGuide
-          audience={"Agents and the teams that run them, when a decision needs onchain facts it can prove."}
+          audience={"Agents, and the teams behind them, whenever a decision rests on onchain facts it must be able to prove."}
           steps={[
-            { title: "Buy calls", text: "One x402 payment in USDG, or in ORRY for less, buys a pack of calls on your address and its API key." },
-            { title: "Query", text: "Ask a dataset for records. Each answer costs one call and comes signed by Orrery's data key." },
-            { title: "Prove", text: "Check the signature and the block each record names. The answer stands on its own, wherever it travels." },
+            { title: "Buy calls", text: "A single x402 payment, in USDG or for less in ORRY, adds a pack of calls to your address and its API key." },
+            { title: "Query", text: "Request records from a dataset. Every answer uses one call and carries the signature of Orrery's data key." },
+            { title: "Show proof", text: "Verify the signature and the block each record cites. The answer holds up by itself, wherever it is passed along." },
           ]}
         />
       </main>

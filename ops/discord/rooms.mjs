@@ -19,7 +19,7 @@ async function call(method, path, body) {
 // Same map as ROOM_RELEASES in discord.ts: room -> the release feature that opens it, and the name shown to members.
 export const ROOMS = {
   operators: ["core", "Orrery"], "agent-builders": ["core", "Orrery"], merchants: ["core", "Orrery"], showcase: ["core", "Orrery"],
-  "orry-chat": ["earn", "ORRY"], "earn-and-stake": ["earn", "Earn and Stake"], "burn-tracker": ["burn", "the burn page"],
+  "orry-chat": ["earn", "ORRY"], "earn-and-stake": ["earn", "Earn and Stake"], "burn-tracker": ["burn", "the burn chart"],
   missions: ["achievements", "Missions"], achievements: ["achievements", "Achievements"], "bounty-board": ["achievements", "the bounty board"],
 };
 const SEND = 1n << 11n, VIEW = 1n << 10n, HISTORY = 1n << 16n, ATTACH = 1n << 15n, EMBED = 1n << 14n;
@@ -44,7 +44,7 @@ if (action === "lock") {
     await setMember(ch, false);
     const pins = await call("GET", `/channels/${ch.id}/pins`);
     if (!pins.some((m) => m.author?.id === me.id && m.content.startsWith("🔒"))) {
-      const m = await call("POST", `/channels/${ch.id}/messages`, { content: `🔒 This room opens when ${label} goes live on orrery.tech. Follow <#${byName("announcements")?.id}> for the moment it opens.`, flags: 4, allowed_mentions: { parse: [] } });
+      const m = await call("POST", `/channels/${ch.id}/messages`, { content: `🔒 This room comes into view with ${label} on orrery.tech. <#${byName("announcements")?.id}> marks the moment it opens.`, flags: 4, allowed_mentions: { parse: [] } });
       await call("PUT", `/channels/${ch.id}/pins/${m.id}`);
     }
     console.log(`hidden  #${name} (opens with ${feat})`);
@@ -53,7 +53,7 @@ if (action === "lock") {
   if (!byName("release-drafts")) {
     const team = chans.find((c) => c.type === 4 && c.name.toUpperCase() === "TEAM");
     const ow = [{ id: guild, type: 0, allow: "0", deny: VIEW.toString() }, ...staff.map((id) => ({ id, type: 0, allow: (VIEW | SEND | HISTORY | ATTACH | EMBED).toString(), deny: "0" }))];
-    const c = await call("POST", `/guilds/${guild}/channels`, { name: "release-drafts", type: 0, parent_id: team?.id, topic: "Release posts waiting for review. Approve one and it goes to #announcements.", permission_overwrites: ow });
+    const c = await call("POST", `/guilds/${guild}/channels`, { name: "release-drafts", type: 0, parent_id: team?.id, topic: "Release posts awaiting review. An approved post moves on to #announcements.", permission_overwrites: ow });
     console.log(`created #release-drafts ${c.id}`);
   }
 } else if (action === "unlock") {

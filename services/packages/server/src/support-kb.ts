@@ -31,8 +31,6 @@ export const KB_PAGES = [
 export const OFFICIAL_LINKS = {
   site: "https://orrery.tech",
   docs: "https://orrery.tech/docs",
-  x: "https://x.com/OrreryHQ",
-  discord: "https://discord.gg/zk3dybhead",
   explorer: "https://robinhoodchain.blockscout.com",
 };
 
@@ -78,12 +76,12 @@ export function pricingText(json: string): string | null {
     const perCredit = usdg(p.packPrice) / p.packSize;
     const n = (x: number) => x.toLocaleString("en-US", { maximumFractionDigits: 6 });
     const lines = [
-      `Credit pack: ${n(usdg(p.packPrice))} USDG buys ${n(p.packSize)} credits, paid over x402 on Robinhood Chain.`,
-      `Included: ${n(p.freeChecksPerMonth)} signed checks per address every month at no charge.`,
-      `After that a check costs ${p.creditsPerCheck} credits (${n(perCredit * p.creditsPerCheck)} USDG), and ${p.volumeCreditsPerCheck} credit (${n(perCredit * p.volumeCreditsPerCheck)} USDG) above ${n(p.volumeChecks)} checks a month.`,
-      `Rate limit: ${n(p.checksPerMinute)} checks per minute.`,
+      `Credit pack price: ${n(p.packSize)} credits for ${n(usdg(p.packPrice))} USDG, settled over x402 on Robinhood Chain.`,
+      `Included each month: ${n(p.freeChecksPerMonth)} signed checks per address, at no cost.`,
+      `Beyond that, each check uses ${p.creditsPerCheck} credits (${n(perCredit * p.creditsPerCheck)} USDG), dropping to ${p.volumeCreditsPerCheck} credit (${n(perCredit * p.volumeCreditsPerCheck)} USDG) past ${n(p.volumeChecks)} checks in a month.`,
+      `Throughput: up to ${n(p.checksPerMinute)} checks a minute.`,
     ];
-    if (p.plan) lines.push(`Monthly plan: ${n(usdg(p.plan.price))} USDG for ${p.plan.days} days with ${n(p.plan.credits)} credits and ${n(p.plan.checksPerMinute)} checks per minute.`);
+    if (p.plan) lines.push(`Platform plan: ${p.plan.days} days, ${n(p.plan.credits)} credits and up to ${n(p.plan.checksPerMinute)} checks a minute for ${n(usdg(p.plan.price))} USDG.`);
     return lines.join("\n");
   } catch {
     return null;
@@ -118,13 +116,12 @@ export async function buildKb(src: KbSources): Promise<{ text: string; missing: 
 
   parts.push(
     [
-      "# Official links",
+      "# Official addresses",
       `Website: ${OFFICIAL_LINKS.site}`,
       `Docs: ${OFFICIAL_LINKS.docs}`,
-      `X: ${OFFICIAL_LINKS.x} (@OrreryHQ)`,
-      `Discord: ${OFFICIAL_LINKS.discord}`,
+      "X and Discord: use the official links exactly as the site pages below show them.",
       `Explorer: ${OFFICIAL_LINKS.explorer}`,
-      "Chain: Robinhood Chain mainnet (chain id 4663).",
+      "Network: Robinhood Chain mainnet, chain id 4663.",
     ].join("\n"),
   );
 
@@ -132,7 +129,7 @@ export async function buildKb(src: KbSources): Promise<{ text: string; missing: 
   if (ca) {
     try {
       const j = JSON.parse(ca) as { ca?: string | null };
-      if (j.ca) parts.push(`# ORRY token\nORRY contract address on Robinhood Chain: ${j.ca}`);
+      if (j.ca) parts.push(`# ORRY token\nORRY token contract on Robinhood Chain: ${j.ca}`);
     } catch {
       missing.push("/api/ca");
     }
@@ -140,7 +137,7 @@ export async function buildKb(src: KbSources): Promise<{ text: string; missing: 
 
   const pricing = await get(fetchImpl, `${api}/v1/pricing`);
   const readable = pricing ? pricingText(pricing) : null;
-  if (readable) parts.push(`# Live pricing (GET ${api}/v1/pricing)\n${readable}`);
+  if (readable) parts.push(`# Current prices (from GET ${api}/v1/pricing)\n${readable}`);
   else missing.push("/v1/pricing");
 
   const releases = await get(fetchImpl, `${api}/v1/releases`);
@@ -150,7 +147,7 @@ export async function buildKb(src: KbSources): Promise<{ text: string; missing: 
       const now = Date.parse(j.serverTime);
       const open = Object.entries(j.releases).filter(([, at]) => at && Date.parse(at) <= now).map(([f]) => f);
       const held = Object.entries(j.releases).filter(([, at]) => !at || Date.parse(at) > now).map(([f]) => f);
-      parts.push(`# Feature status\nOpen now: ${open.join(", ") || "none"}\nComing soon (not open yet): ${held.join(", ") || "none"}`);
+      parts.push(`# What is open\nAvailable now: ${open.join(", ") || "none"}\nComing soon: ${held.join(", ") || "none"}`);
     } catch {
       missing.push("/v1/releases");
     }

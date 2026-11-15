@@ -56,7 +56,7 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
       const w = new ShieldedWallet(getAddress(address), k);
       w.apply(await loadShieldEvents());
       const known = await pub.readContract({ address: POOL, abi: poolAbi, functionName: "knownRoots", args: [w.tree.root()] });
-      if (!known) throw new Error("The notes are still being read. Try again in a moment.");
+      if (!known) throw new Error("Your notes are still syncing with the chain. Open it again in a few seconds.");
       await w.checkSpent((n) => pub.readContract({ address: POOL, abi: poolAbi, functionName: "nullifierSpent", args: [n] }) as Promise<boolean>);
       setWallet(w);
       return w;
@@ -66,17 +66,17 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
 
   async function open() {
     await tx.run("Open Shield", async ({ send, step }) => {
-      step("Sign once in your wallet to open your Shield keys. This signature cannot move funds.");
+      step("Sign one message in your wallet to unlock your Shield keys. It moves no funds.");
       const k = deriveAccountKeys(await sign.mutateAsync(accountKeyTypedData(CHAIN_ID)));
       if (!registered) {
-        step("Register your Shield account in your wallet.");
+        step("Approve the Shield account registration in your wallet.");
         await send({ address: POOL, abi: poolAbi, functionName: "register", args: [k.npk, k.viewKey] });
         await account.refetch();
       }
       setKeys(k);
-      step("Reading your notes.");
+      step("Syncing your notes from the chain.");
       await sync(k);
-      return "Your Shield is open.";
+      return "Shield unlocked. Your private balance is in view.";
     });
   }
 
@@ -86,14 +86,14 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
     await tx.run("Deposit", async ({ send, step }) => {
       const fee = (await pub!.readContract({ address: POOL, abi: poolAbi, functionName: "depositFee", args: [address, a] })) as bigint;
       const note = { asset: BigInt(asset), amount: a - fee, blinding: randomField(), ownerHash: ownerHash(getAddress(address), keys.npk) };
-      step("Approve USDG for Shield in your wallet.");
+      step("Approve the USDG spend for Shield in your wallet.");
       await send({ address: asset, abi: erc20 as Abi, functionName: "approve", args: [POOL, a] });
-      step("Confirm the deposit in your wallet.");
+      step("Sign the deposit transaction in your wallet.");
       await send({ address: POOL, abi: poolAbi, functionName: "deposit", args: [a, secretCommit(note), encryptNote(keys.viewKey, note)] });
       setAmt("");
       await new Promise((r) => setTimeout(r, 4000));
       await sync(keys);
-      return `${usdg(a - fee)} USDG added to your private balance.`;
+      return `Your private balance grew by ${usdg(a - fee)} USDG.`;
     });
   }
 
@@ -104,12 +104,12 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
       let recipient: { npk: bigint; viewKey: Hex } | undefined;
       if (kind === "send") {
         const [npk, viewKey] = (await pub.readContract({ address: POOL, abi: poolAbi, functionName: "accountOf", args: [target] })) as readonly [bigint, Hex];
-        if (npk === 0n) throw new Error("That address has no Shield account yet.");
+        if (npk === 0n) throw new Error("No Shield account is registered for that address.");
         recipient = { npk, viewKey };
       }
       const exit = all ? exitWithdrawal(wallet.balance(), 0n, withdrawBps) : undefined;
       const amount = exit?.amount ?? parseAmount(amt, USDG_DECIMALS);
-      if (!amount) throw new Error("Enter an amount.");
+      if (!amount) throw new Error("Add an amount to continue.");
       const floor = kind === "withdraw" ? ((await pub.readContract({ address: POOL, abi: poolAbi, functionName: "withdrawFeeFloor", args: [target, amount] })) as bigint) : undefined;
       const prepared = prepareTransact({
         chainId: CHAIN_ID,
@@ -129,12 +129,12 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
         tree: wallet.tree,
         relayer: getAddress(address),
       });
-      step("Sign the action in your wallet.");
+      step("Sign this move in your wallet.");
       const signature = await sign.mutateAsync(prepared.typedData as never);
-      step("Proving in your browser. This takes a little while.");
+      step("Building the proof in this browser tab. It needs a little time.");
       const prover = await getProver();
       const { proof } = await prover.prove(await prepared.witness(signature));
-      step("Confirm the transaction in your wallet.");
+      step("Send the transaction from your wallet.");
       const held = wallet.hold(prepared.spent);
       try {
         await send({ address: POOL, abi: poolAbi, functionName: "transact", args: [{ ...prepared.args, proof }, prepared.ext] });
@@ -145,7 +145,7 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
       setAmt("");
       await new Promise((r) => setTimeout(r, 4000));
       await sync(keys);
-      return kind === "send" ? `Sent ${usdg(amount)} USDG privately.` : `${usdg(amount)} USDG withdrawn to ${target.slice(0, 6)}…${target.slice(-4)}.`;
+      return kind === "send" ? `${usdg(amount)} USDG sent privately.` : `${usdg(amount)} USDG left Shield for ${target.slice(0, 6)}…${target.slice(-4)}.`;
     });
   }
 
@@ -154,8 +154,8 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
     <>
       {exitOnly ? null : (
         <OrryHead
-          title="Keep your USDG balance private."
-          lead={<p>Deposit USDG into a private balance, send it to another Shield account, and withdraw to any address. Each move is a zero-knowledge proof made in your browser and signed by your wallet.</p>}
+          title="A USDG balance only you can see."
+          lead={<p>Put USDG into a private balance, pass it to another Shield account, or take it out to any address. Every move is a zero-knowledge proof built in your browser and signed by your wallet.</p>}
           reading={
             <div className="rc-card">
               <p className="rc-card-title">Shield</p>
@@ -176,9 +176,9 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
             <WalletButton />
           ) : !keys ? (
             <div className="rc-desk-body">
-              <p className="rc-muted">{registered ? "Sign once to open your Shield and read your private balance." : "Sign once to create your Shield keys, then register them."}</p>
+              <p className="rc-muted">{registered ? "One signature unlocks your Shield and shows your private balance." : "One signature makes your Shield keys, and one transaction registers them."}</p>
               <button className="primary rc-go" type="button" disabled={Boolean(tx.busy)} onClick={() => void open()}>
-                {tx.busy ? "Opening…" : "Open my Shield"}
+                {tx.busy ? "Unlocking…" : "Unlock my Shield"}
               </button>
             </div>
           ) : (
@@ -194,7 +194,7 @@ export function ShieldView({ exitOnly = false }: { exitOnly?: boolean }) {
               />
               <div className="rc-desk-body">
                 {mode === "deposit" ? (
-                  <AmountField id="shield-in" label="USDG to deposit" unit="USDG" value={amt} onChange={setAmt} hint={wallBal !== undefined ? `In your wallet ${usdg(wallBal)} USDG` : undefined} />
+                  <AmountField id="shield-in" label="Deposit amount, USDG" unit="USDG" value={amt} onChange={setAmt} hint={wallBal !== undefined ? `Wallet balance: ${usdg(wallBal)} USDG` : undefined} />
                 ) : (
                   <>
                     <label className="r2-field">

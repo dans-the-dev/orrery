@@ -1,7 +1,7 @@
 /* Dashboard: its own app shell (components/dashboard/Shell.tsx), apart from the marketing site.
    Sidebar of management sections, a sticky top bar, white panels on a quiet ground; numbers in mono. */
 
-.dsh-app { --cp-ground: #f3f5f2; --cp-line: #e3e8ee; --cp-soft: #f2f4f7; display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; background: var(--cp-ground); color: var(--ink); }
+.dsh-app { --cp-ground: #f6f5fa; --cp-line: #e3e8ee; --cp-soft: #f2f4f7; display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; background: var(--cp-ground); color: var(--ink); }
 
 .dsh-side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 22px; padding: 20px 14px; background: #fff; border-right: 1px solid var(--cp-line); }
 .dsh-brand { display: flex; align-items: center; gap: 10px; padding: 2px 10px 6px; font-family: var(--display); font-weight: 700; font-size: 1.2rem; letter-spacing: -0.02em; color: var(--ink); }
@@ -173,7 +173,7 @@
 .cp-try { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
 .cp-try label { display: grid; gap: 6px; font-size: 0.8rem; font-weight: 700; min-width: 0; }
 .cp-try input { height: 42px; border: 1px solid var(--hairline); border-radius: 10px; background: #fff; color: var(--ink); padding: 8px 12px; font-family: var(--mono); font-size: 0.82rem; min-width: 0; }
-.cp-snippet { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--ground-dark); color: #dfe6ff; font-family: var(--mono); font-size: 0.78rem; line-height: 1.7; overflow: auto; white-space: pre; }
+.cp-snippet { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--ground-dark); color: #e7e2fb; font-family: var(--mono); font-size: 0.78rem; line-height: 1.7; overflow: auto; white-space: pre; }
 .cp-guest { margin-top: 20px; }
 @media (max-width: 760px) { .cp-try { grid-template-columns: 1fr; } }
 

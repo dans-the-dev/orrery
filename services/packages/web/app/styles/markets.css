@@ -20,12 +20,12 @@
 .mk-bar span.is-done i { width: 100% !important; opacity: 0.35; }
 .mk-clock-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 0.78rem; color: var(--muted); }
 .mk-clock-foot span:last-child { text-align: right; }
-.mk-clock-count { margin-top: 10px; font-size: 0.86rem; color: #2a3350; }
+.mk-clock-count { margin-top: 10px; font-size: 0.86rem; color: #2b2f52; }
 .mk-clock.is-wait .mk-clock-head strong { color: #b4bccb; }
 @media (prefers-reduced-motion: reduce) { .mk-bar span i { transition: none; } }
 
 /* This wallet's orders on their way */
-.mk-strip { display: flex; flex-direction: column; gap: 2px; margin: -8px 0 30px; padding: 6px 20px; border-radius: 16px; background: var(--ground-dark); color: #eef1fb; }
+.mk-strip { display: flex; flex-direction: column; gap: 2px; margin: -8px 0 30px; padding: 6px 20px; border-radius: 16px; background: var(--ground-dark); color: #ecebf7; }
 .mk-strip-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 18px; align-items: center; padding: 12px 0; border-top: 1px solid rgba(238, 241, 251, 0.14); }
 .mk-strip-row:first-child { border-top: 0; }
 .mk-strip-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -39,20 +39,20 @@
 
 /* Order progress: Sealed, Revealed, Cleared */
 .mk-track { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.mk-track li { position: relative; padding: 6px 10px 6px 22px; border-radius: 8px; font-size: 0.76rem; font-weight: 700; color: #8f9bc0; background: rgba(238, 241, 251, 0.06); white-space: nowrap; }
+.mk-track li { position: relative; padding: 6px 10px 6px 22px; border-radius: 8px; font-size: 0.76rem; font-weight: 700; color: #9e99c2; background: rgba(238, 241, 251, 0.06); white-space: nowrap; }
 .mk-track li::before { content: ""; position: absolute; left: 9px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; border: 1.5px solid currentColor; }
-.mk-track li.is-done { color: #cfd7f2; }
+.mk-track li.is-done { color: #d8d4ea; }
 .mk-track li.is-done::before { background: currentColor; }
 .mk-track li.is-now { color: #fff; background: color-mix(in srgb, var(--brand) 55%, transparent); }
 .mk-track li.is-now::before { background: #fff; border-color: #fff; }
 
 /* Order desk */
-.mk-pick label { display: block; font-size: 0.82rem; font-weight: 600; color: #2a3350; margin-bottom: 6px; }
+.mk-pick label { display: block; font-size: 0.82rem; font-weight: 600; color: #2b2f52; margin-bottom: 6px; }
 .mk-pick select { width: 100%; height: 52px; padding: 0 14px; border: 1px solid var(--hairline); border-radius: 14px; background: var(--paper); color: var(--ink); font-weight: 600; }
 .mk-pick select:focus { outline: 2px solid color-mix(in srgb, var(--brand) 22%, transparent); border-color: var(--brand); }
 .mk-problem { color: var(--danger); font-weight: 600; }
 .mk-tol { display: flex; flex-direction: column; gap: 8px; }
-.mk-tol-line { font-size: 0.86rem; color: #2a3350; }
+.mk-tol-line { font-size: 0.86rem; color: #2b2f52; }
 .rc-muted-inline { color: var(--muted); font-family: var(--text); font-weight: 600; font-size: 0.86rem; }
 .mk-check { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--paper); cursor: pointer; }
 .mk-check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--brand); flex: none; }
@@ -61,7 +61,7 @@
 .mk-check.is-off { cursor: not-allowed; }
 .mk-check.is-off span { color: var(--muted); }
 .mk-reveal { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; }
-.mk-reveal legend { padding: 0; margin-bottom: 6px; font-size: 0.82rem; font-weight: 600; color: #2a3350; }
+.mk-reveal legend { padding: 0; margin-bottom: 6px; font-size: 0.82rem; font-weight: 600; color: #2b2f52; }
 .mk-reveal label { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 10px 14px; border-radius: 14px; background: var(--paper); cursor: pointer; }
 .mk-reveal input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--brand); flex: none; }
 .mk-reveal span { display: flex; flex-direction: column; gap: 2px; font-weight: 700; font-size: 0.92rem; }
@@ -77,18 +77,18 @@
 .mk-steps li:first-child { border-top: 0; }
 .mk-steps li::before { content: counter(step); grid-row: span 2; font-family: var(--mono); font-weight: 700; color: var(--brand); font-size: 0.95rem; }
 .mk-steps strong { font-family: var(--display); font-weight: 600; }
-.mk-steps span { color: #2a3350; font-size: 0.92rem; line-height: 1.5; }
+.mk-steps span { color: #2b2f52; font-size: 0.92rem; line-height: 1.5; }
 .mk-facts { margin-top: 20px; }
 .rc-side h2 + .mk-facts { margin-top: 8px; }
 .mk-tiers { margin-top: 22px; }
 .mk-tiers h3 { font-size: 1.05rem; }
 .mk-tiers ul { list-style: none; margin: 10px 0 0; padding: 0; }
 .mk-tiers li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-radius: 10px; font-size: 0.9rem; }
-.mk-tiers li span { color: #2a3350; }
+.mk-tiers li span { color: #2b2f52; }
 .mk-tiers li strong { font-family: var(--mono); font-size: 0.86rem; }
 .mk-tiers li.is-yours { background: color-mix(in srgb, var(--brand) 10%, transparent); }
 .mk-tiers li.is-yours strong { color: var(--brand); }
-.mk-more { margin-top: 20px; font-size: 0.92rem; color: #2a3350; }
+.mk-more { margin-top: 20px; font-size: 0.92rem; color: #2b2f52; }
 .mk-wait { margin-top: 8px; }
 
 /* Revealed book and batches */

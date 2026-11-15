@@ -4,10 +4,10 @@ TypeScript (Node 22+, pnpm) implementation of `../14-services-spec.md`:
 
 | Package | Contents |
 | :--- | :--- |
-| `@orrery/shared` | Contract ABIs (generated), chains, EIP-712 types (check result, session consent, EIP-3009), x402 v2 wire types |
-| `@orrery/server` | Internal x402 facilitator for USDG, HTTP API (credit packs, API keys, signed checks, public reads), prober with SSRF guards, indexer. Three processes: `api` (includes the facilitator), `prober`, `indexer` |
-| `@orrery/sdk` | Operator calls and signer consent, `AgentClient` (float top-ups, gas, x402 fetch), counterparty `OrreryApi`, `verifyCheck` |
-| `@orrery/web` | Next.js 16 web app in the Current Limit style: landing with a live payer console, signer and agent records, credits (x402 purchase, key rotation, signed checks verified in the browser), operator workspace (Safe 1-of-1), docs |
+| `@orrery/shared` | Generated contract ABIs, chain definitions, EIP-712 types (check result, session consent, EIP-3009) and x402 v2 wire types |
+| `@orrery/server` | HTTP API (credit packs, API keys, signed readings, public reads) with a built-in x402 facilitator for USDG, an SSRF-guarded endpoint prober, and the chain indexer. Runs as three processes: `api` (facilitator included), `prober`, `indexer` |
+| `@orrery/sdk` | Operator calls and signer consent, `AgentClient` (float refills, gas, x402 fetch), the counterparty client `OrreryApi`, and `verifyCheck` |
+| `@orrery/web` | Next.js 16 web app in the observatory style: landing page with a live payer console, signer and agent records, credits (x402 purchase, key rotation, signed readings verified in the browser), the operator workspace (Safe 1-of-1) and docs |
 
 Status 2026-11-07: built and tested locally against anvil and Postgres; not deployed; hosting not decided.
 

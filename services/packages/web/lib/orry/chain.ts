@@ -104,43 +104,43 @@ const until = (t: unknown) => Number(t ?? 0) - Math.floor(Date.now() / 1000);
 
 /** Plain messages for the contracts' custom errors. */
 const ERRORS: Record<string, (args: readonly unknown[]) => string> = {
-  SharesLocked: (a) => (until(a[0]) > 0 ? `Your shares unlock in ${span(until(a[0]))}.` : "Your shares unlock in a moment. Try again shortly."),
-  PriceMovedInBlock: () => "The pool price moved in this block. Try again in a moment.",
-  SlippageExceeded: () => "The price moved past your limit. Try again or raise the limit.",
-  DeadlinePassed: () => "The transaction waited too long. Send it again.",
-  InsufficientShares: () => "That is more than your shares.",
-  ZeroAmount: () => "Enter an amount above zero.",
-  HubNotRegistered: () => "The ORRY pool opens soon. Deposits start then.",
-  NothingReady: () => "Nothing is ready to withdraw yet.",
-  InsufficientActive: () => "That is more than your active stake.",
-  NotAgentController: () => "Only the agent's owner or its agent wallet can stake behind it.",
-  NotStaker: () => "Only the address that staked can move this stake.",
-  PositionHeldByAnotherStaker: () => "Another address already stakes behind this agent.",
-  AgentStakeLocked: (a) => `This agent stake is locked until ${utc(Number(a[0] ?? 0))}.`,
-  InexactTransfer: () => "The token transfer did not match the amount.",
-  TooSoon: (a) => (until(a[0]) > 0 ? `Distribute already ran recently. Next run in ${span(until(a[0]))}.` : "Distribute already ran recently. Try again in a moment."),
-  NothingToDistribute: () => "Nothing is waiting to distribute.",
-  QuoteExpired: () => "The quote expired. Get a new one.",
-  QuoteUsed: () => "This quote was already used. Get a new one.",
-  BadQuoteSignature: () => "The quote was not accepted. Get a new one.",
-  CoinNotSet: () => "ORRY payments open soon.",
-  DailyVerificationCap: () => "ORRY verifications for today are complete. Pay in USDG or come back after 00:00 UTC.",
-  InexactBurn: () => "The burn did not match the amount.",
-  EthTransferFailed: () => "The ETH payout did not go through to your address.",
+  SharesLocked: (a) => (until(a[0]) > 0 ? `These shares stay locked for ${span(until(a[0]))} more.` : "The lock on these shares is ending now. Send it again shortly."),
+  PriceMovedInBlock: () => "The pool price shifted inside this block. Send it again in the next one.",
+  SlippageExceeded: () => "The price left the bounds you set. Send again, or widen the slippage.",
+  DeadlinePassed: () => "The deadline passed before the transaction landed. Send a fresh one.",
+  InsufficientShares: () => "The amount exceeds the shares you hold.",
+  ZeroAmount: () => "Amount must be greater than zero.",
+  HubNotRegistered: () => "Deposits begin once the ORRY pool is live.",
+  NothingReady: () => "No withdrawal has matured yet.",
+  InsufficientActive: () => "The amount exceeds your active stake.",
+  NotAgentController: () => "Staking for this agent is open to its owner and its agent wallet.",
+  NotStaker: () => "This stake moves only from the address that placed it.",
+  PositionHeldByAnotherStaker: () => "This agent already carries a stake from a different address.",
+  AgentStakeLocked: (a) => `The stake on this agent stays locked until ${utc(Number(a[0] ?? 0))}.`,
+  InexactTransfer: () => "The amount received differs from the amount sent.",
+  TooSoon: (a) => (until(a[0]) > 0 ? `Rewards were distributed a short while ago. The next round opens in ${span(until(a[0]))}.` : "Rewards were distributed a short while ago. Send it again shortly."),
+  NothingToDistribute: () => "No rewards are queued for distribution.",
+  QuoteExpired: () => "This quote is out of date. Request a fresh quote.",
+  QuoteUsed: () => "This quote has been spent. Request a fresh quote.",
+  BadQuoteSignature: () => "The quote signature did not check out. Request a fresh quote.",
+  CoinNotSet: () => "Paying in ORRY becomes available shortly.",
+  DailyVerificationCap: () => "Today's ORRY verifications are all taken. Pay in USDG, or pay in ORRY again after 00:00 UTC.",
+  InexactBurn: () => "The burned amount differs from the amount requested.",
+  EthTransferFailed: () => "Your address did not accept the ETH payout.",
   // Sealed batch markets (wave R1).
-  WrongPhase: () => "This batch moved to its next window. Seal the order in the next batch.",
-  AlreadyCommitted: () => "This wallet already has an order sealed in this batch. The next batch opens shortly.",
-  BatchFull: () => "This batch is full. Seal the order in the next batch.",
-  BadReveal: () => "The reveal did not match the sealed order.",
-  BelowMinimum: () => "The order is below the market's minimum size.",
-  AlreadyCleared: () => "This batch has cleared.",
-  Expired: () => "This batch closed without a price, so nothing moved.",
-  BadRound: () => "The price round did not match the batch.",
-  StalePrice: () => "The stock price has not updated for this batch yet.",
-  DeviationTooHigh: () => "The pool price is too far from the batch price for this clearing.",
+  WrongPhase: () => "This batch has moved on to its next phase. Seal your order in the following batch.",
+  AlreadyCommitted: () => "This wallet has already sealed an order in this batch. A new batch starts shortly.",
+  BatchFull: () => "This batch has no room left. Seal your order in the following batch.",
+  BadReveal: () => "The revealed order differs from the one you sealed.",
+  BelowMinimum: () => "Order size is under this market's minimum.",
+  AlreadyCleared: () => "This batch is already settled.",
+  Expired: () => "This batch ended with no clearing price, so no funds moved.",
+  BadRound: () => "The price reading belongs to a different round than this batch.",
+  StalePrice: () => "The stock price for this batch has not arrived yet.",
+  DeviationTooHigh: () => "The pool price sits too far from the batch price to clear now.",
   // Merchant payment addresses (wave 3).
-  SplitterExists: () => "This payment address is already set up.",
-  NothingToForward: () => "Nothing is waiting to forward.",
+  SplitterExists: () => "A payment address already exists for this.",
+  NothingToForward: () => "No balance is waiting to be forwarded.",
 };
 
 export function explain(e: unknown, fallback: string): string {
@@ -150,12 +150,12 @@ export function explain(e: unknown, fallback: string): string {
       const f = ERRORS[reverted.data.errorName];
       if (f) return f(reverted.data.args ?? []);
     }
-    if (/reject|denied/i.test(e.shortMessage + e.message)) return "Request closed in the wallet.";
-    if (/insufficient funds/i.test(e.message)) return "Not enough ETH for this amount and the gas.";
+    if (/reject|denied/i.test(e.shortMessage + e.message)) return "The wallet request was dismissed.";
+    if (/insufficient funds/i.test(e.message)) return "The ETH balance does not cover the amount plus gas.";
     return `${fallback} ${e.shortMessage}`.trim();
   }
   const msg = e instanceof Error ? e.message : "";
-  if (/reject|denied/i.test(msg)) return "Request closed in the wallet.";
+  if (/reject|denied/i.test(msg)) return "The wallet request was dismissed.";
   return msg ? `${fallback} ${msg.split("\n")[0]}` : fallback;
 }
 
@@ -182,35 +182,35 @@ export function useTx() {
   const [notice, setNotice] = useState<Notice>(null);
 
   async function send(c: Call): Promise<Hex> {
-    if (!pub) throw new Error("No connection to the network.");
+    if (!pub) throw new Error("The network is out of reach. Check the connection and send again.");
     // Simulating first surfaces the contract's own error before the wallet opens.
     await pub.simulateContract({ ...c, account } as never).catch((e) => {
       if (e instanceof BaseError && e.walk((x) => x instanceof ContractFunctionRevertedError)) throw e;
     });
     const hash = await writeContractAsync(c as never);
     const r = await pub.waitForTransactionReceipt({ hash });
-    if (r.status !== "success") throw new Error("The transaction reverted.");
+    if (r.status !== "success") throw new Error("The transaction was reverted on chain.");
     return hash;
   }
 
   async function ensureAllowance(owner: Address, spender: Address, amount: bigint, step: (t: string) => void) {
-    if (!pub || !ORRY.token) throw new Error("ORRY is not configured.");
+    if (!pub || !ORRY.token) throw new Error("The ORRY token address is not set for this network.");
     const current = await pub.readContract({ address: ORRY.token, abi: iOrryTokenAbi, functionName: "allowance", args: [owner, spender] });
     if (current >= amount) return;
-    step("Approve ORRY in your wallet.");
+    step("Your wallet asks you to approve ORRY first.");
     await send({ address: ORRY.token, abi: iOrryTokenAbi as Abi, functionName: "approve", args: [spender, amount] });
   }
 
   async function run(label: string, fn: (h: { send: typeof send; step: (t: string) => void; ensureAllowance: typeof ensureAllowance }) => Promise<string | void>) {
     setBusy(label);
-    setNotice({ tone: "", text: `${label}: confirm in your wallet.` });
+    setNotice({ tone: "", text: `${label}. Waiting for your wallet.` });
     try {
       const done = await fn({ send, step: (t) => setNotice({ tone: "", text: t }), ensureAllowance });
-      setNotice({ tone: "ok", text: done || `${label}: done.` });
+      setNotice({ tone: "ok", text: done || `${label} is on record.` });
       await qc.invalidateQueries();
       return true;
     } catch (e) {
-      setNotice({ tone: "error", text: explain(e, `${label} did not go through.`) });
+      setNotice({ tone: "error", text: explain(e, `${label} was not completed.`) });
       return false;
     } finally {
       setBusy(null);

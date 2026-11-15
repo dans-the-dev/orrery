@@ -33,8 +33,8 @@ export function RewardsView() {
   return (
     <>
       <OrryHead
-        title="Rewards from the community pool."
-        lead={<p>Chat fees, name fees and the cut of every tip fill the Reward Pool. It pays bug bounties, the most active wallets of each week and the achievements below.</p>}
+        title="What the Reward Pool pays out."
+        lead={<p>The Reward Pool collects chat fees, name fees and a share of each tip. From it come bug bounties, prizes for each week&apos;s most active wallets and the achievements listed below.</p>}
         reading={<PoolCard data={data} error={rewards.isError} meta={meta} />}
       />
       <Events cfg={config} events={data?.events} loading={rewards.isLoading} meta={meta} />
@@ -50,16 +50,16 @@ function PoolCard({ data, error, meta }: { data?: RewardsResponse; error: boolea
     <div className="rc-card">
       <p className="rc-card-title">Reward Pool</p>
       {!data ? (
-        <p className="rc-card-wait">{error ? "Pool balances appear here in a moment." : "…"}</p>
+        <p className="rc-card-wait">{error ? "Pool balances load in a moment." : "…"}</p>
       ) : pool.length === 0 ? (
-        <p className="rc-card-wait">Balances appear here as fees reach the pool.</p>
+        <p className="rc-card-wait">Balances are charted here as fees flow in.</p>
       ) : (
         <dl className="rc-rows">
           {pool.map((p) => {
             const m = meta(p.asset);
             const locked = big(p.locked);
             return (
-              <Row key={p.asset} label={m?.symbol ?? mask(p.asset)} hint={locked > 0n && m ? `${assetAmount(locked, m)} set aside for open rewards` : undefined}>
+              <Row key={p.asset} label={m?.symbol ?? mask(p.asset)} hint={locked > 0n && m ? `${assetAmount(locked, m)} reserved for rewards in progress` : undefined}>
                 {assetAmount(big(p.free) + locked, m) || "…"}
               </Row>
             );
@@ -77,14 +77,14 @@ function Events({ cfg, events, loading, meta }: { cfg: CommunityConfig; events?:
       <div className="rc-panel-head">
         <h2>Events</h2>
         <p>
-          Bug bounties, the week&apos;s most active wallets and quests. Winners are published with a public check
-          {cfg.checkWindowSeconds > 0 ? ` of ${period(cfg.checkWindowSeconds)}` : ""}, then each winner claims the prize.
+          Bug bounties, quests and the weekly most active wallets. Each list of winners stays open to public review
+          {cfg.checkWindowSeconds > 0 ? ` for ${period(cfg.checkWindowSeconds)}` : ""}, after which every winner collects their prize.
         </p>
       </div>
       {loading ? (
         <p className="rc-muted">…</p>
       ) : list.length === 0 ? (
-        <p className="rc-muted">Events appear here when the next one opens.</p>
+        <p className="rc-muted">The next event is listed here once it starts.</p>
       ) : (
         <ul className="cm-events">
           {list.map((e) => (
@@ -118,18 +118,18 @@ function EventRow({ cfg, event: e, meta }: { cfg: CommunityConfig; event: Commun
   const status =
     e.status === "open"
       ? deadline > now
-        ? `Open until ${utc(deadline)}`
-        : "Ended. The amount returns to the pool"
+        ? `Runs until ${utc(deadline)}`
+        : "Closed. The prize amount goes back to the pool"
       : e.status === "published"
         ? payableAt > now
-          ? `Winners published. Prizes claimable in ${span(payableAt - now)}`
-          : "Winners published. Prizes claimable now"
-        : "Ended. The amount went back to the pool";
+          ? `Winners on record. Prizes open in ${span(payableAt - now)}`
+          : "Winners on record. Prizes can be claimed"
+        : "Closed. The prize amount is back in the pool";
 
   async function claim() {
     await tx.run("Claim prize", async ({ send }) => {
       await send({ address: pool, abi: poolAbi, functionName: "claim", args: [BigInt(e.id)] });
-      return `Claimed ${assetAmount(prize, meta)}.`;
+      return `${assetAmount(prize, meta)} went to your wallet.`;
     });
   }
 
@@ -156,12 +156,12 @@ function EventRow({ cfg, event: e, meta }: { cfg: CommunityConfig; event: Commun
       {prize > 0n ? (
         <div className="rc-claim cm-claim">
           <div>
-            <p className="rc-claim-label">{claimed ? "Your prize, claimed" : "Your prize"}</p>
+            <p className="rc-claim-label">{claimed ? "Prize collected" : "Prize for this wallet"}</p>
             <p className="rc-claim-value">{assetAmount(prize, meta)}</p>
           </div>
           {claimed ? null : (
             <button className="primary" type="button" disabled={!ready || Boolean(tx.busy) || payableAt > now} onClick={() => void claim()}>
-              {payableAt > now ? `Claimable in ${span(payableAt - now)}` : tx.busy ? "Claiming…" : "Claim"}
+              {payableAt > now ? `Opens in ${span(payableAt - now)}` : tx.busy ? "Claiming…" : "Claim"}
             </button>
           )}
         </div>
@@ -183,14 +183,14 @@ function Board({ cfg, data, loading, meta }: { cfg: CommunityConfig; data?: Rewa
     <section className="rc-panel" aria-label="Achievement Board">
       <div className="rc-panel-head">
         <h2>Achievement Board</h2>
-        <p>Each achievement pays the same reward to every wallet that completes it, first come first served. Recipients are listed in the order they completed it.</p>
+        <p>Each achievement carries one fixed reward per wallet, paid in order of completion. The recipient list follows that same order.</p>
       </div>
       {!cfg.addresses.achievements ? (
         <p className="rc-muted">Achievements: {COMING_SOON}.</p>
       ) : loading ? (
         <p className="rc-muted">…</p>
       ) : list.length === 0 ? (
-        <p className="rc-muted">Achievements appear here when the first one opens.</p>
+        <p className="rc-muted">Achievements are listed here once the first one starts.</p>
       ) : (
         <ul className="cm-achievements">
           {list.map((a) => (
@@ -200,7 +200,7 @@ function Board({ cfg, data, loading, meta }: { cfg: CommunityConfig; data?: Rewa
       )}
       {!connected && list.length > 0 ? (
         <div className="rc-connect">
-          <p>Connect a wallet to claim the achievements you completed.</p>
+          <p>Claiming a completed achievement needs a connected wallet.</p>
           <WalletButton />
         </div>
       ) : null}
@@ -246,11 +246,11 @@ function AchievementRow({ cfg, a, meta, held }: { cfg: CommunityConfig; a: Commu
 
   const how = verifier
     ? needsAgent
-      ? "Own an agent that Orrery has verified, then claim with its agent ID."
+      ? "For owners of an agent verified by Orrery. Claim with the agent ID."
       : minStake !== undefined
-        ? `Hold an earning stake worth ${usd(minStake)} or more, then claim.`
-        : "Meet the condition on chain, then claim."
-    : `Orrery lists the wallets that complete it. Each can claim${cfg.checkWindowSeconds > 0 ? ` ${period(cfg.checkWindowSeconds)}` : ""} after its listing.`;
+        ? `For wallets with ${usd(minStake)} or more earning in Stake. Claim once that holds.`
+        : "The condition is checked on chain when you claim."
+    : `Orrery records each wallet that completes it. A listed wallet claims${cfg.checkWindowSeconds > 0 ? ` ${period(cfg.checkWindowSeconds)}` : ""} after its entry.`;
 
   async function claim() {
     const label = "Claim reward";
@@ -261,7 +261,7 @@ function AchievementRow({ cfg, a, meta, held }: { cfg: CommunityConfig; a: Commu
       } else {
         await send({ address: board, abi: achievementsAbi, functionName: "claimListed", args: [BigInt(a.id)] });
       }
-      return `Claimed ${assetAmount(big(a.rewardPerUser), meta)}.`;
+      return `${assetAmount(big(a.rewardPerUser), meta)} went to your wallet.`;
     });
   }
 
@@ -288,7 +288,7 @@ function AchievementRow({ cfg, a, meta, held }: { cfg: CommunityConfig; a: Commu
   } else if (listedAt > 0) {
     action =
       claimableAt > now ? (
-        <span className="cm-state">Claimable in {span(claimableAt - now)}</span>
+        <span className="cm-state">Opens in {span(claimableAt - now)}</span>
       ) : (
         <button className="primary" type="button" disabled={!ready || Boolean(tx.busy)} onClick={() => void claim()}>
           {tx.busy ? "Claiming…" : "Claim"}
@@ -302,16 +302,16 @@ function AchievementRow({ cfg, a, meta, held }: { cfg: CommunityConfig; a: Commu
         <div>
           <strong>{kindName(a.kind, a.kindName)}</strong>
           <span>{how}</span>
-          <span>{ended ? "Ended" : `Until ${utc(deadline)}`}</span>
+          <span>{ended ? "Closed" : `Runs until ${utc(deadline)}`}</span>
         </div>
         <div className="cm-reward">
           <span className="cm-amount">{held ? COMING_SOON : assetAmount(big(a.rewardPerUser), meta) || "…"}</span>
-          {held ? null : <small>per wallet</small>}
+          {held ? null : <small>each wallet</small>}
         </div>
       </div>
       <div className="cm-achievement-foot">
         <button type="button" className="cm-link" aria-expanded={showRecipients} onClick={() => setShowRecipients((s) => !s)}>
-          {showRecipients ? "Hide recipients" : "Recipients"}
+          {showRecipients ? "Hide the list" : "Recipients"}
         </button>
         {action}
       </div>
@@ -325,7 +325,7 @@ function Recipients({ id, meta }: { id: number; meta?: AssetMeta }) {
   const q = useRecipients(id, true);
   const rows = q.data?.recipients ?? [];
   if (q.isLoading) return <p className="rc-muted">…</p>;
-  if (rows.length === 0) return <p className="rc-muted">{q.isError ? "Recipients appear here in a moment." : "The first wallet to complete it appears here."}</p>;
+  if (rows.length === 0) return <p className="rc-muted">{q.isError ? "The list loads in a moment." : "Wallets are listed here as they complete it."}</p>;
   return (
     <table className="rc-table cm-recipients">
       <thead>
@@ -355,16 +355,16 @@ function MostActive() {
   const d = q.data;
   const rows = d?.rows ?? [];
   return (
-    <section className="rc-panel rc-board" aria-label="Most active, 7 days">
+    <section className="rc-panel rc-board" aria-label="Most active wallets · 7 days">
       <div className="rc-panel-head">
-        <h2>Most active, 7 days</h2>
+        <h2>Most active wallets · 7 days</h2>
         <p>
-          Ranked by protocol fees paid in USD over the last 7 days, read from the chain.
+          Sorted by protocol fees paid in USD across the past 7 days, taken from chain records.
           {d?.from && d?.to ? ` ${utc(time(d.from))} to ${utc(time(d.to))}.` : ""}
         </p>
         {d?.rules ? (
           <details className="cm-rules">
-            <summary>Ranking rules</summary>
+            <summary>How the ranking is computed</summary>
             <pre className="mono">{prettyRules(d.rules)}</pre>
           </details>
         ) : null}
@@ -372,7 +372,7 @@ function MostActive() {
       {q.isLoading ? (
         <p className="rc-muted">…</p>
       ) : rows.length === 0 ? (
-        <p className="rc-muted">{q.isError ? "The ranking appears here in a moment." : "The ranking fills as wallets pay fees this week."}</p>
+        <p className="rc-muted">{q.isError ? "The ranking loads in a moment." : "Wallets are ranked here as fees are paid this week."}</p>
       ) : (
         <table className="rc-table">
           <thead>
@@ -395,7 +395,7 @@ function MostActive() {
           </tbody>
         </table>
       )}
-      {d?.rulesHash ? <p className="cm-hash mono">Rules hash {d.rulesHash}</p> : null}
+      {d?.rulesHash ? <p className="cm-hash mono">Hash of the rules · {d.rulesHash}</p> : null}
     </section>
   );
 }

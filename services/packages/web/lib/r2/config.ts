@@ -10,10 +10,10 @@ export const R2_ROUTES: { feature: Extract<OrryFeature, "predict" | "limit-order
 
 /** Burn sources added by lane L3, for the burn page. */
 export const R2_BURN_SOURCES: Record<number, string> = {
-  30: "Prediction markets created",
-  31: "Prediction fees paid in ORRY",
-  32: "Limit order fees paid in ORRY",
-  33: "Gas premium paid in ORRY",
+  30: "New prediction markets",
+  31: "ORRY paid as prediction fees",
+  32: "ORRY paid as limit order fees",
+  33: "ORRY paid as the gas premium",
 };
 
 /** Tip choices for the keeper that fills a limit order, in basis points of the order's USDG value. */

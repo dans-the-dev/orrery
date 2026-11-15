@@ -27,9 +27,9 @@ import { quotePrice, orryForUsd, type Ratio } from "./orry-price.js";
 export type QuoteFailure = { ok: false; status: 503; error: string };
 
 const UNAVAILABLE: Record<string, string> = {
-  hub_not_registered: "ORRY checkout opens when the ORRY pool is live. Try again later.",
-  no_price: "The ORRY pool has no price yet. Try again later.",
-  not_enough_samples: "ORRY prices are still being sampled. Try again in a few minutes.",
+  hub_not_registered: "ORRY checkout opens together with the ORRY pool.",
+  no_price: "The first ORRY price reading arrives shortly. Request the quote again in a moment.",
+  not_enough_samples: "ORRY price readings are still being sampled. Request the quote again in a few minutes.",
 };
 
 const priceView = (ratio: Ratio, basis: "spot" | "median", samples: number): QuotePrice => ({
@@ -41,7 +41,7 @@ const priceView = (ratio: Ratio, basis: "spot" | "median", samples: number): Quo
 
 async function prepare(cfg: Config, chain: Chain, sql: Sql, usd: bigint) {
   // checkout can open at runtime on a server started without a quote key: refuse plainly rather than sign nothing
-  if (!cfg.quoteSignerKey) return { ok: false as const, status: 503 as const, error: "Checkout with ORRY is not available right now." };
+  if (!cfg.quoteSignerKey) return { ok: false as const, status: 503 as const, error: "ORRY checkout is coming soon." };
   const price = await quotePrice(cfg, chain, sql);
   if (!price.ok) return { ok: false as const, status: 503 as const, error: UNAVAILABLE[price.reason]! };
   // The treasury checks `expiry >= block.timestamp`, so the lifetime counts from the chain's clock.

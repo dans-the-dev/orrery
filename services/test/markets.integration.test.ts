@@ -376,7 +376,7 @@ describe("reveal relay", () => {
     const status = await fetch(`${baseUrl}/v1/markets/relay/reveals/${market}/${n}/${A()}`);
     expect((await status.text()).toLowerCase()).not.toContain(salt.slice(2).toLowerCase());
     expect((await fetch(`${baseUrl}/v1/markets/relay/reveals/${market}/${n}/${B()}`)).status).toBe(404);
-    await expect(api.relayReveal(market, 0n, A(), o, salt)).rejects.toThrow(/reveal window has closed/); // batch 0 is long over
+    await expect(api.relayReveal(market, 0n, A(), o, salt)).rejects.toThrow(/reveal period for this batch has ended/); // batch 0 is long over
     const bad = await fetch(`${baseUrl}/v1/markets/relay/reveals`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ market, batch: "1" }) });
     expect(bad.status).toBe(400);
 

@@ -3,59 +3,59 @@ import { Period } from "@/components/orry/docs";
 import { FeatureGate } from "@/components/orry/gate";
 import { ComingSoon } from "@/components/orry/parts";
 
-export const metadata = { title: "Orrery · Earn guide", description: "How Orrery Earn works: deposits, zaps, fee streams, claims and withdrawals." };
+export const metadata = { title: "Orrery · Guide to Earn", description: "The Orrery Earn guide: deposits, zaps, streamed fees, claims and withdrawals." };
 
 export default function EarnDocs() {
   return (
-    <DocsShell kicker="Guide" title="Earn" lead={<p>Pick an ORRY pool and add its tokens, one or both. Your share earns from every swap in that pool.</p>}>
+    <DocsShell kicker="Guide" title="Earn" lead={<p>Choose an ORRY pool and supply one of its tokens or both. Your share collects from each swap the pool handles.</p>}>
       <FeatureGate
         feature="earn"
         held={
-        <ComingSoon title="The Earn guide opens with Earn." text="This guide appears here when Earn opens." />
+        <ComingSoon title="The Earn guide arrives with Earn." text="This guide shows here once Earn starts." />
         }
       >
         <>
-          <h2>What Earn holds</h2>
+          <h2>Inside an Earn vault</h2>
           <p>
-            ORRY trades in several pools on Uniswap v4, all run by Orrery&apos;s own hook: ORRY with ETH and ORRY with USDG. Each pool has its own
-            Earn vault, one shared position across the pool&apos;s full price range. Every swap pays a fee. The liquidity part goes to positions in
-            range, that pool&apos;s Earn vault included. The protocol part reaches the rewards router as ORRY or ETH, and the router pays stakers and
-            burns ORRY.
+            ORRY trades in more than one Uniswap v4 pool, ORRY with ETH and ORRY with USDG, and Orrery&apos;s own hook runs every one of them. A pool
+            has one Earn vault, a single shared position spanning the pool&apos;s entire price range. Each swap pays a fee. Its liquidity cut goes to
+            in range positions, including that pool&apos;s Earn vault. Its protocol cut arrives at the rewards router as ORRY or ETH, from where the
+            router pays stakers and burns ORRY.
           </p>
           <p>
-            Your shares in a vault are units of the liquidity your deposits added to that pool. They stay with your address and do not move to anyone
-            else. Tokens sent to a vault outside a deposit never change what a share is worth. The Earn page shows each pool as its own card, and your
-            withdrawal is set as a share of your position in that pool.
-          </p>
-
-          <h2>Fees stream to shares</h2>
-          <p>
-            Each vault collects its position&apos;s fees on every deposit and withdrawal, and whenever anyone calls <code>harvest()</code>. Collected
-            fees stream to shares over <Period name="earnStream" />, so each share earns for the time it is held. Fees arrive in ORRY and the
-            pool&apos;s other token. The page shows realised fees only: the last 7 days and all time.
+            A vault share is a unit of the liquidity your deposits put into that pool. Shares remain with your address and cannot pass to another.
+            Tokens that reach a vault other than through a deposit leave the value of a share unchanged. On the Earn page every pool has its own card,
+            and you set a withdrawal as a portion of your position in that pool.
           </p>
 
-          <h2>Buttons</h2>
+          <h2>How fees reach shares</h2>
+          <p>
+            A vault gathers its position&apos;s fees on each deposit and withdrawal, and any time someone calls <code>harvest()</code>. Gathered fees
+            stream to shares over <Period name="earnStream" />, so a share earns in proportion to how long it is held. Fees come in ORRY and in the
+            pool&apos;s other token. The page reports realised fees alone, for the last 7 days and for all time.
+          </p>
+
+          <h2>Actions</h2>
           <table>
             <tbody>
-              <tr><td>Deposit</td><td>Adds the pool&apos;s token and ORRY at the pool price. Whatever the pool cannot take at that ratio comes back in the same transaction. <code>deposit(quoteMax, orryMax, minShares, deadline)</code>. ETH goes in as value; USDG and ORRY through an approval.</td></tr>
-              <tr><td>Zap deposit</td><td>Takes one token, swaps about half in the pool and deposits both halves. <code>zapDeposit(fromQuote, amountIn, minSwapOut, minShares, deadline)</code>.</td></tr>
-              <tr><td>Withdraw</td><td>Burns shares and pays the pool&apos;s token and ORRY at the pool price, with your streamed fees. <code>withdraw(shares, minQuoteOut, minOrryOut, deadline)</code>.</td></tr>
-              <tr><td>Claim fees</td><td>Pays that pool&apos;s streamed fees in its token and ORRY and leaves your shares in place. <code>claimFees()</code>. Claim all on the claim page pays every pool and your stake rewards together.</td></tr>
+              <tr><td>Deposit</td><td>Supplies the pool&apos;s token and ORRY at the pool price. Anything the pool does not absorb at that ratio returns in the same transaction. <code>deposit(quoteMax, orryMax, minShares, deadline)</code>. ETH is sent as value, while USDG and ORRY use an approval.</td></tr>
+              <tr><td>Zap deposit</td><td>Accepts a single token, swaps roughly half of it in the pool, and deposits the two halves. <code>zapDeposit(fromQuote, amountIn, minSwapOut, minShares, deadline)</code>.</td></tr>
+              <tr><td>Withdraw</td><td>Burns shares and returns the pool&apos;s token and ORRY at the pool price, along with the fees streamed to you. <code>withdraw(shares, minQuoteOut, minOrryOut, deadline)</code>.</td></tr>
+              <tr><td>Claim fees</td><td>Collects the fees streamed from that pool, in its token and ORRY, without touching your shares. <code>claimFees()</code>. Claim all, on the claim page, collects from every pool and your stake rewards at once.</td></tr>
             </tbody>
           </table>
 
           <h2>Timing</h2>
           <p>
-            A deposit can be withdrawn <Period name="depositLock" /> after it lands. When you add to an existing position, the wait is the share
-            weighted average of what was left and a fresh lock. Zaps check that the pool price held steady within the block before they swap, which
-            keeps same-block trades from moving your entry.
+            A deposit becomes withdrawable <Period name="depositLock" /> after landing. Adding to a position you already hold sets the wait to the
+            share weighted average of the time remaining and a new lock. Before swapping, a zap confirms the pool price stayed steady inside the
+            block, so trades in that same block cannot shift your entry.
           </p>
 
-          <h2>Price limits</h2>
+          <h2>Minimums on every action</h2>
           <p>
-            Every deposit, zap and withdrawal carries a minimum: the shares you accept, the tokens a zap must receive from its swap, the two tokens
-            a withdrawal must pay. The page sets them from the live price and the limit you pick (0.5%, 1% or 2%).
+            Deposits, zaps and withdrawals each carry a floor: the fewest shares you will take, the least a zap must get back from its swap, and the
+            least of each token a withdrawal must return. The page computes them from the current price and the tolerance you choose (0.5%, 1% or 2%).
           </p>
         </>
       </FeatureGate>
