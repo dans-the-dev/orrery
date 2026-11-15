@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { cookieToInitialState } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 import { MOTION_BOOT, MotionRoot } from "@/components/motion/MotionRoot";
+import { EXTENSION_GUARD } from "@/lib/extension-guard";
 import { X_HANDLE } from "@/components/social";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -23,8 +24,9 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const initialState = cookieToInitialState(wagmiConfig, (await headers()).get("cookie"));
   return (
-    <html lang="en" className={`${display.variable} ${text.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${display.variable} ${text.variable} ${mono.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: EXTENSION_GUARD }} />
         <script dangerouslySetInnerHTML={{ __html: MOTION_BOOT }} />
       </head>
       <body>
