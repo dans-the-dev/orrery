@@ -148,7 +148,7 @@ describe("support queue", () => {
     await onReaction(ctx(), react(row!.queue_message_id, "✅"), name);
     expect(sentX).toEqual([{ text: "Set caps at orrery.tech/operator.", to: "101" }]);
     const [s] = await sql`select status, sent_ref from support_items where source_id = '101'`;
-    expect(s).toMatchObject({ status: "sent", sent_ref: "https://x.com/OrreryHQ/status/tw-reply-1" });
+    expect(s).toMatchObject({ status: "sent", sent_ref: "https://x.com/i/status/tw-reply-1" });
   });
 });
 
