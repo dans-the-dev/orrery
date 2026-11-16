@@ -4,8 +4,8 @@
   "stages": ["prelaunch", "launch", "orry"],
   "networks": {
     "mainnet": {
-      "web": "https://orrery.tech",
-      "api": "https://api.orrery.tech"
+      "web": "https://orreryagent.com",
+      "api": "https://api.orreryagent.com"
     }
   },
   "rpc": ["https://rpc.mainnet.chain.robinhood.com", "https://rpc-robinhood.blockmachine.io"],

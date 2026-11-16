@@ -1,7 +1,7 @@
 # 11 Handoff brief for the executing agent
 
 Date: 2026-11-06. The planning session plans; you write and run the code. This brief is the contract between us.
-Project folder: `~/Projects/blockchain/orrery/` (own git repo, branch `main`, local only). Product name: **Orrery**, domain orrery.tech (Q7). Code may keep
+Project folder: `~/Projects/blockchain/orrery/` (own git repo, branch `main`, local only). Product name: **Orrery**, domain orreryagent.com (Q7). Code may keep
 the `Orrery` contract prefix; package scope `@orrery`.
 
 ## 1. Read first, in this order
@@ -71,7 +71,7 @@ Run big builds through `heavy <command>`. Fedora native only; code stays in `~/P
 
 ## 6. Open owner decisions that affect execution
 
-1. **X handle** @orrerytech to register (owner). Domain orrery.tech is held and parked; no DNS change without the owner's word.
+1. **X handle** @orrerytech to register (owner). Domain orreryagent.com is held and parked; no DNS change without the owner's word.
 2. **Hosting** for `api`, `prober`, `indexer`, `facilitator` and Postgres. Default proposal: server 2, after a
    shared-infra check; web on Vercel Hobby.
 3. **Prices**: pack $1 for 500 checks, verification fee 5 USDG (guesses). Default: use them on 46630 only.

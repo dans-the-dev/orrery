@@ -53,7 +53,7 @@ const FAQ = [
 
 const CODE = `import { OrreryApi, verifyCheck } from "@orrery-tech/sdk";
 
-const api = new OrreryApi("https://api.orrery.tech", apiKey);
+const api = new OrreryApi("https://api.orreryagent.com", apiKey);
 const res = await api.checkPayer(payer);
 const v = await verifyCheck(publicClient, attestor, res, { payer });
 

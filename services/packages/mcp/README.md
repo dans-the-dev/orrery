@@ -41,7 +41,7 @@ Every paid tool returns the balance that remains and adds a notice once it falls
 }
 ```
 
-- `ORRERY_API_KEY`: your Orrery API key. You get one with a credit or data pack purchase, or rotate it on orrery.tech.
+- `ORRERY_API_KEY`: your Orrery API key. You get one with a credit or data pack purchase, or rotate it on orreryagent.com.
 - `ORRERY_API_KEY_FILE`: path where `orrery_data_buy_pack` saves a newly issued key, with mode 600.
 - `ORRERY_AGENT_KEY_FILE`: the session signer key of your agent, in a file readable by you alone (`chmod 600`). A file
   with wider permissions is rejected. The agent tools use it; the counterparty tools work without it.

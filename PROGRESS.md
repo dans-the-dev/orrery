@@ -9,8 +9,12 @@
   Discord links, the support assistant whose review queue lived in Discord (X mentions are answered by hand), its ops
   scripts, compose services and migrations 012 and 039. Referral tiers stay, without a Discord role. Plan documents
   that still describe Discord features are history.
-- Before a live run: register orrery.tech, create the X account (set `NEXT_PUBLIC_X_HANDLE`), make new keys in
-  `~/.secrets/orrery/`, deploy with `services/scripts/deploy-4663.ts`, then copy the addresses into `services/packages/sdk/src/quick.ts` and `services/packages/mcp/src/config.ts`.
+- 2026-11-16: domain orreryagent.com (Hostinger, registered 2026-11-16) serves the web from Vercel project `orrery`
+  (apex A 216.198.79.1 and 64.29.17.1, www CNAME to Vercel, set through the Hostinger DNS API); X account @Orreryagent.
+  Vercel production env: `NEXT_PUBLIC_SITE_URL=https://orreryagent.com`, `NEXT_PUBLIC_X_HANDLE=Orreryagent`. Every
+  orrery.tech mention became orreryagent.com (API host api.orreryagent.com, not in DNS until `go-live-4663.ts dns`).
+- 2026-11-16: mainnet keys in `~/.secrets/orrery/` (new, unfunded). Before a live run: fund the deployer, deploy with
+  `services/scripts/deploy-4663.ts`, then copy the addresses into `services/packages/sdk/src/quick.ts` and `services/packages/mcp/src/config.ts`.
 - Fork tests under `contracts/test/**/fork` still read Runcore's live 4663 contracts as fixtures; they need Orrery's
   own addresses once it is deployed.
 
@@ -75,7 +79,7 @@ names in them to Orrery's; every deployment, account and post they mention belon
 
 ## Next
 
-- Name decided 2026-11-06: **Orrery**, domain orrery.tech (Q7; Proofcap chosen first, then replaced).
+- Name decided 2026-11-06: **Orrery**, domain orreryagent.com (Q7; Proofcap chosen first, then replaced).
 
 - 2026-11-08 owner inputs: deployer = owner = treasury, fee 5 USDG, 500 checks for 1 USDG (M1 to M3); mainnet keys
   created (`docs/MAINNET-4663.md` section 4).
@@ -84,5 +88,5 @@ names in them to Orrery's; every deployment, account and post they mention belon
 
 1. Owner: send ETH on 4663 to deployer (0.0003), relayer (0.0002), attester (0.0002).
 2. Run `deploy-4663.ts` live; the owner types CONFIRM.
-3. Hosting: web on Vercel Hobby at orrery.tech, services on server 1 (when the owner says deploy).
+3. Hosting: web on Vercel Hobby at orreryagent.com, services on server 1 (when the owner says deploy).
 4. Not gates: Kernel 3.1, Slither, a second independent review.

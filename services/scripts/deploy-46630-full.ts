@@ -269,7 +269,7 @@ await step("agent", async () => {
     type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
     name: "Orrery demo agent",
     description: "Demo agent for trying Orrery on the development network.",
-    services: [{ name: "web", endpoint: "https://orrery.tech/" }],
+    services: [{ name: "web", endpoint: "https://orreryagent.com/" }],
     registrations: [{ agentRegistry: `eip155:46630:${REGISTRY}`, agentId: Number(agentId) }],
   };
   await send("operator", REGISTRY, registryAbi as unknown as Abi, "setAgentURI", [agentId, `data:application/json;base64,${Buffer.from(JSON.stringify(registration)).toString("base64")}`]);

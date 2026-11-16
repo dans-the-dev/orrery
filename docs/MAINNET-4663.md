@@ -76,8 +76,8 @@ for byte, INDEX entries written):
 The deploy script refuses before the CONFIRM prompt while the deployer holds less than the estimate (tested with 0 ETH:
 "Nothing was sent."). Live command, from `services/`: `npx tsx scripts/deploy-4663.ts`.
 
-Still open: funding the three wallets above, hosting (web on Vercel Hobby at orrery.tech, API, indexer, prober and
-Postgres on server 1; orrery.tech DNS is on the Hostinger token that owns it, now parked), then the owner types
+Still open: funding the three wallets above, hosting (web on Vercel Hobby at orreryagent.com, API, indexer, prober and
+Postgres on server 1; orreryagent.com DNS is on the Hostinger token that owns it, now parked), then the owner types
 CONFIRM. The X account @OrreryHQ exists and is verified (2026-11-08).
 
 Engineering items that stay open and are not gates: Kernel 3.1 support, Slither, a second independent review.
@@ -110,11 +110,11 @@ the official RPC (253082e). Next: fund relayer and attester (owner), source veri
   metadata hash differs from the sources at HEAD, the bytecode matches). Read through its API from the browser pane
   after the owner passed the Cloudflare check.
 - `go-live-4663.ts` stages run by the owner with CONFIRM: server (API, indexer, prober; key files had to be chowned to
-  uid 1000, fixed in 3f42edb), dns (api.orrery.tech A record and Caddy block), vercel (7 production variables, deployed
+  uid 1000, fixed in 3f42edb), dns (api.orreryagent.com A record and Caddy block), vercel (7 production variables, deployed
   from a clean archive of 3f42edb because `vercel` is not on the owner's terminal PATH), discord (interactions endpoint
-  to https://api.orrery.tech). Check: API healthy on 4663, indexer lag 0, X gate pass.
+  to https://api.orreryagent.com). Check: API healthy on 4663, indexer lag 0, X gate pass.
 - Release `core` opened by the owner's instruction ("saya mau itu dibuka sekarang"). Every other release held.
-- Live on orrery.tech: Signer lookup reads the mainnet lens, Credits shows the API's pricing, Operator ready.
+- Live on orreryagent.com: Signer lookup reads the mainnet lens, Credits shows the API's pricing, Operator ready.
 - Still owner: relayer 0x21f7…C6C0 and attester 0xe044…4eC0 hold 0 ETH; credit purchases and attestations need about
   0.0002 ETH each.
 
@@ -130,7 +130,7 @@ the official RPC (253082e). Next: fund relayer and attester (owner), source veri
 
 ## Core checks without funds, 2026-11-11
 
-- `scripts/check-core-4663.ts` against api.orrery.tech, buyer `0xD661…AF7F`: 18 of 18 passed. Key rotation by a signed
+- `scripts/check-core-4663.ts` against api.orreryagent.com, buyer `0xD661…AF7F`: 18 of 18 passed. Key rotation by a signed
   message (a used nonce and a nonce for another address are refused), credits kept across rotation (500, one purchase),
   bad or missing key refused, checks by signer and by agent answer, the check signature recovers to an active check
   signer on the attestor, a check about another address fails the payer pin, bad input 400, checks metered (free
@@ -139,7 +139,7 @@ the official RPC (253082e). Next: fund relayer and attester (owner), source veri
   `~/.secrets/orrery/mainnet-buyer-api.json` (backed up, INDEX line). Not exercised live: credits spent after the free
   1000, and a 402 at zero credits (unit and 46630 tested).
 - Held routes refused by the API: `/v1/orry/*`, `/v1/markets`, `/v1/merchants/*`, `/v1/x402/supported` answer 404.
-- First-visit walk on orrery.tech with a fresh never-funded wallet (`mainnet-walk.json`, `0x2d8D…7788`, signing only
+- First-visit walk on orreryagent.com with a fresh never-funded wallet (`mainnet-walk.json`, `0x2d8D…7788`, signing only
   against a local fork): 19 routes at 1440x900 and at 375x812 (touch), no horizontal overflow on the phone; nav shows
   ORRY, Markets and Merchants with Soon; held pages show their Coming soon state. Dashboard walk: sidebar Overview,
   Agents, Merchant Soon, Positions Soon, Orders Soon, every section renders, no console errors.
@@ -203,7 +203,7 @@ everything else waits for approval in #reply-queue; Hypatia's Anthropic key unti
 
 ## Web deploy, 2026-11-11 (owner: "Deploy sekarang")
 
-- orrery.tech now serves build/v1 faef3ab (Vercel `dpl_Cy8S6nmRg9X9AvXFxNGpfCxdSkeh`, orrery-qm3k3ibxn). Rollback target: the
+- orreryagent.com now serves build/v1 faef3ab (Vercel `dpl_Cy8S6nmRg9X9AvXFxNGpfCxdSkeh`, orrery-qm3k3ibxn). Rollback target: the
   previous production deployment `dpl_E7C7y6JPeAZtZFnrJ1xPQ1xomxmb` (orrery-57bica8m5), `vercel rollback` or promote it.
 - New: the top nav shows open sections inline and every held section in one "Coming soon" menu; the pages of the merged
   update lanes (Community, Data, Predict, Limit orders, Gas, Shield) are on the site in their held state. The API image on
@@ -223,14 +223,14 @@ everything else waits for approval in #reply-queue; Hypatia's Anthropic key unti
 - Live checks with the test buyer: the sign-in message says it reads only; that signature is refused by key rotation;
   the session reads credits 500, 7 checks this month, the 1 USDG pack with its transaction; it cannot run a check (401);
   sign-out ends it (401). Release switch unchanged (only `core` open). Public pricing 200; CORS preflight from
-  orrery.tech 204 with the origin allowed.
-- Web: orrery.tech now serves 1af25bb (Vercel `dpl_F6Wp7tJGmurTqB28vgL2kshZ9GCw`, orrery-91x4o7hea); rollback to
+  orreryagent.com 204 with the origin allowed.
+- Web: orreryagent.com now serves 1af25bb (Vercel `dpl_F6Wp7tJGmurTqB28vgL2kshZ9GCw`, orrery-91x4o7hea); rollback to
   `dpl_Cy8S6nmRg9X9AvXFxNGpfCxdSkeh`. Audit of 33 live pages at 1440 and 375 px: 0 overflow, 0 text under 12 px,
   0 console errors.
 
 ## Web deploy, 2026-11-11 13:34 to 13:40 UTC (owner: "deploy jika sudah aman")
 
-- orrery.tech now serves build/v1 1d6ef81 (Vercel `dpl_9uQ7MCQKvi4KDHBrHZiB2vntpQ1X`, orrery-bctzdje12). Built from a
+- orreryagent.com now serves build/v1 1d6ef81 (Vercel `dpl_9uQ7MCQKvi4KDHBrHZiB2vntpQ1X`, orrery-bctzdje12). Built from a
   clean worktree with `vercel deploy --prod --skip-domain`, then `vercel promote`. Rollback target: the previous
   production deployment `dpl_F6Wp7tJGmurTqB28vgL2kshZ9GCw` (orrery-91x4o7hea, 1af25bb), `vercel rollback` or promote it.
   The API, indexer and release switch are untouched (only `core` open); no env variable was added (`ORRERY_TRADE_LINKS`
@@ -256,7 +256,7 @@ First run of the whole core loop on 4663 from the live site, with the walk walle
 
 - Funding (owner, CONFIRM): `fund-roles-4663.ts --roles walk --target 0.0004` and `fund-usdg-4663.ts --to walk --usdg 7.2`
   (about 0.00352 ETH through the Uniswap V2 router). Deployer after both: 0.00681 ETH.
-- From orrery.tech/dashboard/agents: account (Safe 1.4.1 with the Safe7579 adapter and the policy module)
+- From orreryagent.com/dashboard/agents: account (Safe 1.4.1 with the Safe7579 adapter and the policy module)
   `0xE40b3C7c5fFb16d2dD849905f1efEE1ef43e3628` in two transactions, ERC-8004 agent **#25431**, identity bound, signer
   `0x35de05B6a78A58c49e2A5c656bd29AF9F8470819` created on the page, session opened from the Small preset (1 / 10 / 5 USDG,
   expiry 2026-12-11), 1 USDG added to the account, 0.0002 ETH sent to the signer, verification paid (5 USDG; `isVerified` true).
@@ -287,7 +287,7 @@ Found by this walk:
 
 ## Web deploy, 2026-11-11 14:24 to 14:27 UTC (owner: "Ya, commit dan deploy")
 
-- orrery.tech now serves build/v1 92fba30 (Vercel `dpl_CCWdj72yQ78snXNVH8Y9gVHq6qYc`, orrery-b1ho761e6), built from a clean
+- orreryagent.com now serves build/v1 92fba30 (Vercel `dpl_CCWdj72yQ78snXNVH8Y9gVHq6qYc`, orrery-b1ho761e6), built from a clean
   worktree with `vercel deploy --prod --skip-domain` and promoted. Rollback target: `dpl_9uQ7MCQKvi4KDHBrHZiB2vntpQ1X`
   (orrery-bctzdje12, 1d6ef81). Only 3a15ddb changed the web since 1d6ef81: agent key files carry an RPC that publishes
   transactions. API, indexer, release switch and Vercel env untouched (`NEXT_PUBLIC_AGENT_RPC_URL` unset, the default applies).

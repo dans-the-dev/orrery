@@ -40,8 +40,8 @@ blockhash contract otherwise needs state the RPC has dropped), role wallets fund
 
 | Piece | Where | How |
 | :--- | :--- | :--- |
-| Web (Next.js) | Vercel Hobby, project root `services/packages/web`, domain `orrery.tech` | `vercel deploy --prod` from the repo |
-| API | server 1, container `orrery-api`, shared edge alias `orrery-api`, `api.orrery.tech` | `ops/server1/compose.yml` |
+| Web (Next.js) | Vercel Hobby, project root `services/packages/web`, domain `orreryagent.com` | `vercel deploy --prod` from the repo |
+| API | server 1, container `orrery-api`, shared edge alias `orrery-api`, `api.orreryagent.com` | `ops/server1/compose.yml` |
 | Indexer (v1 + ORRY) | server 1, `orrery-indexer`, health on `127.0.0.1:18788` (lag against the head) | same |
 | Prober (endpoint attestations, every 6 h) | server 1, `orrery-prober` | same |
 | Keeper (hourly collect, distribute, buyback slices) | server 1, `orrery-keeper`, compose profile `orry` | same, only once ORRY is deployed |
@@ -79,9 +79,9 @@ CU there). No keyed URL is ever placed in the web's `NEXT_PUBLIC_RPC_URL`.
 5. `docker compose -p orrery-mainnet --env-file release.env -f compose.yml up -d postgres api indexer prober`.
 6. Seed the release switch with every wave held: `releases.ts set <feature> null` for each feature, inside the api container:
    `docker exec orrery-api /app/node_modules/.bin/tsx /app/scripts/releases.ts set <feature> null`, then `... releases.ts list`.
-7. DNS: A record `api.orrery.tech` to 187.53.130.188 (Hostinger API token, `orrery.tech` zone). Append
+7. DNS: A record `api.orreryagent.com` to 187.53.130.188 (Hostinger API token, `orreryagent.com` zone). Append
    `Caddyfile-block` to `/opt/phioradata/infra/Caddyfile` and reload from a `docker cp` copy (stale bind mount trap).
-8. Check: `curl -s 127.0.0.1:18788` shows lag near 0; `https://api.orrery.tech/health` answers; `/v1/releases` shows all held.
+8. Check: `curl -s 127.0.0.1:18788` shows lag near 0; `https://api.orreryagent.com/health` answers; `/v1/releases` shows all held.
 
 After the ORRY deploy: fill the `ORRERY_ORRY_*` values, recreate api and indexer, then
 `docker compose ... --profile orry up -d keeper` once the keeper wallet holds gas.
@@ -99,7 +99,7 @@ and network names at launch. Release opening for the builder rooms at T0: `relea
 1. Copy `~/.secrets/orrery/discord-bot.txt` to `/opt/orrery/secrets/` (600). Reset the token first if it was ever pasted
    in a chat, and save the new one with `ops/save-discord-token.sh`.
 2. Fill `discord.env` from `discord.env.example`, then `docker compose ... --profile discord up -d discord` and recreate `api`.
-3. In the Developer Portal set **Interactions Endpoint URL** to `https://api.orrery.tech/v1/discord/interactions`
+3. In the Developer Portal set **Interactions Endpoint URL** to `https://api.orreryagent.com/v1/discord/interactions`
    (Discord sends a signed PING; the API answers it only with the right public key).
 4. Slash commands: `node ops/discord/register-commands.mjs 1569247955108630598 1569204585011220480` (done 2026-11-09:
    /payer, /agent, /orry, /verify).
@@ -108,21 +108,21 @@ and network names at launch. Release opening for the builder rooms at T0: `relea
    to #announcements with `/announce <feature>` (before the API is live: `node ops/discord/announce.mjs <guild> <feature>`
    after the owner approves). At the release hour the rooms that feature opens unlock for members
    (`ops/discord/rooms.mjs`, same map as `ROOM_RELEASES`). The notifier also posts burns to #burn-tracker and alerts (indexer lag, low gas on the
-   watched wallets, once per six hours each) to #alerts. `/verify` links a wallet through `orrery.tech/discord/verify`
+   watched wallets, once per six hours each) to #alerts. `/verify` links a wallet through `orreryagent.com/discord/verify`
    and gives Verified, ORRY Holder, Operator and Merchant; roles are re-checked every six hours.
 
 ## 4. Vercel steps (after the v1 deploy)
 
 1. `vercel link` in the repo root, new project `orrery`, root directory `services/packages/web`, framework Next.js
    (the pnpm workspace is in `services/`).
-2. Production env: `NEXT_PUBLIC_CHAIN_ID=4663`, `NEXT_PUBLIC_API_URL=https://api.orrery.tech`,
+2. Production env: `NEXT_PUBLIC_CHAIN_ID=4663`, `NEXT_PUBLIC_API_URL=https://api.orreryagent.com`,
    `NEXT_PUBLIC_MODULE`, `NEXT_PUBLIC_ATTESTOR`, `NEXT_PUBLIC_LENS`, `NEXT_PUBLIC_REGISTRY` from `deployments/4663.json`;
    ORRY addresses after the ORRY deploy. `NEXT_PUBLIC_RPC_URL` stays unset (keyless default).
    `ORRERY_CA=0x85272EA3aE8685C768045dba5455fE305C706aA4` is the ORRY token for the hero's CA pill: a server-side variable (no `NEXT_PUBLIC_` prefix),
    read by `/api/ca` at request time; already needed now that ORRY is live on Pons (`ORRY-DEPLOY-4663.md` section 0).
-3. `vercel deploy --prod`, then add `orrery.tech` and `www.orrery.tech` to the project and point DNS at Vercel.
-4. Hard gate before T0: on the live domain every route's header X button links to `https://x.com/OrreryHQ` and
-   `twitter:site` is `@OrreryHQ`.
+3. `vercel deploy --prod`, then add `orreryagent.com` and `www.orreryagent.com` to the project and point DNS at Vercel.
+4. Hard gate before T0: on the live domain every route's header X button links to `https://x.com/Orreryagent` and
+   `twitter:site` is `@Orreryagent`.
 5. First-visit walk on mainnet from the landing with a fresh wallet.
 
 ## 5. Wallets that need gas

@@ -16,7 +16,7 @@ import { AgentClient, OrreryApi, verifyCheck } from "./index";
 export const ORRERY_MAINNET = {
   chainId: 4663,
   rpcUrl: "https://robinhood-rpc.publicnode.com",
-  apiUrl: "https://api.orrery.tech",
+  apiUrl: "https://api.orreryagent.com",
   module: null,
   attestor: null,
   lens: null,

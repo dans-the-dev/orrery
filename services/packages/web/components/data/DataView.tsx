@@ -90,7 +90,7 @@ export function DataView() {
             {[
               `import { verifyDataResponse } from "@orrery/sdk";`,
               ``,
-              `const res = await fetch("${API_URL ?? "https://api.orrery.tech"}/v1/data/datasets/agents", {`,
+              `const res = await fetch("${API_URL ?? "https://api.orreryagent.com"}/v1/data/datasets/agents", {`,
               `  headers: { authorization: \`Bearer \${apiKey}\` },`,
               `}).then((r) => r.json());`,
               `const { ok } = await verifyDataResponse(res, { signer: "${signer.data?.signer ?? "0x..."}" });`,

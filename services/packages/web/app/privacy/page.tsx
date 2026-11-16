@@ -7,7 +7,7 @@ import { X_HANDLE, X_URL } from "@/components/social";
 
 export const metadata = {
   title: "Orrery · Privacy Policy",
-  description: "The records Orrery holds when you use orrery.tech or the Orrery API, and the reason for each.",
+  description: "The records Orrery holds when you use orreryagent.com or the Orrery API, and the reason for each.",
 };
 
 const UPDATED = "9 November 2026";
@@ -20,7 +20,7 @@ function Contact() {
   if (X_URL) channels.push(<>on X at <a href={X_URL} target="_blank" rel="noreferrer">{X_HANDLE}</a></>);
   return (
     <p>
-      {channels.length ? <>Write to the team {channels[0]}{channels[1] ? <> or {channels[1]}</> : null}. </> : <>Write to the team through the contact channels published on orrery.tech. </>}
+      {channels.length ? <>Write to the team {channels[0]}{channels[1] ? <> or {channels[1]}</> : null}. </> : <>Write to the team through the contact channels published on orreryagent.com. </>}
       The rules for using the service sit in the <Link href="/terms">Terms of Use</Link>.
     </p>
   );
@@ -33,7 +33,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          This policy applies to orrery.tech and the Orrery API. Orrery identifies people by wallet address. Each record the service holds is described below, with the reason it is held.
+          This policy applies to orreryagent.com and the Orrery API. Orrery identifies people by wallet address. Each record the service holds is described below, with the reason it is held.
         </p>
         <p>Orrery never asks for your name, email, phone number or a password, and the website carries no advertising or analytics trackers.</p>
       </>
@@ -153,7 +153,7 @@ export default function Privacy() {
         <PageHead
           kicker="Legal"
           title="Privacy Policy"
-          lead={<p>The records Orrery holds when you use orrery.tech or the Orrery API, and the purpose of each one.</p>}
+          lead={<p>The records Orrery holds when you use orreryagent.com or the Orrery API, and the purpose of each one.</p>}
           art="signer-lookup"
         />
         <div className="legal">

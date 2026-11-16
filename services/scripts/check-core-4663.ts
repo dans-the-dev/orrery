@@ -15,7 +15,7 @@ import { createPublicClient, defineChain, fallback, getAddress, http, type Addre
 import { privateKeyToAccount } from "viem/accounts";
 import { verifyCheck, type CheckResponse } from "@orrery/sdk";
 
-const API = "https://api.orrery.tech";
+const API = "https://api.orreryagent.com";
 const SECRETS = join(homedir(), ".secrets/orrery");
 const dep = JSON.parse(readFileSync(new URL("../../deployments/4663.json", import.meta.url), "utf8")) as { attestor: Address; checkSigner: Address };
 const RPCS = ["https://rpc-robinhood.blockmachine.io", "https://robinhood-rpc.publicnode.com"];

@@ -28,7 +28,7 @@ graduates (phase 2):
 
     npx tsx scripts/deploy-orry-4663.ts --orry 0x85272EA3aE8685C768045dba5455fE305C706aA4
 
-The CA shown on orrery.tech comes from the Vercel production env `ORRERY_CA` (server side, read at request time by
+The CA shown on orreryagent.com comes from the Vercel production env `ORRERY_CA` (server side, read at request time by
 `/api/ca`; see `RUNBOOK-INCIDENTS.md` section 2.1). Services keep `ORRERY_ORRY_TOKEN` empty until the ORRY deploy:
 setting it turns ORRY on and requires the eight addresses that deploy prints.
 

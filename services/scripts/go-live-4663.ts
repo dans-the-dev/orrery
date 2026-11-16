@@ -5,9 +5,9 @@
  *   tsx scripts/go-live-4663.ts env     [--fork --rpc <url>]   env files in ops/server1/out/<target>/ from deployments/*.json
  *   tsx scripts/go-live-4663.ts server  [--fork] [--dry-run]   server 1 (keys, pg password, env, image, compose, releases held,
  *                                                              health); --fork rehearses the same compose.yml in local Docker
- *   tsx scripts/go-live-4663.ts dns     [--dry-run]            api.orrery.tech A record (Hostinger API) and the Caddy block
+ *   tsx scripts/go-live-4663.ts dns     [--dry-run]            api.orreryagent.com A record (Hostinger API) and the Caddy block
  *   tsx scripts/go-live-4663.ts vercel  [--dry-run]            production env on the Vercel project `orrery`, then deploy
- *   tsx scripts/go-live-4663.ts check   [--fork]               health, indexer lag, releases, the X gate on orrery.tech
+ *   tsx scripts/go-live-4663.ts check   [--fork]               health, indexer lag, releases, the X gate on orreryagent.com
  *
  * Mainnet stages print what they will do and wait for a typed CONFIRM; --dry-run prints and sends nothing. Keys come
  * from ~/.secrets/orrery/ and are copied, never printed. The deployer key never leaves the laptop. --fork uses
@@ -36,7 +36,9 @@ const TARGET = FORK ? "fork" : "mainnet";
 const OUT = join(OPS, "out", TARGET);
 const HOST = arg("--host") ?? "server1";
 const SERVER_IP = "187.53.130.188";
-const API_HOST = "api.orrery.tech";
+const API_HOST = "api.orreryagent.com";
+const SITE_URL = "https://orreryagent.com";
+const X_HANDLE = "Orreryagent";
 const KEYS = FORK ? "46630" : "mainnet";
 const REHEARSAL_DIR = join(ROOT, "ops/server1/out/rehearsal");
 const VERCEL = { org: "team_wRfsbfi0dD9R8aLIlSrQAvRX", project: "prj_EnJvBohVCy94TRGI3eWVCWovKNEX" }; // Vercel project "orrery"
@@ -144,7 +146,7 @@ function envFiles(rpc: string) {
       ORRERY_FEE_TIERS: String(markets.feeTiers),
     });
   }
-  const cors = FORK ? "http://localhost:3100,http://127.0.0.1:3100" : "https://orrery.tech,https://www.orrery.tech";
+  const cors = FORK ? "http://localhost:3100,http://127.0.0.1:3100" : "https://orreryagent.com,https://www.orreryagent.com";
   const api = {
     ORRERY_CORS_ORIGINS: cors,
     ORRERY_QUOTE_SIGNER_KEY_FILE: "/run/keys/quote-signer.json",
@@ -158,6 +160,7 @@ function envFiles(rpc: string) {
     NEXT_PUBLIC_LENS: String(v1.lens),
     NEXT_PUBLIC_REGISTRY: String(v1.registry),
     NEXT_PUBLIC_USDG: String(v1.usdg),
+    ...(FORK ? {} : { NEXT_PUBLIC_SITE_URL: SITE_URL, NEXT_PUBLIC_X_HANDLE: X_HANDLE }),
   };
   if (FORK) web.NEXT_PUBLIC_RPC_URL = rpc.split(",")[0]!.replace("10.232.9.1", "127.0.0.1");
   if (orry) {
@@ -285,15 +288,15 @@ async function dns() {
   const tokenFile = join(homedir(), ".claude/secrets/hostinger-api-token.txt");
   if (!existsSync(tokenFile)) fail("the Hostinger token file is missing");
   const token = readFileSync(tokenFile, "utf8").trim();
-  const base = "https://developers.hostinger.com/api/dns/v1/zones/orrery.tech";
+  const base = "https://developers.hostinger.com/api/dns/v1/zones/orreryagent.com";
   const headers = { authorization: `Bearer ${token}`, "content-type": "application/json", accept: "application/json" };
   const zone = (await (await fetch(base, { headers })).json()) as { name: string; type: string; records: { content: string }[] }[];
-  if (!Array.isArray(zone)) fail("could not read the orrery.tech zone");
+  if (!Array.isArray(zone)) fail("could not read the orreryagent.com zone");
   const have = zone.find((r) => r.name === "api" && r.type === "A");
   // read-only, so it runs on --dry-run too
   const caddyHas = execFileSync("ssh", [HOST, `grep -c '^${API_HOST} {' /opt/phioradata/infra/Caddyfile || true`], { encoding: "utf8" }).trim();
   await confirm([
-    `DNS: ${have ? `api A record exists (${have.records.map((r) => r.content).join(", ")})` : `add A record api.orrery.tech -> ${SERVER_IP}, TTL 300`}`,
+    `DNS: ${have ? `api A record exists (${have.records.map((r) => r.content).join(", ")})` : `add A record api.orreryagent.com -> ${SERVER_IP}, TTL 300`}`,
     `Caddy: ${caddyHas && caddyHas !== "0" ? "block already in /opt/phioradata/infra/Caddyfile" : "append ops/server1/Caddyfile-block, reload from a docker cp copy"}`,
   ]);
   if (!have && !DRY) {
@@ -302,8 +305,8 @@ async function dns() {
     if (!v.ok) fail(`Hostinger validate answered ${v.status}`);
     const p = await fetch(base, { method: "PUT", headers, body });
     if (!p.ok) fail(`Hostinger update answered ${p.status}`);
-    log("DNS: api.orrery.tech added");
-  } else if (have && !have.records.some((r) => r.content === SERVER_IP)) fail(`api.orrery.tech points elsewhere (${have.records.map((r) => r.content).join(", ")}); fix it by hand`);
+    log("DNS: api.orreryagent.com added");
+  } else if (have && !have.records.some((r) => r.content === SERVER_IP)) fail(`api.orreryagent.com points elsewhere (${have.records.map((r) => r.content).join(", ")}); fix it by hand`);
   if (!caddyHas || caddyHas === "0") {
     // The container's own Caddyfile is a stale bind mount: reload from a copy of the host file (memory: server 1 inventory).
     ssh(`cp /opt/phioradata/infra/Caddyfile /opt/phioradata/infra/Caddyfile.bak-$(date +%Y%m%d%H%M%S) && printf '\\n' >> /opt/phioradata/infra/Caddyfile && grep -v '^#' /opt/orrery/Caddyfile-block >> /opt/phioradata/infra/Caddyfile`);
@@ -350,13 +353,10 @@ async function check() {
   const open = Object.entries(rel.releases).filter(([, v]) => v !== null).map(([k]) => k);
   log(`releases: ${open.length ? `open ${open.join(", ")}` : "all held"}`);
   if (!FORK) {
-    const home = await get("https://orrery.tech/");
-    // The X handle comes from NEXT_PUBLIC_X_HANDLE (web/components/social.ts); no handle means the site shows no X link.
-    const handle = (process.env.NEXT_PUBLIC_X_HANDLE ?? "").replace(/^@/, "");
-    if (handle) {
-      const x = home.includes(`href="https://x.com/${handle}"`) && home.includes(`twitter:site" content="@${handle}"`);
-      log(`X gate on orrery.tech: ${x ? "pass" : "FAIL"}`);
-    } else log("X gate on orrery.tech: skipped (NEXT_PUBLIC_X_HANDLE not set)");
+    const home = await get("https://orreryagent.com/");
+    // The vercel stage sets NEXT_PUBLIC_X_HANDLE to X_HANDLE (web/components/social.ts renders the link from it).
+    const x = home.includes(`href="https://x.com/${X_HANDLE}"`) && home.includes(`twitter:site" content="@${X_HANDLE}"`);
+    log(`X gate on orreryagent.com: ${x ? "pass" : "FAIL"}`);
   }
 }
 

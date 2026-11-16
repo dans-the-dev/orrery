@@ -70,7 +70,7 @@ pnpm exec tsx scripts/exercise-api.ts --deployment ../deployments/46630.json
   consent, verification fee, top-up. Lens: Active, bound, installed, verified, 3.50 USDG spent.
 - Services against the fork: a pack sold over x402 (500 credits, key issued); the agent paid over x402 from its float;
   the merchant's signed check verified (signature valid, verified, registration valid, endpoints live after a real
-  internet probe of `https://orrery.tech/`, attestation written); the indexer reached lag 0 with 11 event kinds.
+  internet probe of `https://orreryagent.com/`, attestation written); the indexer reached lag 0 with 11 event kinds.
 
 ## What the live run adds, and what it does not
 
@@ -98,7 +98,7 @@ stop Postgres and the API.
   installed, verified, 3.50 USDG spent.
 - Services against 46630 (API, Postgres and the exercise script on this machine): merchant pack settled over x402
   (`0x9d3910…87d5`), the agent paid from its float over x402 (`0x59a30c…e7aa`), the merchant's signed check verified
-  (status Active, verified, registration valid, endpoints live after a public probe of `https://orrery.tech/`), the
+  (status Active, verified, registration valid, endpoints live after a public probe of `https://orreryagent.com/`), the
   prober attested on-chain (`0xd81014…474a`), the indexer reached lag 0 with 11 event kinds.
 - Web app against 46630: the landing console and the signer record read the live session; the credits page loaded the
   pack price from the API. A layout bug found here and fixed: focusing the console input at 1024 px scrolled the hero

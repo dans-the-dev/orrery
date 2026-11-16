@@ -17,7 +17,7 @@ import { createPublicClient, createWalletClient, defineChain, erc20Abi, fallback
 import { privateKeyToAccount } from "viem/accounts";
 import { HEADER_REQUIRED, OrreryApi, decodeHeader, type PaymentRequired } from "@orrery/sdk";
 
-const API = "https://api.orrery.tech";
+const API = "https://api.orreryagent.com";
 const DRY = process.argv.includes("--dry-run");
 const YES = process.argv.includes("--yes");
 const RPCS = ["https://robinhood-rpc.publicnode.com", "https://rpc-robinhood.blockmachine.io"];
@@ -36,7 +36,7 @@ const pricing = (await (await fetch(`${API}/v1/pricing`)).json()) as { packSize:
 const usdg = await pub.readContract({ address: terms.asset, abi: erc20Abi, functionName: "balanceOf", args: [buyer.address] });
 const treasuryBefore = await pub.readContract({ address: terms.asset, abi: erc20Abi, functionName: "balanceOf", args: [terms.payTo] });
 
-console.log(`Buy 1 credit pack (${pricing.packSize} credits) on orrery.tech for ${formatUnits(BigInt(terms.amount), 6)} USDG
+console.log(`Buy 1 credit pack (${pricing.packSize} credits) on orreryagent.com for ${formatUnits(BigInt(terms.amount), 6)} USDG
   buyer     ${buyer.address} (USDG ${formatUnits(usdg, 6)})
   pays to   ${terms.payTo} (the Orrery treasury, USDG ${formatUnits(treasuryBefore, 6)})
   settled by the relayer over x402 (EIP-3009); the buyer pays no gas`);

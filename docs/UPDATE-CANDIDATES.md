@@ -148,7 +148,7 @@ Q9 / Q10 sit with #27 in wave 4. Q3, Q5, Q6 and Q7 are folded into #4, #5, #11, 
 - **Why**: only 3 to 15% of ERC-8004 registrations are valid and live (`01-analysis.md`), and `registrationValid` and
   `domainVerified` are in every check. Helping operators pass them raises the value of each check and the number of
   agents worth the 5 USDG verification.
-- **Effort**: S to M. **Contract**: none. **Conflicts**: hosting the file on orrery.tech would make Orrery part of
+- **Effort**: S to M. **Contract**: none. **Conflicts**: hosting the file on orreryagent.com would make Orrery part of
   the agent's identity availability; prefer IPFS through a pinning service, and degrade to "download the file" when no
   pinning key is configured (workspace rule 5).
 

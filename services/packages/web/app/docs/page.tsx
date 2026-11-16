@@ -56,7 +56,7 @@ if (v.ok) {
 }`}</pre>
         <p>Or call it over plain HTTP from whatever language you use:</p>
         <pre>{`curl -H "authorization: Bearer $ORRERY_API_KEY" \\
-  https://api.orrery.tech/v1/check/by-signer/0xPAYING_ADDRESS`}</pre>
+  https://api.orreryagent.com/v1/check/by-signer/0xPAYING_ADDRESS`}</pre>
 
         <h2>Fields in a signed reading</h2>
         <table>

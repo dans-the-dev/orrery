@@ -17,8 +17,8 @@ State on 2026-11-09: the web is live on Vercel; on server 1 only `orrery-pg` and
 
 | Piece | Where | Health | Logs |
 | :--- | :--- | :--- | :--- |
-| Web | Vercel, project `orrery`, `orrery.tech` | `curl -sI https://orrery.tech/` | Vercel dashboard, `vercel logs` |
-| API | `orrery-api`, behind `infra-caddy-1` as `api.orrery.tech` | `curl -s 127.0.0.1:18787/health` on server 1 | `docker logs orrery-api` |
+| Web | Vercel, project `orrery`, `orreryagent.com` | `curl -sI https://orreryagent.com/` | Vercel dashboard, `vercel logs` |
+| API | `orrery-api`, behind `infra-caddy-1` as `api.orreryagent.com` | `curl -s 127.0.0.1:18787/health` on server 1 | `docker logs orrery-api` |
 | Indexer | `orrery-indexer` | `curl -s 127.0.0.1:18788` on server 1 (lag against the live head) | `docker logs orrery-indexer` (a failing step at most once a minute) |
 | Prober | `orrery-prober`, every 6 h | its attestations on chain | `docker logs orrery-prober` |
 | Keeper | `orrery-keeper`, hourly, compose profile `orry` | one JSON line per pass | `docker logs orrery-keeper` |
@@ -75,10 +75,10 @@ it writes `probe/host.json` with the container states, the indexer health answer
 
 | Check | Stage | Passes when |
 | :--- | :--- | :--- |
-| web / | prelaunch | `https://orrery.tech/` answers 200 and contains `orrery` |
+| web / | prelaunch | `https://orreryagent.com/` answers 200 and contains `orrery` |
 | web /discord/verify | prelaunch | 200 and contains `Verify your wallet.` |
 | discord container | prelaunch | `orrery-discord` running, not restarting, up at least 120 s |
-| api /health | launch | `https://api.orrery.tech/health` gives `ok: true`, `chainId: 4663` |
+| api /health | launch | `https://api.orreryagent.com/health` gives `ok: true`, `chainId: 4663` |
 | api /v1/releases | launch | 200 with `serverTime` and `releases` |
 | database backup | prelaunch | the newest dump in `/opt/orrery/backups` is at most 26 h old |
 | indexer lag | launch | indexer health 200 with `ok: true`, and its cursor within 600 blocks (about a minute) of the live head read from the official RPC and blockmachine (the higher answer); the ORRY cursor within 610 |
@@ -173,11 +173,11 @@ count of every table next to the live count, and removes the container and its v
 2026-11-09: 27 tables restored, 0 missing, counts equal (`discord_posts` 4, `schema_migrations` 6, the rest empty
 before launch).
 
-## 2. The web is down (orrery.tech)
+## 2. The web is down (orreryagent.com)
 
 Signal: WhatsApp `web /` or `web /discord/verify` FAIL.
 
-1. From the laptop: `curl -sI https://orrery.tech/ | head -3` and `dig +short @1.1.1.1 orrery.tech` (expected
+1. From the laptop: `curl -sI https://orreryagent.com/ | head -3` and `dig +short @1.1.1.1 orreryagent.com` (expected
    `76.76.21.21`; `www` is a CNAME to `cname.vercel-dns.com`). Ask 1.1.1.1: the laptop's ISP resolver rewrites
    missing names to its own addresses.
 2. Vercel answers 5xx, or the page lost its content after a deploy: roll back, then fix forward.
@@ -191,17 +191,17 @@ Signal: WhatsApp `web /` or `web /discord/verify` FAIL.
 
    Project `dandiapriandimamonto-1782/orrery`.
 
-3. DNS answer wrong or missing: the `orrery.tech` zone is on Hostinger (API token, memory note
+3. DNS answer wrong or missing: the `orreryagent.com` zone is on Hostinger (API token, memory note
    `feedback_hostinger_api_for_dns.md`, never hPanel). Restore the apex A record to `76.76.21.21` and `www` to
    `cname.vercel-dns.com`; check the domain has not expired.
 4. Vercel itself is down (https://www.vercel-status.com): nothing to change; the API on server 1 keeps serving
    integrators and on-chain limits keep holding.
 5. Only server 1 sees the failure (the laptop and 1.1.1.1 are fine): server 1's resolver or egress; the site is up.
-   Check with `docker run --rm curlimages/curl -sI https://orrery.tech/`.
+   Check with `docker run --rm curlimages/curl -sI https://orreryagent.com/`.
 
 Pages that render but show no live data point at the API (section 3).
 
-### 2.1 Change the CA shown on orrery.tech
+### 2.1 Change the CA shown on orreryagent.com
 
 The hero's CA pill (`components/ContractAddress.tsx`) shows the ORRY token from `/api/ca`, which reads the Vercel
 production env `ORRERY_CA` at request time (cached 60 s at the edge). Since 2026-11-10 it is
@@ -215,12 +215,12 @@ export VERCEL_ORG_ID=team_wRfsbfi0dD9R8aLIlSrQAvRX VERCEL_PROJECT_ID=prj_eBjksRc
 vercel env rm ORRERY_CA production --yes
 printf '%s' 0x85272EA3aE8685C768045dba5455fE305C706aA4 | vercel env add ORRERY_CA production
 vercel redeploy "$(vercel ls orrery -e production --status READY 2>/dev/null | sed -n 1p)"
-curl -s https://orrery.tech/api/ca      # {"ca":"0x85272EA3aE8685C768045dba5455fE305C706aA4"} within a minute
+curl -s https://orreryagent.com/api/ca      # {"ca":"0x85272EA3aE8685C768045dba5455fE305C706aA4"} within a minute
 ```
 
-## 3. The API is down (api.orrery.tech)
+## 3. The API is down (api.orreryagent.com)
 
-After the deploy only. Path: internet, `infra-caddy-1` (block `api.orrery.tech` in
+After the deploy only. Path: internet, `infra-caddy-1` (block `api.orreryagent.com` in
 `/opt/phioradata/infra/Caddyfile`), `orrery-api:8787` on network `infra_default`, then `orrery-pg`.
 
 While the API is down, signed checks, credit purchases (x402 settlement), the release schedule and `/verify` in
@@ -246,13 +246,13 @@ Discord stop. Limits on chain keep being enforced by OrreryPolicyModule.
      ```
 
 4. Edge side:
-   - DNS: `dig +short @1.1.1.1 api.orrery.tech` must be `187.53.130.188`.
+   - DNS: `dig +short @1.1.1.1 api.orreryagent.com` must be `187.53.130.188`.
    - Caddy reaches the API: `docker exec infra-caddy-1 wget -qO- http://orrery-api:8787/health`.
      If not, check the alias: `docker inspect -f '{{json .NetworkSettings.Networks.infra_default.Aliases}}' orrery-api`
      must list `orrery-api`; fix with
      `docker network disconnect infra_default orrery-api && docker network connect --alias orrery-api infra_default orrery-api`.
    - Caddy lost the site (another session reloaded from the stale mount): confirm the block is in the host file
-     (`grep -n api.orrery.tech /opt/phioradata/infra/Caddyfile`), then reload from a copy, the only safe way:
+     (`grep -n api.orreryagent.com /opt/phioradata/infra/Caddyfile`), then reload from a copy, the only safe way:
 
      ```bash
      docker cp /opt/phioradata/infra/Caddyfile infra-caddy-1:/tmp/Caddyfile.current

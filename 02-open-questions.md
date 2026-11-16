@@ -87,7 +87,7 @@ Working folder name `orrery`. Candidates checked 2026-11-06 by RDAP (registry an
 
 First decision: Proofcap (owner, 2026-11-06), **superseded the same day**.
 
-Decision: **Orrery**, domain **orrery.tech** (owner, 2026-11-06). The owner already holds orrery.tech (Hostinger,
+Decision: **Orrery**, domain **orreryagent.com** (owner, 2026-11-06). The owner already holds orreryagent.com (Hostinger,
 DNS parked: A 2.57.91.91, NS dns-parking.com, checked 2026-11-06) and released the name from the paused aethernode
 project the same day, together with the X handle @orrerytech (still to register; @Orrery is taken) and the GitHub
 repo name `orrery`. The ORRY ticker comes with the name but is unused: no token in v1 (W2).

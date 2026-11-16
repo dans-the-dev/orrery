@@ -48,7 +48,7 @@ export function loadMcpConfig(env: NodeJS.ProcessEnv = process.env): McpConfig {
   const chainId = Number(env.ORRERY_CHAIN_ID ?? 4663);
   if (!Number.isInteger(chainId) || chainId <= 0) throw new Error("ORRERY_CHAIN_ID expects a positive integer chain id");
   return {
-    apiUrl: (env.ORRERY_API_URL || "https://api.orrery.tech").replace(/\/+$/, ""),
+    apiUrl: (env.ORRERY_API_URL || "https://api.orreryagent.com").replace(/\/+$/, ""),
     apiKey: env.ORRERY_API_KEY || null,
     apiKeyFile: env.ORRERY_API_KEY_FILE || null,
     rpcUrl: env.ORRERY_RPC_URL || "https://rpc.mainnet.chain.robinhood.com",

@@ -1,4 +1,4 @@
-// Live walk on orrery.tech with real funds on Robinhood Chain 4663, for the owner to run and confirm.
+// Live walk on orreryagent.com with real funds on Robinhood Chain 4663, for the owner to run and confirm.
 //
 //   node scripts/walk/operator-live-4663.mjs --sign-only    Dashboard Credits with signed messages only: sign in, issue
 //                                                           an API key, run a signed check. No transaction, no funds.
@@ -49,8 +49,8 @@ if (REHEARSAL && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(process.env.WAL
 const SHOTS = new URL(REHEARSAL ? "../../.local/live-walk-rehearsal/" : "../../.local/live-walk/", import.meta.url).pathname;
 mkdirSync(SHOTS, { recursive: true });
 const AGENT_ENV = REHEARSAL && !RESUME ? join(SHOTS, "rehearsal-agent.env") : join(SECRETS, "mainnet-walk-agent.env");
-const SITE = REHEARSAL ? process.env.WALK_SITE : "https://orrery.tech";
-const API = "https://api.orrery.tech";
+const SITE = REHEARSAL ? process.env.WALK_SITE : "https://orreryagent.com";
+const API = "https://api.orreryagent.com";
 // publicnode first: it publishes transactions; blockmachine answers reads but refuses eth_sendRawTransaction
 const RPCS = REHEARSAL ? [process.env.WALK_RPC] : ["https://robinhood-rpc.publicnode.com", "https://rpc-robinhood.blockmachine.io"];
 const KEY_FILE = join(SECRETS, "mainnet-walk.json");
