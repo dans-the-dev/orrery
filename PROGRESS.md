@@ -13,6 +13,10 @@
   (apex A 216.198.79.1 and 64.29.17.1, www CNAME to Vercel, set through the Hostinger DNS API); X account @Orreryagent.
   Vercel production env: `NEXT_PUBLIC_SITE_URL=https://orreryagent.com`, `NEXT_PUBLIC_X_HANDLE=Orreryagent`. Every
   orrery.tech mention became orreryagent.com (API host api.orreryagent.com, not in DNS until `go-live-4663.ts dns`).
+- 2026-11-16: server 1 is suspended (since 2026-11-14), so the services run on the Tridjaya host (`ssh vps`) for now:
+  `services/scripts/host-tridjaya.ts prep | deploy | check` (systemd units `orrery@api|indexer|prober`, the host's
+  Postgres 16 and nginx, files in `ops/tridjaya/`). It replaces the `server` and `dns` stages of `go-live-4663.ts`
+  there; `go-live-4663.ts env`, `vercel` and `check` still apply. API keys now start with `or_`.
 - 2026-11-16: mainnet keys in `~/.secrets/orrery/` (new, unfunded). Before a live run: fund the deployer, deploy with
   `services/scripts/deploy-4663.ts`, then copy the addresses into `services/packages/sdk/src/quick.ts` and `services/packages/mcp/src/config.ts`.
 - Fork tests under `contracts/test/**/fork` still read Runcore's live 4663 contracts as fixtures; they need Orrery's

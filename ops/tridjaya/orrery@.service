@@ -1,0 +1,28 @@
+# Orrery service on the Tridjaya host (vps), one instance per process: orrery@api, orrery@indexer, orrery@prober,
+# orrery@keeper (keeper only after ORRY is deployed). Installed by services/scripts/host-tridjaya.ts deploy.
+[Unit]
+Description=Orrery %i (Robinhood Chain mainnet 4663)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=orrery
+Group=orrery
+WorkingDirectory=/opt/orrery/app/packages/server
+EnvironmentFile=/etc/orrery/common.env
+EnvironmentFile=-/etc/orrery/%i.env
+Environment="NODE_OPTIONS=--max-old-space-size=224 --require=/opt/orrery/bind-loopback.cjs"
+ExecStart=/opt/node24/bin/node /opt/orrery/app/node_modules/tsx/dist/cli.mjs src/bin/%i.ts
+Restart=on-failure
+RestartSec=5
+CPUWeight=20
+Nice=5
+MemoryMax=320M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target
