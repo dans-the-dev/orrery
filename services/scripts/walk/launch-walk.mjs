@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { createPublicClient, http, toHex } from "viem";
 import { mnemonicToAccount } from "viem/accounts";
 import { attachWallet } from "./wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 
 const [base = "http://localhost:3205", api = "http://127.0.0.1:18687", rpc = "http://127.0.0.1:18680", out = "launch-shots", keys = "launch-keys"] = process.argv.slice(2);

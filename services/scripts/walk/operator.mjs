@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { attachWallet } from "./wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 const [base = "https://orrery-dev.vercel.app", account = "0x339A3fC1726E06aE26A69c4C527A86073C5559a4", agent = "328", shots = "."] = process.argv.slice(2);
 const browser = await chromium.launch({ executablePath: "/usr/bin/google-chrome" });

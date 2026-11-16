@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 import { createPublicClient, createWalletClient, defineChain, http, maxUint256, parseAbi, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { attachWallet } from "./wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 const [base, rpc, chainIdIn, keyFile, payerFile, api, shots = "."] = process.argv.slice(2);
 if (!base || !rpc || !chainIdIn || !keyFile || !payerFile || !api) throw new Error("usage: node merchants.mjs <web base> <rpc> <chainId> <merchant key> <payer key> <api base> [shots dir]");

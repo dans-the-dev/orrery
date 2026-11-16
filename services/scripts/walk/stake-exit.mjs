@@ -6,7 +6,7 @@
 import { createRequire } from "node:module";
 import { createPublicClient, http, parseAbi, formatUnits } from "viem";
 import { attachWallet } from "./wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 const [mode, base, rpc, keyFile, account, agentId, amount] = process.argv.slice(2);
 const STAKING = process.env.WALK_STAKING ?? "0x187d4bb95587fded89ec13e7cd53d80155fb0a5f";

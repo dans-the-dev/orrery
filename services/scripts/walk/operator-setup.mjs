@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { createPublicClient, encodeAbiParameters, erc20Abi, http, keccak256, numberToHex, parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { attachWallet } from "./wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 
 const [base = "http://localhost:3161", rpc = "http://127.0.0.1:8561", out = "."] = process.argv.slice(2);

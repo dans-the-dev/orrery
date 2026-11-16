@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { createPublicClient, http, parseAbi } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { attachWallet } from "./wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 const [base, rpc, chainIdIn, keyFile, api, agentId, attestor, shots = "."] = process.argv.slice(2);
 if (!attestor) throw new Error("usage: node checkout.mjs <web base> <rpc> <chainId> <key file> <api base> <agentId> <attestor> [shots dir]");

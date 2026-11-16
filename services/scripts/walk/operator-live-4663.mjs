@@ -30,7 +30,7 @@ import { createInterface } from "node:readline/promises";
 import { createPublicClient, decodeFunctionData, erc20Abi, fallback, formatEther, formatUnits, getAddress, http, parseAbi, parseEther, parseEventLogs, parseUnits } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { attachGuardedWallet } from "./guarded-wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 
 const has = (f) => process.argv.includes(f);

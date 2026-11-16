@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { attachWallet } from "./wallet.mjs";
-const require = createRequire("/home/dand/Projects/blockchain/matriks-destiny/package.json");
+const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Projects/promo-films/_pw/package.json");
 const { chromium } = require("playwright-core");
 
 const [base = "http://127.0.0.1:3201", out = "walk-community"] = process.argv.slice(2);

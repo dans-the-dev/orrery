@@ -24,6 +24,7 @@ SETS["mainnet"] = {
     ["market-keeper", "Orrery markets keeper gas key (clears sealed batches) on 4663, hot key on the market keeper"],
     ["reveal-relay", "Orrery markets reveal relay gas key (revealFor) on 4663, hot key on the market relay"],
     ["buyer", "Orrery mainnet test buyer: buys credit packs over x402 to prove the live purchase path on 4663 (USDG from the owner)"],
+    ["walk", "Orrery mainnet operator walk wallet: creates a Safe, registers an agent, pays a verification and buys a pack on 4663 (operator-live-4663.mjs)"],
   ],
 };
 const REHEARSAL: [string, string][] = [
