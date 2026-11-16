@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<defs>
+<radialGradient id="lift" cx="50%" cy="46%" r="62%"><stop offset="0" stop-color="#1b2a45"/><stop offset=".62" stop-color="#0f1a2e"/><stop offset="1" stop-color="#0a1222"/></radialGradient>
+<pattern id="eng" width="180" height="28" patternUnits="userSpaceOnUse"><g fill="none" stroke="#e9ecef" stroke-opacity=".05" stroke-width="1"><path d="M0 7c22.5-9 22.5 9 45 0s22.5-9 45 0 22.5 9 45 0 22.5-9 45 0"/><path d="M0 21c22.5 9 22.5-9 45 0s22.5 9 45 0 22.5-9 45 0 22.5 9 45 0"/></g></pattern>
+<mask id="g"><rect width="40" height="40" fill="#fff"/><path d="M39 20A19 5.4 0 0 1 1 20" fill="none" stroke="#000" stroke-width="4" transform="rotate(-22 20 20)"/></mask>
+</defs>
+<rect width="1000" height="1000" fill="url(#lift)"/>
+<rect width="1000" height="1000" fill="url(#eng)"/>
+<g transform="translate(500 500) scale(14.5) translate(-20 -20)">
+<path mask="url(#g)" fill="#d9967a" fill-rule="evenodd" transform="rotate(-14 20 20)" d="M4.2 20a15.8 16.4 0 1 0 31.6 0a15.8 16.4 0 1 0-31.6 0ZM10.4 20a9.6 12.9 0 1 0 19.2 0a9.6 12.9 0 1 0-19.2 0Z"/>
+<path d="M37.2 21.6A19 5.4 0 0 1 1 20" fill="none" stroke="#d9967a" stroke-width="1.5" stroke-linecap="round" transform="rotate(-22 20 20)"/>
+<circle cx="36.6" cy="12.9" r="2.6" fill="#d9967a"/>
+</g>
+</svg>
