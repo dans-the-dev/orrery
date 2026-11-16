@@ -185,7 +185,7 @@ const dotenv = (o: Record<string, string>, head: string) =>
 function writeEnv() {
   // Containers reach the laptop's fork through the compose network's gateway (10.232.9.1, see compose.yml); anvil must
   // listen on 0.0.0.0 for that.
-  const rpc = arg("--rpc") ?? (FORK ? "http://10.232.9.1:18548" : "https://rpc.mainnet.chain.robinhood.com,https://rpc-robinhood.blockmachine.io");
+  const rpc = arg("--rpc") ?? (FORK ? "http://10.232.9.1:18548" : "https://rpc.mainnet.chain.robinhood.com,https://robinhood.api.pocket.network");
   const e = envFiles(rpc);
   mkdirSync(OUT, { recursive: true });
   writeFileSync(join(OUT, "common.env"), dotenv(e.common, `Orrery ${TARGET}, every service`));
