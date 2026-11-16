@@ -41,8 +41,8 @@ const fail = (s: string): never => {
   process.exit(1);
 };
 const ssh = (script: string, input?: string) =>
-  execFileSync("ssh", ["-o", "BatchMode=yes", HOST, `set -euo pipefail\n${script}`], { encoding: "utf8", input, stdio: ["pipe", "pipe", "inherit"] });
-const sh = (cmd: string, args: string[]) => execFileSync(cmd, args, { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
+  execFileSync("ssh", ["-o", "BatchMode=yes", HOST, `set -euo pipefail\n${script}`], { encoding: "utf8", input, stdio: ["pipe", "pipe", "inherit"], maxBuffer: 64 * 1024 * 1024 });
+const sh = (cmd: string, args: string[]) => execFileSync(cmd, args, { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"], maxBuffer: 64 * 1024 * 1024 });
 
 async function confirm(lines: string[]) {
   log(lines.join("\n"));
@@ -129,7 +129,7 @@ async function deploy() {
     `  units orrery@${UNITS.join(", orrery@")} enabled and started; every release stays held`,
   ]);
   // Code: a tarball of the tracked files the services need, unpacked over a clean app folder.
-  const tar = execFileSync("git", ["-C", join(ROOT, "services"), "archive", "--format=tar", "HEAD", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "tsconfig.base.json", "tsconfig.json", "packages/shared", "packages/sdk", "packages/server", "packages/web/package.json", "scripts/releases.ts"]);
+  const tar = execFileSync("git", ["-C", join(ROOT, "services"), "archive", "--format=tar", "HEAD", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "tsconfig.base.json", "tsconfig.json", "packages/shared", "packages/sdk", "packages/server", "packages/web/package.json", "scripts/releases.ts"], { maxBuffer: 512 * 1024 * 1024 });
   execFileSync("ssh", ["-o", "BatchMode=yes", HOST, "rm -rf /opt/orrery/app.new && mkdir -p /opt/orrery/app.new && tar -x -C /opt/orrery/app.new"], { input: tar, stdio: ["pipe", "inherit", "inherit"] });
   ssh(`
 install -m 644 /dev/stdin /opt/orrery/bind-loopback.cjs`, readFileSync(join(OPS, "bind-loopback.cjs"), "utf8"));
