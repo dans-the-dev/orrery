@@ -9,7 +9,7 @@ const require = createRequire(process.env.WALK_PLAYWRIGHT ?? "/home/dand/Project
 const { chromium } = require("playwright-core");
 const [base = "https://orrery-dev.vercel.app", out = "walk-shots"] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
-const routes = ["/", "/dashboard", "/merchants", "/signer", "/signer/0x4C4bd566516eAe906ad5029317758C58E4A2a606", "/operator", "/credits", "/earn", "/stake", "/claim", "/leaderboard", "/burn", "/stocks", "/swap", "/dark-pool", "/docs", "/terms", "/privacy"];
+const routes = ["/", "/dashboard", "/merchants", "/signer", "/signer/" + (process.env.WALK_SIGNER ?? "0x4C4bd566516eAe906ad5029317758C58E4A2a606"), "/operator", "/credits", "/earn", "/stake", "/claim", "/leaderboard", "/burn", "/stocks", "/swap", "/dark-pool", "/docs", "/terms", "/privacy"];
 const browser = await chromium.launch({ executablePath: "/usr/bin/google-chrome" });
 // WALK_VIEWPORT=375x812 walks the phone layout (touch, mobile user agent).
 const [vw, vh] = (process.env.WALK_VIEWPORT ?? "1440x900").split("x").map(Number);

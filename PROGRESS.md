@@ -13,6 +13,13 @@
   (apex A 216.198.79.1 and 64.29.17.1, www CNAME to Vercel, set through the Hostinger DNS API); X account @Orreryagent.
   Vercel production env: `NEXT_PUBLIC_SITE_URL=https://orreryagent.com`, `NEXT_PUBLIC_X_HANDLE=Orreryagent`. Every
   orrery.tech mention became orreryagent.com (API host api.orreryagent.com, not in DNS until `go-live-4663.ts dns`).
+- 2026-11-16 LIVE ON MAINNET 4663 (block 115888274): attestor 0x6f192242029d779d676246C773AdbA47F7c3a0d7, module
+  0x2B4F4B391eD19C26587fC7c83fbf7646BA24CE72, lens 0xe576C399A01beA52816889585c6693b674E174D2, treasury
+  0xa108f36699b4a42dd0230406561f9ac6796e6f21 (deployments/4663.json). Deployer funded over the Ethereum bridge
+  (bridge-eth-4663.ts). Services on the Tridjaya host, web at orreryagent.com, release `core` open, the other 35 held.
+  Live walk (operator-live-4663.mjs, walk wallet 0x1B5B4bE4E832f298599309c131B8e636295B0b84): Safe 0xF8a5…25fD,
+  agent #26036 registered, bound and verified (5 USDG), session Small, SDK top-up 0.5 USDG and an over-cap refusal,
+  signed check valid, credit pack 1 USDG to 500 credits; treasury holds 6 USDG. 18/18 routes clean at 1440 and 375 px.
 - 2026-11-16: server 1 is suspended (since 2026-11-14), so the services run on the Tridjaya host (`ssh vps`) for now:
   `services/scripts/host-tridjaya.ts prep | deploy | check` (systemd units `orrery@api|indexer|prober`, the host's
   Postgres 16 and nginx, files in `ops/tridjaya/`). It replaces the `server` and `dns` stages of `go-live-4663.ts`
