@@ -21,9 +21,9 @@ export interface McpConfig {
   maxPaymentUsd: number;
 }
 
-/** Orrery v1 on 4663: null until the mainnet deployment writes its addresses (`docs/MAINNET-4663.md`). */
-const ATTESTOR_4663: Address | null = null;
-const MODULE_4663: Address | null = null;
+/** Orrery v1 on 4663, from deployments/4663.json (deployed 2026-11-16, block 115888274). */
+const ATTESTOR_4663: Address | null = "0x6f192242029d779d676246C773AdbA47F7c3a0d7";
+const MODULE_4663: Address | null = "0x2B4F4B391eD19C26587fC7c83fbf7646BA24CE72";
 
 function addr(env: NodeJS.ProcessEnv, name: string, dflt: Address | null): Address {
   const v = env[name] || dflt;

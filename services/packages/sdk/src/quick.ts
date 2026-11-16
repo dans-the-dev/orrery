@@ -8,8 +8,8 @@ import { robinhoodChain } from "@orrery/shared";
 import { AgentClient, OrreryApi, verifyCheck } from "./index";
 
 /**
- * Orrery v1 on Robinhood Chain 4663. The contract addresses stay null until `deploy-4663.ts` writes
- * deployments/4663.json and they are copied here; until then every call needs them passed in. The RPC is one that publishes
+ * Orrery v1 on Robinhood Chain 4663, addresses from deployments/4663.json (deployed 2026-11-16, block 115888274).
+ * The RPC is one that publishes
  * transactions: an agent sends its own top-ups, and rpc-robinhood.blockmachine.io (the web's read endpoint) answers
  * eth_sendRawTransaction with "publishing transactions not supported by this endpoint" (seen on mainnet, 2026-11-11).
  */
@@ -17,9 +17,9 @@ export const ORRERY_MAINNET = {
   chainId: 4663,
   rpcUrl: "https://robinhood-rpc.publicnode.com",
   apiUrl: "https://api.orreryagent.com",
-  module: null,
-  attestor: null,
-  lens: null,
+  module: "0x2B4F4B391eD19C26587fC7c83fbf7646BA24CE72",
+  attestor: "0x6f192242029d779d676246C773AdbA47F7c3a0d7",
+  lens: "0xe576C399A01beA52816889585c6693b674E174D2",
 } as { readonly chainId: 4663; readonly rpcUrl: string; readonly apiUrl: string; readonly module: Address | null; readonly attestor: Address | null; readonly lens: Address | null };
 
 type Env = Record<string, string | undefined>;
