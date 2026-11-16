@@ -300,7 +300,7 @@ describe("Orrery Data: packs", () => {
     expect(r.status).toBe(200);
     const account = r.body.account as { address: string; calls: string; apiKey?: string };
     expect(account.calls).toBe("1000");
-    expect(account.apiKey).toMatch(/^rc_/);
+    expect(account.apiKey).toMatch(/^or_/);
     apiKey = account.apiKey!;
     expect((await balance(usdg, treasury())) - before).toBe(USD);
     const again = await post("/v1/data/packs", {}, { [HEADER_SIGNATURE]: header });
@@ -347,7 +347,7 @@ describe("Orrery Data: packs", () => {
     expect(r.status).toBe(200);
     const acc = r.body.account as { calls: string; apiKey?: string };
     expect(acc.calls).toBe("999");
-    expect(acc.apiKey).toMatch(/^rc_/);
+    expect(acc.apiKey).toMatch(/^or_/);
   });
 });
 

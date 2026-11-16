@@ -275,7 +275,7 @@ function Query({ apiKey, onKey, signer }: { apiKey: string; onKey: (k: string) =
       <div className="mc-form">
         <label className="field">
           API key
-          <input value={apiKey} onChange={(e) => onKey(e.target.value.trim())} placeholder="rc_" autoComplete="off" spellCheck={false} />
+          <input value={apiKey} onChange={(e) => onKey(e.target.value.trim())} placeholder="or_" autoComplete="off" spellCheck={false} />
         </label>
         <label className="field">
           Dataset
@@ -319,7 +319,7 @@ function McpSection() {
             `    "orrery": {`,
             `      "command": "npx",`,
             `      "args": ["-y", "@orrery/mcp"],`,
-            `      "env": { "ORRERY_API_KEY": "rc_...", "ORRERY_AGENT_KEY_FILE": "/path/to/agent.key" }`,
+            `      "env": { "ORRERY_API_KEY": "or_...", "ORRERY_AGENT_KEY_FILE": "/path/to/agent.key" }`,
             `    }`,
             `  }`,
             `}`,

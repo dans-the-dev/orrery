@@ -33,7 +33,7 @@ Every paid tool returns the balance that remains and adds a notice once it falls
       "command": "npx",
       "args": ["-y", "@orrery/mcp"],
       "env": {
-        "ORRERY_API_KEY": "rc_...",
+        "ORRERY_API_KEY": "or_...",
         "ORRERY_AGENT_KEY_FILE": "/home/you/.config/orrery/agent.key"
       }
     }

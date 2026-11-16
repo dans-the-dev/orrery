@@ -157,9 +157,9 @@ describe("@orrery/mcp", () => {
     expect(r.isError).toBeFalsy();
     const body = parsed(r);
     expect(body.calls).toBe("1000");
-    expect(r.content[0]!.text).not.toMatch(/rc_[0-9a-f]{64}/);
+    expect(r.content[0]!.text).not.toMatch(/or_[0-9a-f]{64}/);
     expect(statSync(apiKeyFile).mode & 0o777).toBe(0o600);
-    expect(readFileSync(apiKeyFile, "utf8")).toMatch(/^rc_[0-9a-f]{64}$/);
+    expect(readFileSync(apiKeyFile, "utf8")).toMatch(/^or_[0-9a-f]{64}$/);
     const after = (await c.pub.readContract({ address: usdg, abi: devUSDGAbi, functionName: "balanceOf", args: [treasury()] })) as bigint;
     expect(after - before).toBe(USD);
   });

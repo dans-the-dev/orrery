@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { isAddress, type Address, type Hex } from "viem";
 import { API_URL } from "../config";
+import { ORRY } from "./config";
 import { useReleases } from "./releases";
 
 /**
@@ -282,7 +283,8 @@ export const useAccountView = (address?: Address) =>
   useQuery({
     queryKey: ["orry", "account", address?.toLowerCase()],
     queryFn: async () => parseAccount(await get<J>(`/v1/orry/accounts/${address}`)),
-    enabled: Boolean(API_URL && address),
+    // The API has no ORRY routes until ORRY is deployed; asking earlier only logs a 404 in the console.
+    enabled: Boolean(API_URL && address && ORRY.token),
     ...live,
   });
 export const useBoard = (kind: "stakers" | "earners", limit = 50) =>

@@ -53,7 +53,7 @@ export function TryCheck({ apiKey, onChecked }: { apiKey: string | null; onCheck
       <div className="cp-try">
         <label>
           API key
-          <input value={k} onChange={(e) => setKey(e.target.value.trim())} placeholder="rc_…" spellCheck={false} autoComplete="off" />
+          <input value={k} onChange={(e) => setKey(e.target.value.trim())} placeholder="or_…" spellCheck={false} autoComplete="off" />
         </label>
         <label>
           Paying address

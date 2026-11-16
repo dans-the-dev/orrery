@@ -188,7 +188,7 @@ describe("x402 credits", () => {
   it("sells a pack over x402 and issues one API key", async () => {
     const r = await OrreryApi.buyCredits(baseUrl, merchant, pub);
     expect(r.credits).toBe("500");
-    expect(r.apiKey).toMatch(/^rc_/);
+    expect(r.apiKey).toMatch(/^or_/);
     merchantKey = r.apiKey;
     expect(await pub.readContract({ address: usdg, abi: devUSDGAbi, functionName: "balanceOf", args: [treasury] })).toBe(1_000_000n);
     const second = await OrreryApi.buyCredits(baseUrl, merchant, pub);
@@ -263,7 +263,7 @@ describe("x402 credits", () => {
     const signature = await merchant.signMessage({ account: merchant.account, message: n.message });
     const r = await fetch(`${baseUrl}/v1/keys/rotate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address: merchant.account.address, nonce: n.nonce, signature }) });
     const body = (await r.json()) as { apiKey: string };
-    expect(body.apiKey).toMatch(/^rc_/);
+    expect(body.apiKey).toMatch(/^or_/);
     const replay = await fetch(`${baseUrl}/v1/keys/rotate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address: merchant.account.address, nonce: n.nonce, signature }) });
     expect(replay.status).toBe(401);
     const old = await fetch(`${baseUrl}/v1/credits`, { headers: { authorization: `Bearer ${merchantKey}` } });
@@ -398,7 +398,7 @@ describe("check pricing (R-58)", () => {
 
   it("a new address signs in for a free key and uses its monthly allowance first", async () => {
     keys.buyer = await signIn(buyer);
-    expect(keys.buyer).toMatch(/^rc_/);
+    expect(keys.buyer).toMatch(/^or_/);
     expect(await account2(keys.buyer)).toMatchObject({ credits: "0", checkCost: 2, planUntil: null, month: { checks: 0, freeChecks: 0, freeChecksLeft: 2 } });
     for (let i = 0; i < 2; i++) {
       const r = await check(keys.buyer);

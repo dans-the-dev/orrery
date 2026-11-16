@@ -46,7 +46,7 @@ check("rotation nonce issued", typeof n.nonce === "string" && n.message.includes
 const signature = await buyer.signMessage({ message: n.message });
 const rotated = await post("/v1/keys/rotate", { address: buyer.address, nonce: n.nonce, signature });
 const apiKey = rotated.body.apiKey as string | undefined;
-check("key rotated with a signed message", rotated.status === 200 && typeof apiKey === "string" && apiKey.startsWith("rc_"));
+check("key rotated with a signed message", rotated.status === 200 && typeof apiKey === "string" && apiKey.startsWith("or_"));
 if (!apiKey) process.exit(1);
 writeFileSync(join(SECRETS, "mainnet-buyer-api.json"), JSON.stringify({ address: buyer.address, apiKey, issued: new Date().toISOString() }, null, 2) + "\n", { mode: 0o600 });
 chmodSync(join(SECRETS, "mainnet-buyer-api.json"), 0o600);
@@ -59,7 +59,7 @@ check("a nonce for another address is refused", forged.status === 401, `HTTP ${f
 // 2 the account behind the new key: the purchased pack is still there
 const before = (await get("/v1/credits", apiKey)).body as unknown as Account;
 check("credits kept across rotation", before.credits === "500" && before.purchases.length === 1, `credits ${before.credits}, purchases ${before.purchases.length}, free left ${before.month.freeChecksLeft}`);
-check("a bad key is refused", (await get("/v1/credits", "rc_" + "0".repeat(64))).status === 401);
+check("a bad key is refused", (await get("/v1/credits", "or_" + "0".repeat(64))).status === 401);
 check("no key is refused", (await get("/v1/credits")).status === 401);
 
 // 3 signed checks, verified against the attestor on chain

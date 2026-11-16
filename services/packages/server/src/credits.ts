@@ -12,7 +12,7 @@ export async function issueKeyIfNone(sql: Sql, address: Address): Promise<string
   const a = address.toLowerCase();
   const [existing] = await sql`select 1 from api_keys where address = ${a} and active`;
   if (existing) return null;
-  const key = `rc_${randomBytes(32).toString("hex")}`;
+  const key = `or_${randomBytes(32).toString("hex")}`;
   try {
     await sql`insert into api_keys (key_hash, address) values (${hashKey(key)}, ${a})`;
   } catch {
@@ -162,7 +162,7 @@ export async function rotateKey(
   if (!ok) return null;
   const used = await sql`update key_nonces set used = true where nonce = ${nonce} and not used returning nonce`;
   if (used.length !== 1) return null;
-  const key = `rc_${randomBytes(32).toString("hex")}`;
+  const key = `or_${randomBytes(32).toString("hex")}`;
   await sql.begin(async (tx) => {
     await tx`insert into credit_accounts (address) values (${address.toLowerCase()}) on conflict do nothing`;
     await tx`update api_keys set active = false where address = ${address.toLowerCase()}`;
