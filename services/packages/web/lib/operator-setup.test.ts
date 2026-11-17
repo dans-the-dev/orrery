@@ -5,7 +5,7 @@ import { DEFAULT_PRESET, LIMIT_PRESETS, SAFE_STACK, agentEnvFile, createSafeCall
 const stack = SAFE_STACK[4663]!;
 const owner = "0x1111111111111111111111111111111111111111" as const;
 const safe = "0x2222222222222222222222222222222222222222" as const;
-const module = "0x2934c34AFD7b5410D05ddD638982EED1D49F0D4c" as const;
+const module = "0x2B4F4B391eD19C26587fC7c83fbf7646BA24CE72" as const;
 
 describe("operator one-click setup", () => {
   it("creates a 1-of-1 Safe for the owner with the adapter as fallback handler and no setup delegatecall", () => {

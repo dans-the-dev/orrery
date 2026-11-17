@@ -13,6 +13,6 @@ export const dynamic = "force-dynamic";
 export function GET() {
   const raw = process.env.ORRERY_CA?.trim() ?? "";
   const ca = isAddress(raw) ? getAddress(raw) : null;
-  // The buttons beside the pill: where ORRY trades (Pons by default; ORRERY_TRADE_LINKS replaces the list).
+  // The buttons beside the pill: where ORRY trades (from ORRERY_TRADE_LINKS if set).
   return Response.json({ ca, trade: tradeVenues(ca, process.env.ORRERY_TRADE_LINKS) }, { headers: { "cache-control": "public, max-age=60, s-maxage=60, stale-while-revalidate=600" } });
 }

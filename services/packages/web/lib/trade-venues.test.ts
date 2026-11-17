@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { tradeVenues } from "./trade-venues";
 
-const CA = "0x85272EA3aE8685C768045dba5455fE305C706aA4";
+const CA = "0x2c30E8E77B752Bf9f945A9BF99427EE0b60C50be";
 
 describe("trade venues beside the CA", () => {
-  it("links the Pons launch page of the token by default", () => {
-    expect(tradeVenues(CA)).toEqual([{ name: "Pons", url: `https://ponsfamily.com/launchpad/${CA}`, icon: "/venues/pons.png" }]);
-    expect(tradeVenues(CA, "  ")).toHaveLength(1);
+  it("shows nothing by default when ORRERY_TRADE_LINKS is unset or blank", () => {
+    expect(tradeVenues(CA)).toEqual([]);
+    expect(tradeVenues(CA, "  ")).toEqual([]);
   });
 
   it("shows nothing without a contract address", () => {
