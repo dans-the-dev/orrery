@@ -1,8 +1,6 @@
 # Orrery incident runbook (Robinhood Chain 4663)
 
-> **Orrery note (2026-11-15):** this document records Runcore's own run, from the codebase Orrery was copied from,
-> with the names switched to Orrery's by the rename pass. Orrery itself has no deployment, keys, X or Discord account
-> yet; addresses, ids and dates below are Runcore's and serve only as a worked example of the procedure.
+> **Note:** Earlier addresses, ids and dates below serve as a reference example of the procedure; see `deployments/4663.json` for Orrery's live mainnet addresses.
 
 
 Internal engineering document, written 2026-11-09. Setup and deploy steps live in `HOSTING-4663.md` and

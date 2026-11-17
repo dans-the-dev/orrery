@@ -12,8 +12,7 @@ remappings = [
   "solmate/=lib/v4-periphery/lib/v4-core/lib/solmate/",
   "@openzeppelin/contracts/=lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/contracts/",
 ]
-# lib/v4-periphery is a symlink to ~/Projects/blockchain/kya-protocol-vendor/v4-periphery-c6e4754d
-# (Uniswap v4-periphery at c6e4754d, 2026-10-26, with v4-core, permit2, solmate, openzeppelin nested); not committed
+# lib/v4-periphery is a local symlink to Uniswap v4-periphery at c6e4754d (with v4-core, permit2, solmate, openzeppelin nested); not committed
 # Offline: point solc at a locally installed binary. Online: use solc = "0.8.28" instead.
 solc = "/home/dand/.local/bin/solc"
 evm_version = "cancun"

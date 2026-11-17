@@ -1,6 +1,6 @@
 # Orrery design: Mainspring
 
-Orrery is a rebrand of Runcore with the same functions. Its visual direction is **Mainspring** (chosen by the owner on
+Orrery's visual direction is **Mainspring** (chosen by the owner on
 2026-11-15 from the saved style set, then redrawn for Orrery: `design/mainspring/`). An agent's spending is a body on a
 fixed orbit, shown as a mechanical orrery built like a watch movement; the operator sets the orbit, and a merchant takes
 a reading of the payer.

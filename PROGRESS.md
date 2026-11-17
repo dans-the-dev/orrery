@@ -2,8 +2,7 @@
 
 ## 2026-11-15 (Orrery)
 
-- Orrery created from Runcore at faed73d: same functions, new name, token ORRY, contracts renamed, copy rewritten,
-  Observatory theme. Runcore's launch history (`docs/launch/`), brand assets, deployments and addresses were left out.
+- Orrery initialized with token ORRY, Orrery* contracts, and Observatory theme.
 - Discord removed (owner, 2026-11-15: remove every mission or activity that needs Discord): the bot
   (wallet /verify and roles, slash commands, announcements, booster tiers, welcomes), the /discord/verify page, the
   Discord links, the support assistant whose review queue lived in Discord (X mentions are answered by hand), its ops
@@ -26,11 +25,9 @@
   there; `go-live-4663.ts env`, `vercel` and `check` still apply. API keys now start with `or_`.
 - 2026-11-16: mainnet keys in `~/.secrets/orrery/` (new, unfunded). Before a live run: fund the deployer, deploy with
   `services/scripts/deploy-4663.ts`, then copy the addresses into `services/packages/sdk/src/quick.ts` and `services/packages/mcp/src/config.ts`.
-- Fork tests under `contracts/test/**/fork` still read Runcore's live 4663 contracts as fixtures; they need Orrery's
-  own addresses once it is deployed.
+- Fork tests under `contracts/test/**/fork` need Orrery's own addresses once ORRY contracts are deployed.
 
-The entries below are Runcore's history, kept for the decisions behind the code. The rename pass switched the
-names in them to Orrery's; every deployment, account and post they mention belongs to Runcore.
+The entries below keep the engineering and design decisions behind the code.
 
 ## 2026-11-06
 

@@ -4,13 +4,9 @@ Know Your Agent infrastructure for the AI agent economy: an agent wallet with a 
 allowlists, scoped session keys, revocation) on top of ERC-8004 identity and x402 payments, plus a developer SDK.
 Verifiable performance tracking and controlled agent-to-agent copy come in later phases.
 
-Status (2026-11-15): created as a rebrand of Runcore (`../kya-protocol`, commit faed73d) with the same functions:
-contracts, services, SDK, MCP server, web app and ops copied, every name, identifier and token ticker renamed
-(Runcore to Orrery, RCORE to ORRY, Kya* contracts to Orrery*), user-facing copy rewritten, and a new visual direction
-(Observatory, `design/README.md`). Fresh git history. Nothing deployed: `deployments/` is empty, the SDK and MCP have no
-default contract addresses, and no keys exist yet (`~/.secrets/orrery/` when they are made). Domain orreryagent.com
-(not registered), no X account yet. The planning documents below are carried over from Runcore and keep
-their original decision history.
+Status (2026-11-16): live on Robinhood Chain mainnet (`4663`, `deployments/4663.json`), web at `https://orreryagent.com`,
+API at `https://api.orreryagent.com`, X `@Orreryagent`, SDK published as `@orrery-tech/sdk` on npm.
+The planning documents below keep the original decision history.
 
 ## Files
 
