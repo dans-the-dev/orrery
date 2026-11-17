@@ -29,8 +29,9 @@ const IPV4 = "72.60.237.158";
 const IPV6 = "2a02:4780:5e:fbcc::1";
 const API_PORT = 18787;
 const INDEXER_PORT = 18788;
-const UNITS = ["api", "indexer", "prober"];
+const BASE_UNITS = ["api", "indexer", "prober"];
 const KEYS = ["relayer", "check-signer", "attester", "quote-signer"];
+const OPT_KEYS = ["data-signer", "keeper"];
 const NODE = "/opt/node24/bin/node";
 const TSX = "/opt/orrery/app/node_modules/tsx/dist/cli.mjs";
 const [stage = ""] = process.argv.slice(2);
@@ -120,13 +121,17 @@ function envFor(file: string, pg: string) {
 async function deploy() {
   const sha = sh("git", ["-C", ROOT, "rev-parse", "--short", "HEAD"]).trim();
   if (sh("git", ["-C", ROOT, "status", "--porcelain", "--", "services"]).trim()) fail("services/ has uncommitted changes; commit first");
-  for (const k of KEYS) if (!existsSync(join(SECRETS, `mainnet-${k}.json`))) fail(`~/.secrets/orrery/mainnet-${k}.json is missing`);
+  const hasOrry = /ORRERY_ORRY_TOKEN=0x[0-9a-fA-F]{40}/.test(envFor("common.env", "x"));
+  const hasData = existsSync(join(SECRETS, "mainnet-data-signer.json"));
+  const units = [...BASE_UNITS, ...(hasOrry ? ["keeper"] : [])];
+  const keys = [...KEYS, ...(hasData ? ["data-signer"] : []), ...(hasOrry ? ["keeper"] : [])];
+  for (const k of keys) if (!existsSync(join(SECRETS, `mainnet-${k}.json`))) fail(`~/.secrets/orrery/mainnet-${k}.json is missing`);
   await confirm([
     `Tridjaya host (${HOST}), Orrery deploy at ${sha}:`,
     "  code to /opt/orrery/app (shared, sdk, server, releases.ts), pnpm install --frozen-lockfile there",
-    `  keys copied to /etc/orrery/keys: ${KEYS.join(", ")} (the deployer key stays on this laptop)`,
+    `  keys copied to /etc/orrery/keys: ${keys.join(", ")} (the deployer key stays on this laptop)`,
     `  /etc/orrery/common.env and api.env from ops/server1/out/mainnet; API on 127.0.0.1:${API_PORT}, indexer health :${INDEXER_PORT}`,
-    `  units orrery@${UNITS.join(", orrery@")} enabled and started; every release stays held`,
+    `  units orrery@${units.join(", orrery@")} enabled and started; every release stays held`,
   ]);
   // Code: a tarball of the tracked files the services need, unpacked over a clean app folder.
   const tar = execFileSync("git", ["-C", join(ROOT, "services"), "archive", "--format=tar", "HEAD", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "tsconfig.base.json", "tsconfig.json", "packages/shared", "packages/sdk", "packages/server", "packages/web/package.json", "scripts/releases.ts"], { maxBuffer: 512 * 1024 * 1024 });
@@ -141,13 +146,19 @@ echo ${sha} > REVISION
 chown -R orrery:orrery /opt/orrery/app.new
 rm -rf /opt/orrery/app.old; test -d /opt/orrery/app && mv /opt/orrery/app /opt/orrery/app.old; mv /opt/orrery/app.new /opt/orrery/app
 echo "code ${sha} installed"`);
-  for (const k of KEYS) ssh(`install -o orrery -g orrery -m 400 /dev/stdin /etc/orrery/keys/${k}.json`, readFileSync(join(SECRETS, `mainnet-${k}.json`), "utf8"));
+  for (const k of keys) ssh(`install -o orrery -g orrery -m 400 /dev/stdin /etc/orrery/keys/${k}.json`, readFileSync(join(SECRETS, `mainnet-${k}.json`), "utf8"));
   const pg = ssh("cat /etc/orrery/pg-password").trim();
-  const common = `${envFor("common.env", pg)}ORRERY_PORT=${API_PORT}\nORRERY_INDEXER_HEALTH_PORT=${INDEXER_PORT}\n`;
+  const extra = [
+    `ORRERY_PORT=${API_PORT}`,
+    `ORRERY_INDEXER_HEALTH_PORT=${INDEXER_PORT}`,
+    ...(hasData ? ["ORRERY_DATA_SIGNER_KEY_FILE=/etc/orrery/keys/data-signer.json"] : []),
+    ...(hasOrry ? ["ORRERY_KEEPER_KEY_FILE=/etc/orrery/keys/keeper.json"] : []),
+  ].join("\n");
+  const common = `${envFor("common.env", pg)}${extra}\n`;
   ssh("install -o orrery -g orrery -m 600 /dev/stdin /etc/orrery/common.env", common);
   ssh("install -o orrery -g orrery -m 600 /dev/stdin /etc/orrery/api.env", envFor("api.env", pg));
   ssh("install -m 644 /dev/stdin /etc/systemd/system/orrery@.service", readFileSync(join(OPS, "orrery@.service"), "utf8"));
-  ssh(`systemctl daemon-reload; systemctl enable --now ${UNITS.map((u) => `orrery@${u}`).join(" ")}; systemctl restart ${UNITS.map((u) => `orrery@${u}`).join(" ")}; echo "units started"`);
+  ssh(`systemctl daemon-reload; systemctl enable --now ${units.map((u) => `orrery@${u}`).join(" ")}; systemctl restart ${units.map((u) => `orrery@${u}`).join(" ")}; echo "units started"`);
   await holdReleases();
   await check();
 }
@@ -176,7 +187,7 @@ async function holdReleases() {
 // ------------------------------------------------------------------ check
 
 async function check() {
-  log(ssh(`systemctl is-active ${UNITS.map((u) => `orrery@${u}`).join(" ")} | paste -sd' '`).trim());
+  log(ssh(`systemctl is-active ${BASE_UNITS.map((u) => `orrery@${u}`).join(" ")} | paste -sd' '`).trim());
   for (let i = 0; i < 30; i++) {
     const health = ssh(`curl -s -m 5 127.0.0.1:${API_PORT}/health || true`).trim();
     if (health.includes('"ok":true')) {

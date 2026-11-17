@@ -1,4 +1,4 @@
-# @orrery/mcp
+# @orrery-tech/mcp
 
 Orrery inside any MCP client. Take a signed reading of the agent behind a payment before you serve it, look up an
 agent's policy, read signed onchain datasets, and let your own agent pay x402 endpoints from its float, inside the
@@ -31,7 +31,7 @@ Every paid tool returns the balance that remains and adds a notice once it falls
   "mcpServers": {
     "orrery": {
       "command": "npx",
-      "args": ["-y", "@orrery/mcp"],
+      "args": ["-y", "@orrery-tech/mcp"],
       "env": {
         "ORRERY_API_KEY": "or_...",
         "ORRERY_AGENT_KEY_FILE": "/home/you/.config/orrery/agent.key"
